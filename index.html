@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>ADy Outreach</title>
+<style>
+  /* Layout: single-column dashboard, summary KPIs first, then pipeline, trend, follow-up, mailboxes, insights.
+     Palette: near-black / paper neutrals with a cool silver-grey bias and one brand red accent.
+     Type: Archivo (display), IBM Plex Sans (body/UI), IBM Plex Mono (figures). */
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #fbfbfc;
+    --ink: #141619;
+    --ink-2: #51565e;
+    --ink-3: #868d97;
+    --line: #e4e6ea;
+    --line-2: #eef0f3;
+    --accent: #e5362b;        /* ADy red */
+    --accent-soft: #fdecea;
+    --good: #1f9d64;
+    --good-soft: #e6f4ec;
+    --warn: #c6881a;
+    --warn-soft: #faf0dd;
+    --track: #edeff2;
+    --shadow: 0 1px 2px rgba(18,22,26,.06), 0 8px 24px rgba(18,22,26,.05);
+    --r: 14px;
+    --r-sm: 9px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d0f12;
+      --surface: #16191e;
+      --surface-2: #1b1f25;
+      --ink: #f2f4f7;
+      --ink-2: #aeb4bd;
+      --ink-3: #727a85;
+      --line: #262b32;
+      --line-2: #20242a;
+      --accent: #ff5349;
+      --accent-soft: #2a1715;
+      --good: #35c285;
+      --good-soft: #10231a;
+      --warn: #e0a641;
+      --warn-soft: #251c0e;
+      --track: #22262d;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d0f12;
+    --surface: #16191e;
+    --surface-2: #1b1f25;
+    --ink: #f2f4f7;
+    --ink-2: #aeb4bd;
+    --ink-3: #727a85;
+    --line: #262b32;
+    --line-2: #20242a;
+    --accent: #ff5349;
+    --accent-soft: #2a1715;
+    --good: #35c285;
+    --good-soft: #10231a;
+    --warn: #e0a641;
+    --warn-soft: #251c0e;
+    --track: #22262d;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding-block: 28px 56px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  h1, h2, h3 { font-family: "Archivo", system-ui, sans-serif; margin: 0; text-wrap: balance; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+  /* header */
+  header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap; margin-bottom: 26px;
+  }
+  .brand { display: flex; align-items: center; gap: 13px; }
+  .emblem {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--ink); color: var(--surface);
+    display: grid; place-items: center; flex: none;
+    font-family: "Archivo", sans-serif; font-weight: 700; font-size: 15px;
+    letter-spacing: .5px; position: relative;
+  }
+  .emblem::after { content: ""; position: absolute; right: 5px; top: 7px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+  header h1 { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+  header .sub { color: var(--ink-3); font-size: 12.5px; margin-top: 1px; }
+  .head-right { display: flex; align-items: center; gap: 10px; }
+  .badge-sample, .badge-live {
+    font-size: 11px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase;
+    padding: 5px 9px; border-radius: 999px; white-space: nowrap;
+  }
+  .badge-sample {
+    color: var(--warn); background: var(--warn-soft);
+    border: 1px solid color-mix(in srgb, var(--warn) 28%, transparent);
+  }
+  .badge-live {
+    color: var(--good); background: var(--good-soft);
+    border: 1px solid color-mix(in srgb, var(--good) 30%, transparent);
+  }
+  .badge-live::before {
+    content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--good); margin-right: 5px; vertical-align: 1px;
+  }
+  .toggle {
+    appearance: none; border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-2); border-radius: 999px; width: 34px; height: 34px;
+    cursor: pointer; font-size: 15px; display: grid; place-items: center;
+  }
+  .toggle:hover { border-color: var(--ink-3); color: var(--ink); }
+
+  /* sections */
+  section { margin-top: 26px; }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .sec-head h2 { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+  .sec-head .note { font-size: 12px; color: var(--ink-3); }
+
+  /* KPI tiles */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kpi {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+    padding: 15px 16px 14px; box-shadow: var(--shadow); min-width: 0;
+  }
+  .kpi .label { font-size: 11.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
+  .kpi .val { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 28px; letter-spacing: -.02em; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .kpi .meta { font-size: 12px; color: var(--ink-3); margin-top: 3px; }
+  .kpi.accent .val { color: var(--accent); }
+  .kpi .meta b { color: var(--good); font-weight: 600; }
+
+  /* generic card */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 18px; min-width: 0; }
+  .grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
+
+  /* funnel */
+  .funnel { display: flex; flex-direction: column; gap: 10px; }
+  .fstep { display: grid; grid-template-columns: 112px 1fr auto; align-items: center; gap: 12px; }
+  .fstep .fname { font-size: 13px; color: var(--ink-2); }
+  .ftrack { height: 30px; background: var(--track); border-radius: var(--r-sm); overflow: hidden; }
+  .fbar { height: 100%; border-radius: var(--r-sm); background: var(--accent); display: flex; align-items: center; }
+  .fbar.soft { background: color-mix(in srgb, var(--accent) 55%, var(--track)); }
+  .fbar.softer { background: color-mix(in srgb, var(--accent) 32%, var(--track)); }
+  .fstep .fval { font-size: 13px; text-align: right; white-space: nowrap; }
+  .fstep .fval .pct { color: var(--ink-3); font-size: 11.5px; margin-left: 5px; }
+
+  /* trend chart */
+  .chart-wrap { position: relative; }
+  svg { display: block; width: 100%; height: auto; }
+  .axis-label { fill: var(--ink-3); font-size: 10px; font-family: "IBM Plex Mono", monospace; }
+  .tip {
+    position: absolute; pointer-events: none; opacity: 0; transform: translate(-50%, -112%);
+    background: var(--ink); color: var(--surface); font-size: 11.5px; padding: 5px 8px;
+    border-radius: 7px; white-space: nowrap; transition: opacity .08s; z-index: 5;
+    font-family: "IBM Plex Mono", monospace;
+  }
+
+  /* follow-up bars */
+  .fu { display: flex; flex-direction: column; gap: 13px; }
+  .fu-row .fu-top { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; }
+  .fu-row .fu-top .n { color: var(--ink-2); }
+  .fu-row .fu-top .v { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .fu-track { height: 8px; background: var(--track); border-radius: 999px; overflow: hidden; }
+  .fu-fill { height: 100%; border-radius: 999px; background: var(--ink-3); }
+
+  /* table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: right; padding: 10px 8px; border-bottom: 1px solid var(--line-2); font-variant-numeric: tabular-nums; }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-3); font-weight: 600; border-bottom: 1px solid var(--line); }
+  tbody tr:last-child td { border-bottom: none; }
+  td .mb { color: var(--ink-2); font-size: 12px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+  .pill.best { color: var(--good); background: var(--good-soft); }
+
+  /* insights */
+  .ins { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .ins .card { padding: 15px 16px; }
+  .ins .k { font-size: 11.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
+  .ins .v { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 17px; margin-top: 7px; letter-spacing: -.01em; }
+  .ins .d { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+  .goal { margin-top: 12px; }
+  .goal .gtrack { height: 10px; background: var(--track); border-radius: 999px; overflow: hidden; margin-top: 8px; }
+  .goal .gfill { height: 100%; background: var(--accent); border-radius: 999px; }
+  .goal .gcap { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); margin-top: 7px; }
+
+  footer { margin-top: 30px; font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--line); padding-top: 16px; }
+  footer b { color: var(--ink-2); font-weight: 600; }
+
+  @media (max-width: 820px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .ins { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 440px) {
+    .fstep { grid-template-columns: 84px 1fr; }
+    .fstep .fval { grid-column: 2; text-align: left; margin-top: -4px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="emblem">ADy</div>
+      <div>
+        <h1>ADy Outreach</h1>
+        <div class="sub">Cold email analytics &middot; day 21 of campaign</div>
+      </div>
+    </div>
+    <div class="head-right">
+      <span class="badge-sample" id="badge">Sample data</span>
+      <button class="toggle" id="themeBtn" aria-label="Toggle theme">◐</button>
+    </div>
+  </header>
+
+  <!-- KPIs -->
+  <section>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <!-- Pipeline + follow-up -->
+  <section>
+    <div class="grid-2">
+      <div class="card">
+        <div class="sec-head"><h2>Pipeline</h2><span class="note">delivered &rarr; replied &rarr; booked</span></div>
+        <div class="funnel" id="funnel"></div>
+      </div>
+      <div class="card">
+        <div class="sec-head"><h2>Follow-up status</h2><span class="note" id="fuTotal"></span></div>
+        <div class="fu" id="fu"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trend -->
+  <section>
+    <div class="card">
+      <div class="sec-head"><h2>Emails sent per day</h2><span class="note">3 inboxes, ramping to 150/day</span></div>
+      <div class="chart-wrap">
+        <svg id="trend" viewBox="0 0 720 220" preserveAspectRatio="none" role="img" aria-label="Emails sent per day over 21 days, ramping up"></svg>
+        <div class="tip" id="trendTip"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mailboxes -->
+  <section>
+    <div class="card">
+      <div class="sec-head"><h2>Mailbox performance</h2><span class="note">reply rate on delivered</span></div>
+      <div style="overflow-x:auto">
+        <table id="mailboxes">
+          <thead><tr><th>Inbox</th><th>Sent</th><th>Replied</th><th>Reply rate</th><th>Booked</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Insights -->
+  <section>
+    <div class="sec-head"><h2>Insights</h2></div>
+    <div class="ins" id="insights"></div>
+    <div class="card goal">
+      <div class="k" style="font-size:11.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em">Goal &middot; 5 clients in 1-2 months</div>
+      <div class="gtrack"><div class="gfill" id="goalFill"></div></div>
+      <div class="gcap"><span id="goalNow"></span><span>target: 17 calls booked</span></div>
+    </div>
+  </section>
+
+  <footer>
+    This page is wired to your Supabase project and reads the <b>v_funnel</b>, <b>v_daily_sends</b>, <b>v_mailbox_performance</b> and <b>v_followup</b> views. When the badge says <b>Live</b>, these are your real numbers; <b>Sample data</b> means the project is not reachable yet, so illustrative figures are shown instead. Only aggregate counts are exposed, never an individual lead.
+  </footer>
+</div>
+
+<script>
+/* ========================================================================
+   SUPABASE CONFIG
+   This reads your four summary views (v_funnel, v_daily_sends,
+   v_mailbox_performance, v_followup) with the public anon key. The anon key
+   is meant to live in frontend code; the views expose only counts, never an
+   individual lead's name or email. If the project is not reachable yet
+   (schema or grant not run, no data), the page falls back to sample numbers.
+   ======================================================================== */
+const SUPABASE_URL = "https://vqzdhhpgqicurottmkdq.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxemRoaHBncWljdXJvdHRta2RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2OTA4ODMsImV4cCI6MjEwNzI2Njg4M30.zq32fc77tdcDbSUNUqX-VTRsMoJkyzebwn0KZO0s53E";
+
+/* ---- SAMPLE DATA (shown until live data loads) ---- */
+const SAMPLE = {
+  live: false,
+  total_leads: 17152, left_to_send: 17152, sent: 0, bounced: 0, replied: 0, booked: 0, in_followup: 0,
+  followup: [
+    { name: "Awaiting 1st follow-up", count: 0 },
+    { name: "In follow-up · day 3 sent", count: 0 },
+    { name: "In follow-up · day 7 sent", count: 0 },
+    { name: "Sequence complete", count: 0 },
+  ],
+  daily: [],
+  mailboxes: [
+    { mb: "founder@adystudios.space", sent: 0, replied: 0, booked: 0 },
+    { mb: "founder@adystudios.online", sent: 0, replied: 0, booked: 0 },
+    { mb: "founder@adyaistudios.sbs", sent: 0, replied: 0, booked: 0 },
+  ],
+};
+/* a richer illustrative set, used only when the project is unreachable, so the
+   layout never looks empty while you are still setting Supabase up */
+const DEMO = {
+  live: false,
+  total_leads: 17152, left_to_send: 15346, sent: 1806, bounced: 58, replied: 42, booked: 9, in_followup: 1240,
+  followup: [
+    { name: "Awaiting 1st follow-up", count: 416 },
+    { name: "In follow-up · day 3 sent", count: 720 },
+    { name: "In follow-up · day 7 sent", count: 520 },
+    { name: "Sequence complete", count: 50 },
+  ],
+  daily: [48,52,55,53,57,56,57,80,82,85,86,88,83,84,115,118,120,122,121,123,121],
+  mailboxes: [
+    { mb: "founder@adystudios.space", sent: 620, replied: 18, booked: 4 },
+    { mb: "founder@adystudios.online", sent: 600, replied: 15, booked: 3 },
+    { mb: "founder@adyaistudios.sbs", sent: 586, replied: 9, booked: 2 },
+  ],
+};
+
+const fmt = n => (n == null ? "0" : Number(n).toLocaleString("en-IN"));
+const pct = (a, b) => b ? (a / b * 100) : 0;
+const NS = "http://www.w3.org/2000/svg";
+const mk = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; };
+
+async function sb(view) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${view}?select=*`, {
+    headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON },
+  });
+  if (!r.ok) throw new Error(view + " " + r.status);
+  return r.json();
+}
+
+async function loadLive() {
+  const [funnel, daily, mbx, fu] = await Promise.all([
+    sb("v_funnel"), sb("v_daily_sends"), sb("v_mailbox_performance"), sb("v_followup"),
+  ]);
+  const f = funnel[0] || {};
+  const fuRow = fu[0] || {};
+  return {
+    live: true,
+    total_leads: +f.total_leads || 0,
+    left_to_send: +f.left_to_send || 0,
+    sent: +f.sent || 0,
+    bounced: +f.bounced || 0,
+    replied: +f.replied || 0,
+    booked: +f.booked || 0,
+    in_followup: +f.in_followup || 0,
+    followup: [
+      { name: "Awaiting 1st follow-up", count: +fuRow.awaiting_first || 0 },
+      { name: "In follow-up · day 3 sent", count: +fuRow.followup_1 || 0 },
+      { name: "In follow-up · day 7 sent", count: +fuRow.followup_2 || 0 },
+      { name: "Sequence complete", count: +fuRow.sequence_complete || 0 },
+    ],
+    daily: (daily || []).map(d => +d.sends),
+    mailboxes: (mbx || []).map(m => ({ mb: m.mailbox, sent: +m.sent || 0, replied: +m.replied || 0, booked: +m.booked || 0 })),
+  };
+}
+
+/* ---- RENDER ---- */
+function render(D) {
+  const delivered = D.sent - D.bounced;
+  const replyRate = pct(D.replied, delivered);
+  const bookRate = pct(D.booked, D.replied);
+
+  // status badge
+  const badge = document.getElementById("badge");
+  if (D.live) { badge.textContent = "Live"; badge.className = "badge-live"; }
+  else { badge.textContent = D.demo ? "Sample data" : "No sends yet"; badge.className = "badge-sample"; }
+
+  // KPIs
+  const kpiEl = document.getElementById("kpis"); kpiEl.innerHTML = "";
+  [
+    { label: "Total leads", val: fmt(D.total_leads), meta: fmt(D.left_to_send) + " left to send" },
+    { label: "Emails sent", val: fmt(D.sent), meta: fmt(delivered) + " delivered · " + fmt(D.bounced) + " bounced" },
+    { label: "Replied", val: fmt(D.replied), meta: replyRate.toFixed(1) + "% reply rate" },
+    { label: "Calls booked", val: fmt(D.booked), meta: (D.replied ? bookRate.toFixed(0) + "% of replies" : "no replies yet"), accent: true },
+  ].forEach(k => {
+    const d = document.createElement("div");
+    d.className = "kpi" + (k.accent ? " accent" : "");
+    d.innerHTML = `<div class="label">${k.label}</div><div class="val">${k.val}</div><div class="meta">${k.meta}</div>`;
+    kpiEl.appendChild(d);
+  });
+
+  // Funnel
+  const funnelEl = document.getElementById("funnel"); funnelEl.innerHTML = "";
+  [
+    { name: "Delivered", val: delivered, cls: "", base: delivered },
+    { name: "Replied", val: D.replied, cls: "soft", base: delivered },
+    { name: "Booked a call", val: D.booked, cls: "softer", base: delivered },
+  ].forEach(s => {
+    const share = pct(s.val, s.base);
+    const w = s.val > 0 ? Math.max(share, 1.5) : 0;
+    const p = s.name === "Delivered" ? (delivered ? "100%" : "0%") : share.toFixed(1) + "%";
+    const row = document.createElement("div");
+    row.className = "fstep";
+    row.innerHTML =
+      `<div class="fname">${s.name}</div>
+       <div class="ftrack"><div class="fbar ${s.cls}" style="width:${w}%"></div></div>
+       <div class="fval mono">${fmt(s.val)}<span class="pct">${p}</span></div>`;
+    funnelEl.appendChild(row);
+  });
+
+  // Follow-up
+  const fuEl = document.getElementById("fu"); fuEl.innerHTML = "";
+  const fuMax = Math.max(1, ...D.followup.map(f => f.count));
+  const fuSum = D.followup.reduce((a, f) => a + f.count, 0);
+  document.getElementById("fuTotal").textContent = fmt(fuSum) + " in sequence";
+  D.followup.forEach(f => {
+    const row = document.createElement("div");
+    row.className = "fu-row";
+    row.innerHTML =
+      `<div class="fu-top"><span class="n">${f.name}</span><span class="v mono">${fmt(f.count)}</span></div>
+       <div class="fu-track"><div class="fu-fill" style="width:${(f.count / fuMax * 100).toFixed(1)}%"></div></div>`;
+    fuEl.appendChild(row);
+  });
+
+  renderTrend(D.daily);
+  renderMailboxes(D.mailboxes);
+  renderInsights(D, bookRate);
+}
+
+function renderTrend(data) {
+  const svg = document.getElementById("trend");
+  const tip = document.getElementById("trendTip");
+  svg.innerHTML = "";
+  const W = 720, H = 220, padL = 34, padR = 10, padT = 14, padB = 26;
+  if (!data || data.length === 0) {
+    const t = mk("text", { x: W / 2, y: H / 2, "text-anchor": "middle", class: "axis-label" });
+    t.textContent = "No sends logged yet — this fills in once n8n starts sending";
+    svg.appendChild(t);
+    return;
+  }
+  const n = data.length;
+  const maxV = Math.max(150, Math.ceil(Math.max(...data) / 50) * 50);
+  const x = i => padL + (n === 1 ? 0.5 : i / (n - 1)) * (W - padL - padR);
+  const y = v => padT + (1 - v / maxV) * (H - padT - padB);
+  const ticks = []; for (let v = 0; v <= maxV; v += maxV / 3) ticks.push(Math.round(v));
+  ticks.forEach(v => {
+    svg.appendChild(mk("line", { x1: padL, x2: W - padR, y1: y(v), y2: y(v), stroke: "var(--line)", "stroke-width": 1 }));
+    const t = mk("text", { x: padL - 7, y: y(v) + 3, "text-anchor": "end", class: "axis-label" }); t.textContent = v; svg.appendChild(t);
+  });
+  const xl = [[0, "Day 1"]];
+  if (n > 1) xl.push([n - 1, "Day " + n]);
+  if (n > 8) xl.splice(1, 0, [Math.floor(n / 2), "Day " + (Math.floor(n / 2) + 1)]);
+  xl.forEach(([i, lbl]) => { const t = mk("text", { x: x(i), y: H - 8, "text-anchor": "middle", class: "axis-label" }); t.textContent = lbl; svg.appendChild(t); });
+  let dLine = "";
+  data.forEach((v, i) => { dLine += (i ? "L" : "M") + x(i) + " " + y(v) + " "; });
+  const dArea = dLine + "L" + x(n - 1) + " " + y(0) + " L" + x(0) + " " + y(0) + " Z";
+  const defs = mk("defs", {});
+  const grad = mk("linearGradient", { id: "g1", x1: 0, y1: 0, x2: 0, y2: 1 });
+  grad.appendChild(mk("stop", { offset: "0%", "stop-color": "var(--accent)", "stop-opacity": .22 }));
+  grad.appendChild(mk("stop", { offset: "100%", "stop-color": "var(--accent)", "stop-opacity": 0 }));
+  defs.appendChild(grad); svg.appendChild(defs);
+  svg.appendChild(mk("path", { d: dArea, fill: "url(#g1)" }));
+  svg.appendChild(mk("path", { d: dLine, fill: "none", stroke: "var(--accent)", "stroke-width": 2.2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+  svg.appendChild(mk("circle", { cx: x(n - 1), cy: y(data[n - 1]), r: 4, fill: "var(--accent)", stroke: "var(--surface)", "stroke-width": 2 }));
+  const hov = mk("line", { y1: padT, y2: H - padB, stroke: "var(--ink-3)", "stroke-width": 1, "stroke-dasharray": "3 3", opacity: 0 });
+  const hdot = mk("circle", { r: 4, fill: "var(--accent)", stroke: "var(--surface)", "stroke-width": 2, opacity: 0 });
+  svg.appendChild(hov); svg.appendChild(hdot);
+  svg.onpointermove = e => {
+    const r = svg.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width * W;
+    let i = Math.round((px - padL) / ((W - padL - padR) / Math.max(1, n - 1)));
+    i = Math.max(0, Math.min(n - 1, i));
+    hov.setAttribute("x1", x(i)); hov.setAttribute("x2", x(i)); hov.setAttribute("opacity", 1);
+    hdot.setAttribute("cx", x(i)); hdot.setAttribute("cy", y(data[i])); hdot.setAttribute("opacity", 1);
+    tip.style.opacity = 1; tip.style.left = (x(i) / W * r.width) + "px"; tip.style.top = (y(data[i]) / H * r.height) + "px";
+    tip.textContent = "Day " + (i + 1) + " · " + data[i] + " sent";
+  };
+  svg.onpointerleave = () => { hov.setAttribute("opacity", 0); hdot.setAttribute("opacity", 0); tip.style.opacity = 0; };
+}
+
+function renderMailboxes(mbs) {
+  const tb = document.querySelector("#mailboxes tbody"); tb.innerHTML = "";
+  const rates = mbs.map(m => pct(m.replied, m.sent));
+  const best = Math.max(0, ...rates);
+  mbs.forEach((m, i) => {
+    const rate = rates[i];
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      `<td><span class="mb mono">${m.mb}</span></td>
+       <td class="mono">${fmt(m.sent)}</td>
+       <td class="mono">${fmt(m.replied)}</td>
+       <td class="mono">${rate.toFixed(1)}% ${rate === best && rate > 0 ? '<span class="pill best">best</span>' : ''}</td>
+       <td class="mono">${fmt(m.booked)}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function renderInsights(D, bookRate) {
+  const el = document.getElementById("insights"); el.innerHTML = "";
+  const haveData = D.sent > 0;
+  const bestMb = D.mailboxes.reduce((a, b) => ((b.replied / (b.sent || 1)) > (a.replied / (a.sent || 1)) ? b : a), D.mailboxes[0] || {});
+  const bestName = bestMb.mb ? bestMb.mb.replace("founder@", "") : "—";
+  const cards = [
+    { k: "Best mailbox", v: haveData ? bestName : "—", d: haveData ? pct(bestMb.replied, bestMb.sent).toFixed(1) + "% reply rate" : "waiting for sends" },
+    { k: "Reply → booking", v: D.replied ? bookRate.toFixed(0) + "%" : "—", d: D.replied ? fmt(D.booked) + " of " + fmt(D.replied) + " replies booked" : "waiting for replies" },
+    { k: "In follow-up", v: fmt(D.in_followup), d: "leads being re-touched" },
+  ];
+  cards.forEach(c => {
+    const d = document.createElement("div"); d.className = "card";
+    d.innerHTML = `<div class="k">${c.k}</div><div class="v">${c.v}</div><div class="d">${c.d}</div>`;
+    el.appendChild(d);
+  });
+  const goalPct = Math.min(D.booked / 17 * 100, 100);
+  document.getElementById("goalFill").style.width = goalPct.toFixed(0) + "%";
+  document.getElementById("goalNow").textContent = fmt(D.booked) + " calls booked so far";
+}
+
+/* ---- Theme toggle ---- */
+(function () {
+  const btn = document.getElementById("themeBtn");
+  let cur = null;
+  try { cur = localStorage.getItem("ady-theme"); } catch (e) {}
+  if (cur) document.documentElement.setAttribute("data-theme", cur);
+  btn.addEventListener("click", () => {
+    const isDark = matchMedia("(prefers-color-scheme: dark)").matches;
+    const now = document.documentElement.getAttribute("data-theme");
+    const next = now ? (now === "dark" ? "light" : "dark") : (isDark ? "light" : "dark");
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem("ady-theme", next); } catch (e) {}
+  });
+})();
+
+/* ---- INIT: try live, fall back ---- */
+render(DEMO ? Object.assign({}, DEMO, { demo: true }) : SAMPLE);
+loadLive()
+  .then(D => render(D))
+  .catch(() => { /* keep demo sample; project not reachable yet */ });
+</script>
+
+</body>
+</html>
