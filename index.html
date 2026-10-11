@@ -3,555 +3,666 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>ADy Outreach</title>
-<style>
-  /* Layout: single-column dashboard, summary KPIs first, then pipeline, trend, follow-up, mailboxes, insights.
-     Palette: near-black / paper neutrals with a cool silver-grey bias and one brand red accent.
-     Type: Archivo (display), IBM Plex Sans (body/UI), IBM Plex Mono (figures). */
-  :root {
-    --bg: #f4f5f7;
-    --surface: #ffffff;
-    --surface-2: #fbfbfc;
-    --ink: #141619;
-    --ink-2: #51565e;
-    --ink-3: #868d97;
-    --line: #e4e6ea;
-    --line-2: #eef0f3;
-    --accent: #e5362b;        /* ADy red */
-    --accent-soft: #fdecea;
-    --good: #1f9d64;
-    --good-soft: #e6f4ec;
-    --warn: #c6881a;
-    --warn-soft: #faf0dd;
-    --track: #edeff2;
-    --shadow: 0 1px 2px rgba(18,22,26,.06), 0 8px 24px rgba(18,22,26,.05);
-    --r: 14px;
-    --r-sm: 9px;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #0d0f12;
-      --surface: #16191e;
-      --surface-2: #1b1f25;
-      --ink: #f2f4f7;
-      --ink-2: #aeb4bd;
-      --ink-3: #727a85;
-      --line: #262b32;
-      --line-2: #20242a;
-      --accent: #ff5349;
-      --accent-soft: #2a1715;
-      --good: #35c285;
-      --good-soft: #10231a;
-      --warn: #e0a641;
-      --warn-soft: #251c0e;
-      --track: #22262d;
-      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
-      color-scheme: dark;
-    }
-  }
-  :root[data-theme="dark"] {
-    --bg: #0d0f12;
-    --surface: #16191e;
-    --surface-2: #1b1f25;
-    --ink: #f2f4f7;
-    --ink-2: #aeb4bd;
-    --ink-3: #727a85;
-    --line: #262b32;
-    --line-2: #20242a;
-    --accent: #ff5349;
-    --accent-soft: #2a1715;
-    --good: #35c285;
-    --good-soft: #10231a;
-    --warn: #e0a641;
-    --warn-soft: #251c0e;
-    --track: #22262d;
-    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
-    color-scheme: dark;
-  }
-
-  * { box-sizing: border-box; }
-  body {
-    background: var(--bg);
-    color: var(--ink);
-    font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
-  .wrap {
-    max-width: 1080px;
-    margin: 0 auto;
-    padding-block: 28px 56px;
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-  h1, h2, h3 { font-family: "Archivo", system-ui, sans-serif; margin: 0; text-wrap: balance; }
-  .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
-
-  /* header */
-  header {
-    display: flex; align-items: flex-start; justify-content: space-between;
-    gap: 16px; flex-wrap: wrap; margin-bottom: 26px;
-  }
-  .brand { display: flex; align-items: center; gap: 13px; }
-  .emblem {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: var(--ink); color: var(--surface);
-    display: grid; place-items: center; flex: none;
-    font-family: "Archivo", sans-serif; font-weight: 700; font-size: 15px;
-    letter-spacing: .5px; position: relative;
-  }
-  .emblem::after { content: ""; position: absolute; right: 5px; top: 7px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
-  header h1 { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
-  header .sub { color: var(--ink-3); font-size: 12.5px; margin-top: 1px; }
-  .head-right { display: flex; align-items: center; gap: 10px; }
-  .badge-sample, .badge-live {
-    font-size: 11px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase;
-    padding: 5px 9px; border-radius: 999px; white-space: nowrap;
-  }
-  .badge-sample {
-    color: var(--warn); background: var(--warn-soft);
-    border: 1px solid color-mix(in srgb, var(--warn) 28%, transparent);
-  }
-  .badge-live {
-    color: var(--good); background: var(--good-soft);
-    border: 1px solid color-mix(in srgb, var(--good) 30%, transparent);
-  }
-  .badge-live::before {
-    content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
-    background: var(--good); margin-right: 5px; vertical-align: 1px;
-  }
-  .toggle {
-    appearance: none; border: 1px solid var(--line); background: var(--surface);
-    color: var(--ink-2); border-radius: 999px; width: 34px; height: 34px;
-    cursor: pointer; font-size: 15px; display: grid; place-items: center;
-  }
-  .toggle:hover { border-color: var(--ink-3); color: var(--ink); }
-
-  /* sections */
-  section { margin-top: 26px; }
-  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
-  .sec-head h2 { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
-  .sec-head .note { font-size: 12px; color: var(--ink-3); }
-
-  /* KPI tiles */
-  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .kpi {
-    background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
-    padding: 15px 16px 14px; box-shadow: var(--shadow); min-width: 0;
-  }
-  .kpi .label { font-size: 11.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
-  .kpi .val { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 28px; letter-spacing: -.02em; margin-top: 6px; font-variant-numeric: tabular-nums; }
-  .kpi .meta { font-size: 12px; color: var(--ink-3); margin-top: 3px; }
-  .kpi.accent .val { color: var(--accent); }
-  .kpi .meta b { color: var(--good); font-weight: 600; }
-
-  /* generic card */
-  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 18px; min-width: 0; }
-  .grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
-
-  /* funnel */
-  .funnel { display: flex; flex-direction: column; gap: 10px; }
-  .fstep { display: grid; grid-template-columns: 112px 1fr auto; align-items: center; gap: 12px; }
-  .fstep .fname { font-size: 13px; color: var(--ink-2); }
-  .ftrack { height: 30px; background: var(--track); border-radius: var(--r-sm); overflow: hidden; }
-  .fbar { height: 100%; border-radius: var(--r-sm); background: var(--accent); display: flex; align-items: center; }
-  .fbar.soft { background: color-mix(in srgb, var(--accent) 55%, var(--track)); }
-  .fbar.softer { background: color-mix(in srgb, var(--accent) 32%, var(--track)); }
-  .fstep .fval { font-size: 13px; text-align: right; white-space: nowrap; }
-  .fstep .fval .pct { color: var(--ink-3); font-size: 11.5px; margin-left: 5px; }
-
-  /* trend chart */
-  .chart-wrap { position: relative; }
-  svg { display: block; width: 100%; height: auto; }
-  .axis-label { fill: var(--ink-3); font-size: 10px; font-family: "IBM Plex Mono", monospace; }
-  .tip {
-    position: absolute; pointer-events: none; opacity: 0; transform: translate(-50%, -112%);
-    background: var(--ink); color: var(--surface); font-size: 11.5px; padding: 5px 8px;
-    border-radius: 7px; white-space: nowrap; transition: opacity .08s; z-index: 5;
-    font-family: "IBM Plex Mono", monospace;
-  }
-
-  /* follow-up bars */
-  .fu { display: flex; flex-direction: column; gap: 13px; }
-  .fu-row .fu-top { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; }
-  .fu-row .fu-top .n { color: var(--ink-2); }
-  .fu-row .fu-top .v { color: var(--ink); font-variant-numeric: tabular-nums; }
-  .fu-track { height: 8px; background: var(--track); border-radius: 999px; overflow: hidden; }
-  .fu-fill { height: 100%; border-radius: 999px; background: var(--ink-3); }
-
-  /* table */
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th, td { text-align: right; padding: 10px 8px; border-bottom: 1px solid var(--line-2); font-variant-numeric: tabular-nums; }
-  th:first-child, td:first-child { text-align: left; }
-  thead th { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-3); font-weight: 600; border-bottom: 1px solid var(--line); }
-  tbody tr:last-child td { border-bottom: none; }
-  td .mb { color: var(--ink-2); font-size: 12px; }
-  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
-  .pill.best { color: var(--good); background: var(--good-soft); }
-
-  /* insights */
-  .ins { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  .ins .card { padding: 15px 16px; }
-  .ins .k { font-size: 11.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
-  .ins .v { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 17px; margin-top: 7px; letter-spacing: -.01em; }
-  .ins .d { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
-  .goal { margin-top: 12px; }
-  .goal .gtrack { height: 10px; background: var(--track); border-radius: 999px; overflow: hidden; margin-top: 8px; }
-  .goal .gfill { height: 100%; background: var(--accent); border-radius: 999px; }
-  .goal .gcap { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); margin-top: 7px; }
-
-  footer { margin-top: 30px; font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--line); padding-top: 16px; }
-  footer b { color: var(--ink-2); font-weight: 600; }
-
-  @media (max-width: 820px) {
-    .kpis { grid-template-columns: repeat(2, 1fr); }
-    .grid-2 { grid-template-columns: 1fr; }
-    .ins { grid-template-columns: 1fr; }
-  }
-  @media (max-width: 440px) {
-    .fstep { grid-template-columns: 84px 1fr; }
-    .fstep .fval { grid-column: 2; text-align: left; margin-top: -4px; }
-  }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* ===========================================================================
+   ADy Outreach — cold-email control room
+   Identity: monochrome console (cool near-black + platinum) with one red accent.
+   Type: Archivo (numbers/titles) · Hanken Grotesk (UI) · JetBrains Mono (data).
+   =========================================================================== */
+:root{
+  --bg:#0b0d11; --bg-rail:#0e1116; --surface:#14181e; --surface-2:#1a1f27; --raise:#20262f;
+  --line:#242a33; --line-soft:#1c2128;
+  --ink:#eef2f7; --ink-2:#9aa4b2; --ink-3:#616b7a; --ink-4:#444d59;
+  --accent:#ff463a; --accent-2:#ff6a60; --accent-dim:rgba(255,70,58,.14);
+  --silver:#c7cdd6;
+  --good:#3ddc97; --good-dim:rgba(61,220,151,.13);
+  --warn:#eab547; --warn-dim:rgba(234,181,71,.13);
+  --info:#64a6ff; --info-dim:rgba(100,166,255,.13);
+  --dead:#7a8595; --dead-dim:rgba(122,133,149,.12);
+  --radius:12px; --radius-s:8px;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ui:"Hanken Grotesk",system-ui,-apple-system,sans-serif;
+  --disp:"Archivo",system-ui,sans-serif;
+  --rail-w:236px;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#f3f5f8; --bg-rail:#0e1116; --surface:#ffffff; --surface-2:#f7f9fb; --raise:#eef1f5;
+  --line:#e3e7ec; --line-soft:#edf0f4;
+  --ink:#121620; --ink-2:#55606f; --ink-3:#8a95a3; --ink-4:#aab2bd;
+  --accent:#e5362b; --accent-2:#c92c22; --accent-dim:rgba(229,54,43,.10);
+  --silver:#6b7280;
+  --good:#149f68; --good-dim:rgba(20,159,104,.10);
+  --warn:#b5851c; --warn-dim:rgba(181,133,28,.12);
+  --info:#2f6fe0; --info-dim:rgba(47,111,224,.10);
+  --dead:#8a95a3; --dead-dim:rgba(138,149,163,.12);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--ui);
+  font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+::selection{background:var(--accent-dim)}
+/* scrollbars */
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-thumb{background:var(--raise);border-radius:8px;border:2px solid var(--bg)}
+*::-webkit-scrollbar-track{background:transparent}
+
+.app{display:grid;grid-template-columns:var(--rail-w) 1fr;min-height:100%}
+
+/* ---------- RAIL ---------- */
+.rail{
+  background:var(--bg-rail); border-right:1px solid #1b2128;
+  display:flex;flex-direction:column; position:sticky;top:0;height:100vh;
+  padding:0; z-index:20;
+}
+.brand{display:flex;align-items:center;gap:11px;padding:22px 20px 20px}
+.emblem{
+  width:34px;height:34px;border-radius:50%;flex:none;position:relative;
+  background:radial-gradient(120% 120% at 30% 25%,#2a2f38,#101319);
+  border:1px solid #2d333d; display:grid;place-items:center;
+  font-family:var(--disp);font-weight:800;font-size:12.5px;letter-spacing:.3px;color:var(--silver);
+}
+.emblem::after{content:"";position:absolute;right:4px;top:6px;width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.brand .wm{font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:-.01em;color:#f3f6fa}
+.brand .wm small{display:block;font-family:var(--ui);font-weight:500;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5a6472;margin-top:2px}
+
+.nav{display:flex;flex-direction:column;gap:2px;padding:8px 12px;flex:1}
+.nav-label{font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#4c5663;padding:14px 10px 6px}
+.nav a{
+  display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:var(--radius-s);
+  color:#aeb7c4;text-decoration:none;font-weight:500;font-size:13.5px;cursor:pointer;
+  transition:background .13s,color .13s;position:relative;
+}
+.nav a svg{width:18px;height:18px;flex:none;stroke:currentColor;opacity:.85}
+.nav a .count{margin-left:auto;font-family:var(--mono);font-size:11px;color:#6b7482;background:#191e25;padding:1px 7px;border-radius:20px}
+.nav a:hover{background:#171c23;color:#e4e9ef}
+.nav a.active{background:#191f27;color:#fff}
+.nav a.active::before{content:"";position:absolute;left:-12px;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--accent)}
+.nav a.active svg{opacity:1;stroke:var(--accent)}
+.nav a.active .count{color:#e4e9ef;background:#222932}
+
+.rail-foot{border-top:1px solid #1b2128;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.pulse{display:flex;align-items:center;gap:8px;font-size:12px;color:#8a94a2}
+.pulse .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 0 var(--good);animation:ping 2.4s ease-out infinite}
+.pulse.sample .dot{background:var(--warn);animation:none}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(61,220,151,.5)}70%{box-shadow:0 0 0 7px rgba(61,220,151,0)}100%{box-shadow:0 0 0 0 rgba(61,220,151,0)}}
+.goal-mini{font-size:11.5px;color:#6b7482}
+.goal-mini b{color:#cfd6df;font-family:var(--mono)}
+.goal-mini .bar{height:5px;background:#1b212a;border-radius:4px;margin-top:6px;overflow:hidden}
+.goal-mini .fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:4px}
+
+/* ---------- MAIN ---------- */
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{
+  display:flex;align-items:center;gap:14px;padding:18px 28px;border-bottom:1px solid var(--line-soft);
+  position:sticky;top:0;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(8px);z-index:10;
+}
+.topbar h1{font-family:var(--disp);font-weight:700;font-size:20px;letter-spacing:-.015em;margin:0}
+.topbar .sub{color:var(--ink-3);font-size:12.5px;margin-left:2px}
+.topbar .spacer{flex:1}
+.chip{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;padding:6px 11px;border-radius:30px;border:1px solid var(--line)}
+.chip.live{color:var(--good);background:var(--good-dim);border-color:transparent}
+.chip.live .d{width:7px;height:7px;border-radius:50%;background:var(--good)}
+.chip.sample{color:var(--warn);background:var(--warn-dim);border-color:transparent}
+.iconbtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);display:grid;place-items:center;cursor:pointer;transition:.13s}
+.iconbtn:hover{color:var(--ink);border-color:var(--ink-3)}
+.iconbtn svg{width:16px;height:16px;stroke:currentColor;fill:none}
+
+.view{padding:24px 28px 56px;max-width:1240px}
+.view[hidden]{display:none}
+
+/* ---------- KPI console ---------- */
+.kpis{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
+.kpi{background:var(--surface);padding:15px 16px 14px;min-width:0;transition:background .13s}
+.kpi:hover{background:var(--surface-2)}
+.kpi .k{font-size:11px;font-weight:600;letter-spacing:.03em;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.kpi .k .dotc{width:6px;height:6px;border-radius:2px}
+.kpi .v{font-family:var(--disp);font-weight:800;font-size:25px;letter-spacing:-.02em;margin-top:8px;line-height:1;font-variant-numeric:tabular-nums}
+.kpi .m{font-size:11.5px;color:var(--ink-3);margin-top:6px}
+.kpi.hero .v{color:var(--accent)}
+
+.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;margin-bottom:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px;min-width:0}
+.panel-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px}
+.panel-h h2{font-family:var(--disp);font-weight:700;font-size:14px;letter-spacing:.01em;margin:0}
+.panel-h .note{font-size:11.5px;color:var(--ink-3)}
+
+/* funnel */
+.funnel{display:flex;flex-direction:column;gap:11px}
+.fstep{display:grid;grid-template-columns:96px 1fr auto;align-items:center;gap:12px}
+.fstep .n{font-size:12.5px;color:var(--ink-2)}
+.ftrack{height:26px;background:var(--line-soft);border-radius:7px;overflow:hidden}
+.fbar{height:100%;border-radius:7px;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+.fstep .fv{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+.fstep .fv .p{color:var(--ink-3);margin-left:6px}
+
+/* chart */
+.chart{position:relative}
+svg.trend{display:block;width:100%;height:auto}
+.axl{fill:var(--ink-3);font-family:var(--mono);font-size:9.5px}
+.tip{position:absolute;pointer-events:none;opacity:0;transform:translate(-50%,-115%);background:var(--raise);color:var(--ink);border:1px solid var(--line);font-family:var(--mono);font-size:11px;padding:5px 9px;border-radius:7px;white-space:nowrap;transition:opacity .08s;z-index:5}
+
+/* tables */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);padding:12px 16px;border-bottom:1px solid var(--line);background:var(--surface-2);position:sticky;top:0}
+tbody td{padding:12px 16px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr{transition:background .1s}
+tbody tr:hover{background:var(--surface-2)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.mail{font-family:var(--mono);font-size:12.5px;color:var(--ink)}
+.muted{color:var(--ink-3)}
+.monocell{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+
+/* pills */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;line-height:1.3}
+.pill .pd{width:6px;height:6px;border-radius:50%}
+.pill.sent{color:var(--info);background:var(--info-dim)}
+.pill.waiting{color:var(--ink-2);background:var(--dead-dim)}
+.pill.followup{color:var(--warn);background:var(--warn-dim)}
+.pill.replied{color:var(--good);background:var(--good-dim)}
+.pill.booked{color:#fff;background:var(--accent)}
+.pill.booked .pd{background:#fff}
+.pill.dead{color:var(--dead);background:var(--dead-dim)}
+.pill.first{color:var(--ink-2);background:var(--line-soft)}
+.pill.d7{color:var(--warn);background:var(--warn-dim)}
+.pill.d10{color:var(--accent-2);background:var(--accent-dim)}
+
+/* tabs */
+.tabs{display:inline-flex;gap:3px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;margin-bottom:16px}
+.tabs button{appearance:none;border:0;background:transparent;color:var(--ink-2);font-family:var(--ui);font-weight:600;font-size:12.5px;padding:7px 14px;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.12s}
+.tabs button .c{font-family:var(--mono);font-size:11px;opacity:.8}
+.tabs button:hover{color:var(--ink)}
+.tabs button.on{background:var(--raise);color:var(--ink)}
+.tabs button.on.accent{background:var(--accent);color:#fff}
+
+/* day log header */
+.logbar{display:flex;align-items:center;gap:14px;padding:14px 18px;border:1px solid var(--line);border-bottom:0;border-radius:var(--radius) var(--radius) 0 0;background:var(--surface-2)}
+.logbar .daynav{display:flex;align-items:center;gap:8px}
+.logbar .dayttl{font-family:var(--disp);font-weight:700;font-size:15px}
+.logbar .daysub{font-size:12px;color:var(--ink-3);margin-top:1px}
+.logbar .count-b{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.logbar .count-b b{color:var(--ink);font-size:15px}
+.navbtn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);display:grid;place-items:center;cursor:pointer}
+.navbtn:hover:not(:disabled){color:var(--ink);border-color:var(--ink-3)}
+.navbtn:disabled{opacity:.35;cursor:default}
+.navbtn svg{width:15px;height:15px;stroke:currentColor;fill:none}
+.logtable{border-radius:0 0 var(--radius) var(--radius)}
+
+/* day pager */
+.pager{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.pager button{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:var(--mono);font-size:11.5px;padding:6px 11px;border-radius:8px;cursor:pointer;transition:.12s;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:62px}
+.pager button span{font-size:9.5px;color:var(--ink-4)}
+.pager button:hover{border-color:var(--ink-3);color:var(--ink)}
+.pager button.on{background:var(--raise);color:var(--ink);border-color:var(--ink-3)}
+.pager button.on span{color:var(--accent)}
+
+/* banner */
+.banner{display:flex;gap:11px;align-items:flex-start;padding:13px 16px;border-radius:var(--radius);background:var(--dead-dim);border:1px solid var(--line);margin-bottom:16px;font-size:13px;color:var(--ink-2)}
+.banner svg{width:18px;height:18px;flex:none;stroke:var(--dead);fill:none;margin-top:1px}
+.banner b{color:var(--ink)}
+
+.cadence{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;font-size:12.5px;color:var(--ink-3)}
+.cadence .step{display:flex;align-items:center;gap:8px;padding:8px 13px;border:1px solid var(--line);border-radius:30px;background:var(--surface)}
+.cadence .step b{color:var(--ink);font-family:var(--mono);font-size:12px}
+.cadence .arrow{color:var(--ink-4);align-self:center}
+
+.empty{padding:48px 20px;text-align:center;color:var(--ink-3);font-size:13px}
+.empty .big{font-family:var(--disp);font-weight:700;color:var(--ink-2);font-size:15px;margin-bottom:6px}
+
+.foot{color:var(--ink-4);font-size:11.5px;margin-top:26px;padding-top:16px;border-top:1px solid var(--line-soft)}
+
+/* mobile */
+.menubtn{display:none}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(4,1fr)}.grid2{grid-template-columns:1fr}}
+@media(max-width:860px){
+  .app{grid-template-columns:1fr}
+  .rail{position:fixed;left:0;top:0;bottom:0;width:260px;transform:translateX(-100%);transition:transform .2s;height:100%}
+  .rail.open{transform:none;box-shadow:0 0 0 2000px rgba(0,0,0,.5)}
+  .menubtn{display:grid}
+  .view{padding:18px 16px 48px}
+  .topbar{padding:14px 16px}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:480px){.kpis{grid-template-columns:repeat(2,1fr)}.topbar h1{font-size:17px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
 </head>
 <body>
-<div class="wrap">
-  <header>
+<div class="app">
+  <aside class="rail" id="rail">
     <div class="brand">
       <div class="emblem">ADy</div>
-      <div>
-        <h1>ADy Outreach</h1>
-        <div class="sub">Cold email analytics &middot; day 21 of campaign</div>
+      <div class="wm">ADy Outreach<small>Control Room</small></div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-label">Operations</div>
+      <a data-view="overview" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Overview
+      </a>
+      <a data-view="log">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        Send Log
+      </a>
+      <a data-view="followups">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4"/><path d="M12 8v4l3 2"/></svg>
+        Follow-ups <span class="count" id="nav-fu">0</span>
+      </a>
+      <a data-view="dead">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>
+        Dead List <span class="count" id="nav-dead">0</span>
+      </a>
+    </nav>
+    <div class="rail-foot">
+      <div class="pulse" id="pulse"><span class="dot"></span><span id="pulse-txt">Connecting…</span></div>
+      <div class="goal-mini">Goal · <b id="goal-txt">0 / 17</b> calls booked
+        <div class="bar"><div class="fill" id="goal-fill" style="width:0%"></div></div>
       </div>
     </div>
-    <div class="head-right">
-      <span class="badge-sample" id="badge">Sample data</span>
-      <button class="toggle" id="themeBtn" aria-label="Toggle theme">◐</button>
-    </div>
-  </header>
+  </aside>
 
-  <!-- KPIs -->
-  <section>
-    <div class="kpis" id="kpis"></div>
-  </section>
+  <main class="main">
+    <header class="topbar">
+      <button class="iconbtn menubtn" id="menubtn" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <h1 id="pg-title">Overview</h1>
+      <span class="sub" id="pg-date"></span>
+      <span class="spacer"></span>
+      <span class="chip" id="mode-chip">…</span>
+      <button class="iconbtn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.3M21 12a9 9 0 0 1-15.5 6.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg></button>
+      <button class="iconbtn" id="theme" aria-label="Theme"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg></button>
+    </header>
 
-  <!-- Pipeline + follow-up -->
-  <section>
-    <div class="grid-2">
-      <div class="card">
-        <div class="sec-head"><h2>Pipeline</h2><span class="note">delivered &rarr; replied &rarr; booked</span></div>
-        <div class="funnel" id="funnel"></div>
+    <!-- OVERVIEW -->
+    <section class="view" id="v-overview">
+      <div class="kpis" id="kpis"></div>
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-h"><h2>Pipeline</h2><span class="note">delivered → replied → booked</span></div>
+          <div class="funnel" id="funnel"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-h"><h2>Conversion</h2><span class="note">this campaign</span></div>
+          <div id="conv"></div>
+        </div>
       </div>
-      <div class="card">
-        <div class="sec-head"><h2>Follow-up status</h2><span class="note" id="fuTotal"></span></div>
-        <div class="fu" id="fu"></div>
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-h"><h2>Emails sent per day</h2><span class="note">3 inboxes · ramping to 150/day</span></div>
+        <div class="chart"><svg class="trend" id="trend" viewBox="0 0 760 210" preserveAspectRatio="none"></svg><div class="tip" id="trendtip"></div></div>
       </div>
-    </div>
-  </section>
-
-  <!-- Trend -->
-  <section>
-    <div class="card">
-      <div class="sec-head"><h2>Emails sent per day</h2><span class="note">3 inboxes, ramping to 150/day</span></div>
-      <div class="chart-wrap">
-        <svg id="trend" viewBox="0 0 720 220" preserveAspectRatio="none" role="img" aria-label="Emails sent per day over 21 days, ramping up"></svg>
-        <div class="tip" id="trendTip"></div>
+      <div class="panel">
+        <div class="panel-h"><h2>Mailbox performance</h2><span class="note">reply rate on delivered</span></div>
+        <div class="tablewrap" style="border:0"><table id="mbx"><thead><tr><th>Inbox</th><th class="num">Sent</th><th class="num">Replied</th><th class="num">Reply rate</th><th class="num">Booked</th></tr></thead><tbody></tbody></table></div>
       </div>
-    </div>
-  </section>
+      <div class="foot" id="foot"></div>
+    </section>
 
-  <!-- Mailboxes -->
-  <section>
-    <div class="card">
-      <div class="sec-head"><h2>Mailbox performance</h2><span class="note">reply rate on delivered</span></div>
-      <div style="overflow-x:auto">
-        <table id="mailboxes">
-          <thead><tr><th>Inbox</th><th>Sent</th><th>Replied</th><th>Reply rate</th><th>Booked</th></tr></thead>
-          <tbody></tbody>
-        </table>
+    <!-- SEND LOG -->
+    <section class="view" id="v-log" hidden>
+      <div class="tabs" id="log-tabs"></div>
+      <div class="logbar">
+        <div class="daynav">
+          <button class="navbtn" id="day-prev" aria-label="Newer day"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <button class="navbtn" id="day-next" aria-label="Older day"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+        </div>
+        <div>
+          <div class="dayttl" id="day-ttl">—</div>
+          <div class="daysub" id="day-sub"></div>
+        </div>
+        <div class="count-b"><b id="day-count">0</b> sent</div>
       </div>
-    </div>
-  </section>
+      <div class="tablewrap logtable">
+        <table id="logtable"><thead><tr><th>Email</th><th>Nature</th><th>Status</th><th class="num">Time</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="pager" id="pager"></div>
+    </section>
 
-  <!-- Insights -->
-  <section>
-    <div class="sec-head"><h2>Insights</h2></div>
-    <div class="ins" id="insights"></div>
-    <div class="card goal">
-      <div class="k" style="font-size:11.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em">Goal &middot; 5 clients in 1-2 months</div>
-      <div class="gtrack"><div class="gfill" id="goalFill"></div></div>
-      <div class="gcap"><span id="goalNow"></span><span>target: 17 calls booked</span></div>
-    </div>
-  </section>
+    <!-- FOLLOW-UPS -->
+    <section class="view" id="v-followups" hidden>
+      <div class="cadence">
+        <div class="step">Day 0 · <b>1st email</b></div><span class="arrow">→</span>
+        <div class="step">No reply by day 7 · <b>7th-day follow-up</b></div><span class="arrow">→</span>
+        <div class="step">Still nothing by day 10 · <b>10th-day follow-up</b></div><span class="arrow">→</span>
+        <div class="step">No reply after day 10 · <b>dead list</b></div>
+      </div>
+      <div class="tabs" id="fu-tabs"></div>
+      <div class="tablewrap">
+        <table id="futable"><thead><tr><th>Email</th><th>Inbox</th><th>First contacted</th><th class="num">Waiting</th><th>Next send</th><th>Status</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
 
-  <footer>
-    This page is wired to your Supabase project and reads the <b>v_funnel</b>, <b>v_daily_sends</b>, <b>v_mailbox_performance</b> and <b>v_followup</b> views. When the badge says <b>Live</b>, these are your real numbers; <b>Sample data</b> means the project is not reachable yet, so illustrative figures are shown instead. Only aggregate counts are exposed, never an individual lead.
-  </footer>
+    <!-- DEAD LIST -->
+    <section class="view" id="v-dead" hidden>
+      <div class="banner">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>
+        <div>Addresses here are <b>never contacted again</b>. They bounced, unsubscribed, were undeliverable, or went silent after the 10th-day follow-up. The sender skips every address on this list.</div>
+      </div>
+      <div class="tabs" id="dead-tabs"></div>
+      <div class="tablewrap">
+        <table id="deadtable"><thead><tr><th>Email</th><th>Inbox</th><th>Reason</th><th>Date</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+  </main>
 </div>
 
 <script>
-/* ========================================================================
-   SUPABASE CONFIG
-   This reads your four summary views (v_funnel, v_daily_sends,
-   v_mailbox_performance, v_followup) with the public anon key. The anon key
-   is meant to live in frontend code; the views expose only counts, never an
-   individual lead's name or email. If the project is not reachable yet
-   (schema or grant not run, no data), the page falls back to sample numbers.
-   ======================================================================== */
-const SUPABASE_URL = "https://vqzdhhpgqicurottmkdq.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxemRoaHBncWljdXJvdHRta2RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2OTA4ODMsImV4cCI6MjEwNzI2Njg4M30.zq32fc77tdcDbSUNUqX-VTRsMoJkyzebwn0KZO0s53E";
+/* ======================= CONFIG ======================= */
+const SB_URL="https://vqzdhhpgqicurottmkdq.supabase.co";
+const SB_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxemRoaHBncWljdXJvdHRta2RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2OTA4ODMsImV4cCI6MjEwNzI2Njg4M30.zq32fc77tdcDbSUNUqX-VTRsMoJkyzebwn0KZO0s53E";
+const MAILBOXES=[
+  {key:"space",full:"founder@adystudios.space"},
+  {key:"online",full:"founder@adystudios.online"},
+  {key:"sbs",full:"founder@adyaistudios.sbs"},
+];
+const GOAL_CALLS=17;
 
-/* ---- SAMPLE DATA (shown until live data loads) ---- */
-const SAMPLE = {
-  live: false,
-  total_leads: 17152, left_to_send: 17152, sent: 0, bounced: 0, replied: 0, booked: 0, in_followup: 0,
-  followup: [
-    { name: "Awaiting 1st follow-up", count: 0 },
-    { name: "In follow-up · day 3 sent", count: 0 },
-    { name: "In follow-up · day 7 sent", count: 0 },
-    { name: "Sequence complete", count: 0 },
-  ],
-  daily: [],
-  mailboxes: [
-    { mb: "founder@adystudios.space", sent: 0, replied: 0, booked: 0 },
-    { mb: "founder@adystudios.online", sent: 0, replied: 0, booked: 0 },
-    { mb: "founder@adyaistudios.sbs", sent: 0, replied: 0, booked: 0 },
-  ],
-};
-/* a richer illustrative set, used only when the project is unreachable, so the
-   layout never looks empty while you are still setting Supabase up */
-const DEMO = {
-  live: false,
-  total_leads: 17152, left_to_send: 15346, sent: 1806, bounced: 58, replied: 42, booked: 9, in_followup: 1240,
-  followup: [
-    { name: "Awaiting 1st follow-up", count: 416 },
-    { name: "In follow-up · day 3 sent", count: 720 },
-    { name: "In follow-up · day 7 sent", count: 520 },
-    { name: "Sequence complete", count: 50 },
-  ],
-  daily: [48,52,55,53,57,56,57,80,82,85,86,88,83,84,115,118,120,122,121,123,121],
-  mailboxes: [
-    { mb: "founder@adystudios.space", sent: 620, replied: 18, booked: 4 },
-    { mb: "founder@adystudios.online", sent: 600, replied: 15, booked: 3 },
-    { mb: "founder@adyaistudios.sbs", sent: 586, replied: 9, booked: 2 },
-  ],
-};
+/* ======================= HELPERS ======================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const fmt=n=>(n==null?"0":Number(n).toLocaleString("en-IN"));
+const pct=(a,b)=>b?a/b*100:0;
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function dLabel(d){return `${WD[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;}
+function isoDate(d){return d.toISOString().slice(0,10);}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 
-const fmt = n => (n == null ? "0" : Number(n).toLocaleString("en-IN"));
-const pct = (a, b) => b ? (a / b * 100) : 0;
-const NS = "http://www.w3.org/2000/svg";
-const mk = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; };
-
-async function sb(view) {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${view}?select=*`, {
-    headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON },
-  });
-  if (!r.ok) throw new Error(view + " " + r.status);
+async function sb(view,qs=""){
+  const r=await fetch(`${SB_URL}/rest/v1/${view}?${qs||"select=*"}`,{headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
+  if(!r.ok)throw new Error(view+" "+r.status);
   return r.json();
 }
 
-async function loadLive() {
-  const [funnel, daily, mbx, fu] = await Promise.all([
-    sb("v_funnel"), sb("v_daily_sends"), sb("v_mailbox_performance"), sb("v_followup"),
-  ]);
-  const f = funnel[0] || {};
-  const fuRow = fu[0] || {};
-  return {
-    live: true,
-    total_leads: +f.total_leads || 0,
-    left_to_send: +f.left_to_send || 0,
-    sent: +f.sent || 0,
-    bounced: +f.bounced || 0,
-    replied: +f.replied || 0,
-    booked: +f.booked || 0,
-    in_followup: +f.in_followup || 0,
-    followup: [
-      { name: "Awaiting 1st follow-up", count: +fuRow.awaiting_first || 0 },
-      { name: "In follow-up · day 3 sent", count: +fuRow.followup_1 || 0 },
-      { name: "In follow-up · day 7 sent", count: +fuRow.followup_2 || 0 },
-      { name: "Sequence complete", count: +fuRow.sequence_complete || 0 },
-    ],
-    daily: (daily || []).map(d => +d.sends),
-    mailboxes: (mbx || []).map(m => ({ mb: m.mailbox, sent: +m.sent || 0, replied: +m.replied || 0, booked: +m.booked || 0 })),
-  };
+/* status display mapping */
+const STATUS_LABEL={sent:["Sent","sent"],waiting:["Waiting","waiting"],in_followup:["In follow-up","followup"],replied:["Replied","replied"],booked:["Call booked","booked"],bounced:["Bounced","dead"],unsubscribed:["Unsubscribed","dead"],closed:["Closed","dead"]};
+function statusPill(code){const s=STATUS_LABEL[code]||["Waiting","waiting"];return `<span class="pill ${s[1]}"><span class="pd"></span>${s[0]}</span>`;}
+const NATURE={first:["1st email","first"],day7:["7th-day","d7"],day10:["10th-day","d10"]};
+function naturePill(code){const n=NATURE[code]||NATURE.first;return `<span class="pill ${n[1]}">${n[0]}</span>`;}
+
+/* ======================= DEMO DATA ======================= */
+function buildDemo(totalLeads){
+  const rng=mulberry32(20261011);
+  const fn=["jordan","maya","aarav","sofia","liam","noah","ava","ethan","isla","kian","zara","omar","nina","leo","ruby","theo","elif","dev","mia","finn","asha","cole","neha","raj","tara","sam","yuki","ivan","lena","drew"];
+  const co=["brightlabel","northform","saplingco","vellum","orbitwear","mossandco","finchlabs","paperboat","lumenate","harbourgoods","thalia","kindred","novena","cedarhouse","drift","maison-k","oaklyn","superbloom","wildgrain","atelier9","foldwear","roastery","glowbar","studio-mira"];
+  const tld=[".com",".co",".shop",".studio",".co.uk",".store"];
+  const pick=a=>a[Math.floor(rng()*a.length)];
+  const email=()=>`${pick(fn)}${Math.floor(rng()*90)+10}@${pick(co)}${pick(tld)}`;
+
+  const today=new Date();today.setHours(0,0,0,0);
+  const DAYS=21;
+  function perInbox(dayIdx){ // dayIdx 1..21 oldest..today
+    if(dayIdx<=7)return 16+Math.floor(rng()*5);
+    if(dayIdx<=14)return 26+Math.floor(rng()*5);
+    return 38+Math.floor(rng()*6);
+  }
+  const log=[]; // {email,mailbox,date(Date),dayIdx,touch,statusCode,time}
+  for(let i=1;i<=DAYS;i++){
+    const date=new Date(today);date.setDate(today.getDate()-(DAYS-i));
+    for(const mb of MAILBOXES){
+      const n=perInbox(i);
+      for(let k=0;k<n;k++){
+        let touch="first";
+        if(i>=8){const r=rng();if(i>=11&&r<0.12)touch="day10";else if(r<0.18)touch="day7";}
+        // status depends on recency
+        const age=DAYS-i; let statusCode;
+        const r=rng();
+        if(age<=1){statusCode=r<0.9?"waiting":"sent";}
+        else if(age<=3){statusCode=r<0.04?"replied":r<0.06?"booked":r<0.1?"bounced":"waiting";}
+        else {statusCode=r<0.03?"replied":r<0.045?"booked":r<0.09?"bounced":r<0.5?"in_followup":"waiting";}
+        const hh=9+Math.floor(rng()*8),mm=Math.floor(rng()*60);
+        log.push({email:email(),mailbox:mb.key,date,dayIdx:i,touch,statusCode,time:`${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}`});
+      }
+    }
+  }
+  // derive
+  const sent=log.length;
+  const bounced=log.filter(r=>r.statusCode==="bounced").length;
+  const replied=log.filter(r=>r.statusCode==="replied").length;
+  const booked=log.filter(r=>r.statusCode==="booked").length;
+  const inFollow=log.filter(r=>r.statusCode==="in_followup").length;
+  const delivered=sent-bounced;
+  const daily=[];
+  for(let i=1;i<=DAYS;i++)daily.push(log.filter(r=>r.dayIdx===i).length);
+  const mbx=MAILBOXES.map(mb=>{const rows=log.filter(r=>r.mailbox===mb.key);return{mb:mb.full,sent:rows.length,replied:rows.filter(r=>r.statusCode==="replied"||r.statusCode==="booked").length,booked:rows.filter(r=>r.statusCode==="booked").length};});
+
+  // follow-up queue
+  const fu=[];
+  for(let k=0;k<46;k++){const step=rng()<0.68?1:2;const first=new Date(today);first.setDate(today.getDate()-(step===1?7+Math.floor(rng()*2):10+Math.floor(rng()*2)));const next=new Date(today);next.setDate(today.getDate()+Math.floor(rng()*3));fu.push({email:email(),mailbox:pick(MAILBOXES).key,step,first,next,waiting:Math.round((today-first)/864e5)});}
+  // dead list
+  const deadArr=[];
+  const reasons=["Bounced","Bounced","Bounced","Unsubscribed","No reply after day 10","No reply after day 10","Undeliverable"];
+  for(let k=0;k<58;k++){const rr=pick(reasons);const dt=new Date(today);dt.setDate(today.getDate()-Math.floor(rng()*18));deadArr.push({email:email(),mailbox:pick(MAILBOXES).key,reason:rr,date:dt});}
+
+  return {live:false,total_leads:totalLeads||17152,left_to_send:(totalLeads||17152)-sent,sent,delivered,bounced,replied,booked,in_followup:inFollow,dead:deadArr.length,daily,mbx,log,fu,deadList:deadArr,today,DAYS};
 }
 
-/* ---- RENDER ---- */
-function render(D) {
-  const delivered = D.sent - D.bounced;
-  const replyRate = pct(D.replied, delivered);
-  const bookRate = pct(D.booked, D.replied);
+/* ======================= STATE ======================= */
+let DATA=null, MODE="demo";
+let logMailbox="all", logDayIdx=null;
+let fuTab=1, deadTab="all";
 
-  // status badge
-  const badge = document.getElementById("badge");
-  if (D.live) { badge.textContent = "Live"; badge.className = "badge-live"; }
-  else { badge.textContent = D.demo ? "Sample data" : "No sends yet"; badge.className = "badge-sample"; }
+/* ======================= RENDER: OVERVIEW ======================= */
+function renderOverview(){
+  const D=DATA, delivered=D.delivered!=null?D.delivered:D.sent-D.bounced;
+  const rr=pct(D.replied,delivered), br=pct(D.booked,D.replied);
+  const K=[
+    {k:"Total leads",c:null,v:fmt(D.total_leads),m:fmt(D.left_to_send)+" left to send"},
+    {k:"Sent",c:"var(--info)",v:fmt(D.sent),m:fmt(delivered)+" delivered"},
+    {k:"Bounced",c:"var(--dead)",v:fmt(D.bounced),m:(D.sent?(D.bounced/D.sent*100).toFixed(1):"0")+"% of sent"},
+    {k:"Replied",c:"var(--good)",v:fmt(D.replied),m:rr.toFixed(1)+"% reply rate"},
+    {k:"In follow-up",c:"var(--warn)",v:fmt(D.in_followup),m:"being re-touched"},
+    {k:"Dead list",c:"var(--dead)",v:fmt(D.dead),m:"do not contact"},
+    {k:"Calls booked",c:"var(--accent)",v:fmt(D.booked),m:(D.replied?br.toFixed(0)+"% of replies":"—"),hero:true},
+  ];
+  $("#kpis").innerHTML=K.map(x=>`<div class="kpi ${x.hero?'hero':''}"><div class="k">${x.c?`<span class="dotc" style="background:${x.c}"></span>`:""}${x.k}</div><div class="v">${x.v}</div><div class="m">${x.m}</div></div>`).join("");
 
-  // KPIs
-  const kpiEl = document.getElementById("kpis"); kpiEl.innerHTML = "";
-  [
-    { label: "Total leads", val: fmt(D.total_leads), meta: fmt(D.left_to_send) + " left to send" },
-    { label: "Emails sent", val: fmt(D.sent), meta: fmt(delivered) + " delivered · " + fmt(D.bounced) + " bounced" },
-    { label: "Replied", val: fmt(D.replied), meta: replyRate.toFixed(1) + "% reply rate" },
-    { label: "Calls booked", val: fmt(D.booked), meta: (D.replied ? bookRate.toFixed(0) + "% of replies" : "no replies yet"), accent: true },
-  ].forEach(k => {
-    const d = document.createElement("div");
-    d.className = "kpi" + (k.accent ? " accent" : "");
-    d.innerHTML = `<div class="label">${k.label}</div><div class="val">${k.val}</div><div class="meta">${k.meta}</div>`;
-    kpiEl.appendChild(d);
-  });
+  // funnel
+  const steps=[["Delivered",delivered,delivered,"var(--info)"],["Replied",D.replied,delivered,"var(--good)"],["Booked a call",D.booked,delivered,"var(--accent)"]];
+  $("#funnel").innerHTML=steps.map(([n,v,base,col])=>{const share=pct(v,base),w=v>0?Math.max(share,1.5):0;return `<div class="fstep"><span class="n">${n}</span><div class="ftrack"><div class="fbar" style="width:${w}%;background:${col}"></div></div><span class="fv">${fmt(v)}<span class="p">${n==="Delivered"?(delivered?"100%":"0%"):share.toFixed(1)+"%"}</span></span></div>`;}).join("");
 
-  // Funnel
-  const funnelEl = document.getElementById("funnel"); funnelEl.innerHTML = "";
-  [
-    { name: "Delivered", val: delivered, cls: "", base: delivered },
-    { name: "Replied", val: D.replied, cls: "soft", base: delivered },
-    { name: "Booked a call", val: D.booked, cls: "softer", base: delivered },
-  ].forEach(s => {
-    const share = pct(s.val, s.base);
-    const w = s.val > 0 ? Math.max(share, 1.5) : 0;
-    const p = s.name === "Delivered" ? (delivered ? "100%" : "0%") : share.toFixed(1) + "%";
-    const row = document.createElement("div");
-    row.className = "fstep";
-    row.innerHTML =
-      `<div class="fname">${s.name}</div>
-       <div class="ftrack"><div class="fbar ${s.cls}" style="width:${w}%"></div></div>
-       <div class="fval mono">${fmt(s.val)}<span class="pct">${p}</span></div>`;
-    funnelEl.appendChild(row);
-  });
-
-  // Follow-up
-  const fuEl = document.getElementById("fu"); fuEl.innerHTML = "";
-  const fuMax = Math.max(1, ...D.followup.map(f => f.count));
-  const fuSum = D.followup.reduce((a, f) => a + f.count, 0);
-  document.getElementById("fuTotal").textContent = fmt(fuSum) + " in sequence";
-  D.followup.forEach(f => {
-    const row = document.createElement("div");
-    row.className = "fu-row";
-    row.innerHTML =
-      `<div class="fu-top"><span class="n">${f.name}</span><span class="v mono">${fmt(f.count)}</span></div>
-       <div class="fu-track"><div class="fu-fill" style="width:${(f.count / fuMax * 100).toFixed(1)}%"></div></div>`;
-    fuEl.appendChild(row);
-  });
+  // conversion metrics
+  $("#conv").innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:14px">
+      ${convRow("Reply rate",rr.toFixed(1)+"%","of delivered emails",rr,6)}
+      ${convRow("Reply → booking",br.toFixed(0)+"%",fmt(D.booked)+" of "+fmt(D.replied)+" replies booked",br,40)}
+      ${convRow("Progress to goal",D.booked+" / "+GOAL_CALLS,"calls booked toward 5 clients",pct(D.booked,GOAL_CALLS),100)}
+    </div>`;
 
   renderTrend(D.daily);
-  renderMailboxes(D.mailboxes);
-  renderInsights(D, bookRate);
+  // mailbox
+  const rates=D.mbx.map(m=>pct(m.replied,m.sent)),best=Math.max(0,...rates);
+  $("#mbx tbody").innerHTML=D.mbx.map((m,i)=>`<tr><td class="mail">${m.mb}</td><td class="num monocell">${fmt(m.sent)}</td><td class="num monocell">${fmt(m.replied)}</td><td class="num monocell">${rates[i].toFixed(1)}% ${rates[i]===best&&best>0?'<span class="pill replied" style="margin-left:6px"><span class="pd"></span>best</span>':''}</td><td class="num monocell">${fmt(m.booked)}</td></tr>`).join("");
+
+  $("#foot").innerHTML=MODE==="live"
+    ?`Live from Supabase · reading aggregate views only, no individual lead is exposed by the public key.`
+    :`Sample data — the layout and every view with illustrative numbers. Flips to your real figures automatically once n8n starts sending.`;
+}
+function convRow(label,big,sub,p,max){
+  const w=Math.min(p/max*100,100);
+  return `<div><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="color:var(--ink-2);font-size:13px">${label}</span><span style="font-family:var(--disp);font-weight:700;font-size:16px">${big}</span></div><div style="height:6px;background:var(--line-soft);border-radius:4px;margin:7px 0 4px;overflow:hidden"><div style="height:100%;width:${w}%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:4px;transition:width .5s"></div></div><div style="font-size:11.5px;color:var(--ink-3)">${sub}</div></div>`;
+}
+function renderTrend(data){
+  const svg=$("#trend"),tip=$("#trendtip");svg.innerHTML="";
+  const W=760,H=210,pl=34,pr=10,pt=14,pb=26;
+  if(!data||!data.length||data.every(v=>!v)){svg.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" class="axl" style="font-size:12px">No sends logged yet — fills in once n8n starts sending</text>`;return;}
+  const n=data.length,maxV=Math.max(150,Math.ceil(Math.max(...data)/50)*50);
+  const X=i=>pl+(n===1?0.5:i/(n-1))*(W-pl-pr),Y=v=>pt+(1-v/maxV)*(H-pt-pb);
+  const NS="http://www.w3.org/2000/svg",mk=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+  for(let v=0;v<=maxV;v+=maxV/3){svg.appendChild(mk("line",{x1:pl,x2:W-pr,y1:Y(v),y2:Y(v),stroke:"var(--line-soft)","stroke-width":1}));const t=mk("text",{x:pl-6,y:Y(v)+3,"text-anchor":"end",class:"axl"});t.textContent=Math.round(v);svg.appendChild(t);}
+  [[0,"Day 1"],[Math.floor(n/2),"Day "+(Math.floor(n/2)+1)],[n-1,"Day "+n]].forEach(([i,l])=>{const t=mk("text",{x:X(i),y:H-8,"text-anchor":"middle",class:"axl"});t.textContent=l;svg.appendChild(t);});
+  let dl="";data.forEach((v,i)=>dl+=(i?"L":"M")+X(i)+" "+Y(v)+" ");
+  const defs=mk("defs",{}),g=mk("linearGradient",{id:"tg",x1:0,y1:0,x2:0,y2:1});
+  g.appendChild(mk("stop",{offset:"0%","stop-color":"var(--accent)","stop-opacity":.25}));g.appendChild(mk("stop",{offset:"100%","stop-color":"var(--accent)","stop-opacity":0}));
+  defs.appendChild(g);svg.appendChild(defs);
+  svg.appendChild(mk("path",{d:dl+"L"+X(n-1)+" "+Y(0)+" L"+X(0)+" "+Y(0)+" Z",fill:"url(#tg)"}));
+  svg.appendChild(mk("path",{d:dl,fill:"none",stroke:"var(--accent)","stroke-width":2.2,"stroke-linejoin":"round","stroke-linecap":"round"}));
+  svg.appendChild(mk("circle",{cx:X(n-1),cy:Y(data[n-1]),r:3.5,fill:"var(--accent)",stroke:"var(--surface)","stroke-width":2}));
+  const hov=mk("line",{y1:pt,y2:H-pb,stroke:"var(--ink-3)","stroke-width":1,"stroke-dasharray":"3 3",opacity:0}),hd=mk("circle",{r:3.5,fill:"var(--accent)",stroke:"var(--surface)","stroke-width":2,opacity:0});
+  svg.appendChild(hov);svg.appendChild(hd);
+  svg.onpointermove=e=>{const r=svg.getBoundingClientRect(),px=(e.clientX-r.left)/r.width*W;let i=Math.round((px-pl)/((W-pl-pr)/Math.max(1,n-1)));i=Math.max(0,Math.min(n-1,i));hov.setAttribute("x1",X(i));hov.setAttribute("x2",X(i));hov.setAttribute("opacity",1);hd.setAttribute("cx",X(i));hd.setAttribute("cy",Y(data[i]));hd.setAttribute("opacity",1);tip.style.opacity=1;tip.style.left=X(i)/W*r.width+"px";tip.style.top=Y(data[i])/H*r.height+"px";tip.textContent="Day "+(i+1)+" · "+data[i]+" sent";};
+  svg.onpointerleave=()=>{hov.setAttribute("opacity",0);hd.setAttribute("opacity",0);tip.style.opacity=0;};
 }
 
-function renderTrend(data) {
-  const svg = document.getElementById("trend");
-  const tip = document.getElementById("trendTip");
-  svg.innerHTML = "";
-  const W = 720, H = 220, padL = 34, padR = 10, padT = 14, padB = 26;
-  if (!data || data.length === 0) {
-    const t = mk("text", { x: W / 2, y: H / 2, "text-anchor": "middle", class: "axis-label" });
-    t.textContent = "No sends logged yet — this fills in once n8n starts sending";
-    svg.appendChild(t);
-    return;
+/* ======================= RENDER: SEND LOG ======================= */
+function logDays(){ // returns array of {dayIdx,date,count} filtered by mailbox, newest first
+  if(MODE==="demo"){
+    const days=[];
+    for(let i=DATA.DAYS;i>=1;i--){const rows=DATA.log.filter(r=>r.dayIdx===i&&(logMailbox==="all"||r.mailbox===logMailbox));if(rows.length)days.push({dayIdx:i,date:rows[0].date,count:rows.length});}
+    return days;
   }
-  const n = data.length;
-  const maxV = Math.max(150, Math.ceil(Math.max(...data) / 50) * 50);
-  const x = i => padL + (n === 1 ? 0.5 : i / (n - 1)) * (W - padL - padR);
-  const y = v => padT + (1 - v / maxV) * (H - padT - padB);
-  const ticks = []; for (let v = 0; v <= maxV; v += maxV / 3) ticks.push(Math.round(v));
-  ticks.forEach(v => {
-    svg.appendChild(mk("line", { x1: padL, x2: W - padR, y1: y(v), y2: y(v), stroke: "var(--line)", "stroke-width": 1 }));
-    const t = mk("text", { x: padL - 7, y: y(v) + 3, "text-anchor": "end", class: "axis-label" }); t.textContent = v; svg.appendChild(t);
-  });
-  const xl = [[0, "Day 1"]];
-  if (n > 1) xl.push([n - 1, "Day " + n]);
-  if (n > 8) xl.splice(1, 0, [Math.floor(n / 2), "Day " + (Math.floor(n / 2) + 1)]);
-  xl.forEach(([i, lbl]) => { const t = mk("text", { x: x(i), y: H - 8, "text-anchor": "middle", class: "axis-label" }); t.textContent = lbl; svg.appendChild(t); });
-  let dLine = "";
-  data.forEach((v, i) => { dLine += (i ? "L" : "M") + x(i) + " " + y(v) + " "; });
-  const dArea = dLine + "L" + x(n - 1) + " " + y(0) + " L" + x(0) + " " + y(0) + " Z";
-  const defs = mk("defs", {});
-  const grad = mk("linearGradient", { id: "g1", x1: 0, y1: 0, x2: 0, y2: 1 });
-  grad.appendChild(mk("stop", { offset: "0%", "stop-color": "var(--accent)", "stop-opacity": .22 }));
-  grad.appendChild(mk("stop", { offset: "100%", "stop-color": "var(--accent)", "stop-opacity": 0 }));
-  defs.appendChild(grad); svg.appendChild(defs);
-  svg.appendChild(mk("path", { d: dArea, fill: "url(#g1)" }));
-  svg.appendChild(mk("path", { d: dLine, fill: "none", stroke: "var(--accent)", "stroke-width": 2.2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
-  svg.appendChild(mk("circle", { cx: x(n - 1), cy: y(data[n - 1]), r: 4, fill: "var(--accent)", stroke: "var(--surface)", "stroke-width": 2 }));
-  const hov = mk("line", { y1: padT, y2: H - padB, stroke: "var(--ink-3)", "stroke-width": 1, "stroke-dasharray": "3 3", opacity: 0 });
-  const hdot = mk("circle", { r: 4, fill: "var(--accent)", stroke: "var(--surface)", "stroke-width": 2, opacity: 0 });
-  svg.appendChild(hov); svg.appendChild(hdot);
-  svg.onpointermove = e => {
-    const r = svg.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width * W;
-    let i = Math.round((px - padL) / ((W - padL - padR) / Math.max(1, n - 1)));
-    i = Math.max(0, Math.min(n - 1, i));
-    hov.setAttribute("x1", x(i)); hov.setAttribute("x2", x(i)); hov.setAttribute("opacity", 1);
-    hdot.setAttribute("cx", x(i)); hdot.setAttribute("cy", y(data[i])); hdot.setAttribute("opacity", 1);
-    tip.style.opacity = 1; tip.style.left = (x(i) / W * r.width) + "px"; tip.style.top = (y(data[i]) / H * r.height) + "px";
-    tip.textContent = "Day " + (i + 1) + " · " + data[i] + " sent";
-  };
-  svg.onpointerleave = () => { hov.setAttribute("opacity", 0); hdot.setAttribute("opacity", 0); tip.style.opacity = 0; };
+  // live: aggregate from DATA.sendDays [{mailbox,sent_on,sends}]
+  const map={};
+  (DATA.sendDays||[]).forEach(d=>{if(logMailbox!=="all"){const mb=MAILBOXES.find(m=>m.key===logMailbox);if(d.mailbox!==mb.full)return;}map[d.sent_on]=(map[d.sent_on]||0)+Number(d.sends);});
+  return Object.keys(map).sort().reverse().map((d,idx,arr)=>({dayIdx:arr.length-idx,date:new Date(d+"T00:00:00"),sent_on:d,count:map[d]}));
+}
+async function logRows(day){
+  if(MODE==="demo")return DATA.log.filter(r=>r.dayIdx===day.dayIdx&&(logMailbox==="all"||r.mailbox===logMailbox)).sort((a,b)=>a.time<b.time?1:-1);
+  let qs=`select=*&sent_on=eq.${day.sent_on}&order=sent_at.desc`;
+  if(logMailbox!=="all"){const mb=MAILBOXES.find(m=>m.key===logMailbox);qs+=`&mailbox=eq.${encodeURIComponent(mb.full)}`;}
+  const rows=await sb("v_send_log",qs);
+  return rows.map(r=>({email:r.email,mailbox:(MAILBOXES.find(m=>m.full===r.mailbox)||{}).key||r.mailbox,touch:r.touch,statusCode:r.booked?"booked":r.replied?"replied":r.status,time:new Date(r.sent_at).toTimeString().slice(0,5)}));
+}
+function renderLogTabs(){
+  const tabs=[{key:"all",label:"All inboxes"}].concat(MAILBOXES.map(m=>({key:m.key,label:m.full.replace("founder@","")})));
+  $("#log-tabs").innerHTML=tabs.map(t=>`<button class="${t.key===logMailbox?'on':''}" data-mb="${t.key}">${t.label}</button>`).join("");
+  $$("#log-tabs button").forEach(b=>b.onclick=()=>{logMailbox=b.dataset.mb;logDayIdx=null;renderLog();});
+}
+async function renderLog(){
+  renderLogTabs();
+  const days=logDays();
+  if(!days.length){$("#logtable tbody").innerHTML="";$("#day-ttl").textContent="No sends yet";$("#day-sub").textContent="";$("#day-count").textContent="0";$("#pager").innerHTML="";$(".logbar .count-b").style.visibility="hidden";
+    $("#logtable").parentElement.innerHTML=`<div class="empty"><div class="big">Nothing sent for this inbox yet</div>The daily log fills in the moment n8n starts sending.</div>`;return;}
+  $(".logbar .count-b").style.visibility="visible";
+  if(logDayIdx==null||!days.find(d=>d.dayIdx===logDayIdx))logDayIdx=days[0].dayIdx;
+  const idx=days.findIndex(d=>d.dayIdx===logDayIdx),day=days[idx];
+  $("#day-ttl").textContent="Day "+day.dayIdx;
+  $("#day-sub").textContent=dLabel(day.date)+(idx===0?" · latest":"");
+  $("#day-count").textContent=fmt(day.count);
+  $("#day-prev").disabled=idx===0; $("#day-next").disabled=idx===days.length-1;
+  $("#day-prev").onclick=()=>{if(idx>0){logDayIdx=days[idx-1].dayIdx;renderLog();}};
+  $("#day-next").onclick=()=>{if(idx<days.length-1){logDayIdx=days[idx+1].dayIdx;renderLog();}};
+  // pager
+  $("#pager").innerHTML=days.map(d=>`<button class="${d.dayIdx===logDayIdx?'on':''}" data-d="${d.dayIdx}">Day ${d.dayIdx}<span>${d.count} sent</span></button>`).join("");
+  $$("#pager button").forEach(b=>b.onclick=()=>{logDayIdx=+b.dataset.d;renderLog();});
+  // rows
+  const body=$("#logtable tbody");body.innerHTML=`<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">Loading…</td></tr>`;
+  const rows=await logRows(day);
+  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td>${naturePill(r.touch)}</td><td>${statusPill(r.statusCode)}</td><td class="num monocell">${r.time}</td></tr>`).join("")
+    ||`<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">No sends on this day for this inbox.</td></tr>`;
 }
 
-function renderMailboxes(mbs) {
-  const tb = document.querySelector("#mailboxes tbody"); tb.innerHTML = "";
-  const rates = mbs.map(m => pct(m.replied, m.sent));
-  const best = Math.max(0, ...rates);
-  mbs.forEach((m, i) => {
-    const rate = rates[i];
-    const tr = document.createElement("tr");
-    tr.innerHTML =
-      `<td><span class="mb mono">${m.mb}</span></td>
-       <td class="mono">${fmt(m.sent)}</td>
-       <td class="mono">${fmt(m.replied)}</td>
-       <td class="mono">${rate.toFixed(1)}% ${rate === best && rate > 0 ? '<span class="pill best">best</span>' : ''}</td>
-       <td class="mono">${fmt(m.booked)}</td>`;
-    tb.appendChild(tr);
-  });
+/* ======================= RENDER: FOLLOW-UPS ======================= */
+async function fuData(step){
+  if(MODE==="demo")return DATA.fu.filter(r=>r.step===step);
+  const rows=await sb("v_followup_queue",`select=*&step=eq.${step}&order=next_send_at.asc`);
+  const today=new Date();
+  return rows.map(r=>({email:r.email,mailbox:(MAILBOXES.find(m=>m.full===r.mailbox)||{}).key||r.mailbox,step:r.step,first:r.first_contacted?new Date(r.first_contacted+"T00:00:00"):null,next:r.next_send_at?new Date(r.next_send_at):null,waiting:r.first_contacted?Math.round((today-new Date(r.first_contacted))/864e5):null}));
+}
+async function renderFollowups(){
+  const c7=countOf("fu",1),c10=countOf("fu",2);
+  $("#fu-tabs").innerHTML=`<button class="${fuTab===1?'on':''}" data-s="1">7th-day follow-up <span class="c">${c7}</span></button><button class="${fuTab===2?'on accent':''}" data-s="2">10th-day follow-up <span class="c">${c10}</span></button>`;
+  $$("#fu-tabs button").forEach(b=>b.onclick=()=>{fuTab=+b.dataset.s;renderFollowups();});
+  const body=$("#futable tbody");body.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">Loading…</td></tr>`;
+  const rows=await fuData(fuTab);
+  if(!rows.length){body.innerHTML=`<tr><td colspan="6"><div class="empty"><div class="big">No one in this queue</div>Leads land here automatically when a reply hasn't come in.</div></td></tr>`;return;}
+  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td class="monocell">${r.mailbox}</td><td class="monocell">${r.first?dLabel(r.first):"—"}</td><td class="num monocell">${r.waiting!=null?r.waiting+"d":"—"}</td><td class="monocell">${r.next?dLabel(r.next):"—"}</td><td>${naturePill(r.step===1?"day7":"day10")}</td></tr>`).join("");
 }
 
-function renderInsights(D, bookRate) {
-  const el = document.getElementById("insights"); el.innerHTML = "";
-  const haveData = D.sent > 0;
-  const bestMb = D.mailboxes.reduce((a, b) => ((b.replied / (b.sent || 1)) > (a.replied / (a.sent || 1)) ? b : a), D.mailboxes[0] || {});
-  const bestName = bestMb.mb ? bestMb.mb.replace("founder@", "") : "—";
-  const cards = [
-    { k: "Best mailbox", v: haveData ? bestName : "—", d: haveData ? pct(bestMb.replied, bestMb.sent).toFixed(1) + "% reply rate" : "waiting for sends" },
-    { k: "Reply → booking", v: D.replied ? bookRate.toFixed(0) + "%" : "—", d: D.replied ? fmt(D.booked) + " of " + fmt(D.replied) + " replies booked" : "waiting for replies" },
-    { k: "In follow-up", v: fmt(D.in_followup), d: "leads being re-touched" },
-  ];
-  cards.forEach(c => {
-    const d = document.createElement("div"); d.className = "card";
-    d.innerHTML = `<div class="k">${c.k}</div><div class="v">${c.v}</div><div class="d">${c.d}</div>`;
-    el.appendChild(d);
-  });
-  const goalPct = Math.min(D.booked / 17 * 100, 100);
-  document.getElementById("goalFill").style.width = goalPct.toFixed(0) + "%";
-  document.getElementById("goalNow").textContent = fmt(D.booked) + " calls booked so far";
+/* ======================= RENDER: DEAD LIST ======================= */
+function deadRows(){
+  let rows=MODE==="demo"?DATA.deadList:(DATA.deadList||[]).map(r=>({email:r.email,mailbox:(MAILBOXES.find(m=>m.full===r.mailbox)||{}).key||r.mailbox,reason:r.reason,date:r.dead_on?new Date(r.dead_on+"T00:00:00"):null}));
+  if(deadTab!=="all")rows=rows.filter(r=>r.reason.toLowerCase().includes(deadTab));
+  return rows.sort((a,b)=>(b.date||0)-(a.date||0));
+}
+function renderDead(){
+  const all=MODE==="demo"?DATA.deadList:(DATA.deadList||[]);
+  const groups=[["all","All",all.length],["bounce","Bounced",all.filter(r=>r.reason.toLowerCase().includes("bounce")).length],["unsub","Unsubscribed",all.filter(r=>r.reason.toLowerCase().includes("unsub")).length],["no reply","No reply",all.filter(r=>r.reason.toLowerCase().includes("no reply")).length]];
+  $("#dead-tabs").innerHTML=groups.map(([k,l,c])=>`<button class="${deadTab===k?'on':''}" data-k="${k}">${l} <span class="c">${c}</span></button>`).join("");
+  $$("#dead-tabs button").forEach(b=>b.onclick=()=>{deadTab=b.dataset.k;renderDead();});
+  const rows=deadRows(),body=$("#deadtable tbody");
+  const reasonPill=rsn=>{const l=rsn.toLowerCase();const cls=l.includes("unsub")?"d7":l.includes("no reply")?"waiting":"dead";return `<span class="pill ${cls}">${rsn}</span>`;};
+  body.innerHTML=rows.length?rows.map(r=>`<tr><td class="mail">${r.email}</td><td class="monocell">${r.mailbox}</td><td>${reasonPill(r.reason)}</td><td class="monocell">${r.date?dLabel(r.date):"—"}</td></tr>`).join("")
+    :`<tr><td colspan="4"><div class="empty"><div class="big">Clean list</div>No dead addresses in this group yet.</div></td></tr>`;
 }
 
-/* ---- Theme toggle ---- */
-(function () {
-  const btn = document.getElementById("themeBtn");
-  let cur = null;
-  try { cur = localStorage.getItem("ady-theme"); } catch (e) {}
-  if (cur) document.documentElement.setAttribute("data-theme", cur);
-  btn.addEventListener("click", () => {
-    const isDark = matchMedia("(prefers-color-scheme: dark)").matches;
-    const now = document.documentElement.getAttribute("data-theme");
-    const next = now ? (now === "dark" ? "light" : "dark") : (isDark ? "light" : "dark");
-    document.documentElement.setAttribute("data-theme", next);
-    try { localStorage.setItem("ady-theme", next); } catch (e) {}
-  });
-})();
+/* counts for nav/tabs */
+function countOf(kind,step){
+  if(MODE==="demo"){if(kind==="fu")return DATA.fu.filter(r=>r.step===step).length;}
+  if(kind==="fu")return (DATA.fuCounts||{})[step]||0;
+  return 0;
+}
 
-/* ---- INIT: try live, fall back ---- */
-render(DEMO ? Object.assign({}, DEMO, { demo: true }) : SAMPLE);
-loadLive()
-  .then(D => render(D))
-  .catch(() => { /* keep demo sample; project not reachable yet */ });
+/* ======================= ROUTER ======================= */
+const VIEWS={overview:"Overview",log:"Send Log",followups:"Follow-ups",dead:"Dead List"};
+function go(view){
+  if(!VIEWS[view])view="overview";
+  $$(".nav a").forEach(a=>a.classList.toggle("active",a.dataset.view===view));
+  Object.keys(VIEWS).forEach(v=>$("#v-"+v).hidden=(v!==view));
+  $("#pg-title").textContent=VIEWS[view];
+  try{location.hash=view;}catch(e){}
+  $("#rail").classList.remove("open");
+  if(view==="overview")renderOverview();
+  else if(view==="log")renderLog();
+  else if(view==="followups")renderFollowups();
+  else if(view==="dead")renderDead();
+}
+
+/* ======================= BOOT ======================= */
+function setMode(){
+  const sample=MODE==="demo";
+  $("#mode-chip").className="chip "+(sample?"sample":"live");
+  $("#mode-chip").innerHTML=sample?"Sample data":'<span class="d"></span>Live';
+  $("#pulse").className="pulse"+(sample?" sample":"");
+  $("#pulse-txt").textContent=sample?"Sample mode":"Live · Supabase";
+  $("#nav-fu").textContent=fmt(DATA.in_followup||0);
+  $("#nav-dead").textContent=fmt(DATA.dead||0);
+  $("#goal-txt").textContent=(DATA.booked||0)+" / "+GOAL_CALLS;
+  $("#goal-fill").style.width=Math.min((DATA.booked||0)/GOAL_CALLS*100,100)+"%";
+  const t=new Date();$("#pg-date").textContent=dLabel(t);
+}
+async function loadLive(){
+  const [funnel,daily,mbx,days]=await Promise.all([sb("v_funnel"),sb("v_daily_sends"),sb("v_mailbox_performance"),sb("v_send_days")]);
+  const f=funnel[0]||{};
+  const fu=await sb("v_followup_queue","select=step");
+  const dead=await sb("v_dead_list");
+  const fuCounts={1:fu.filter(r=>r.step===1).length,2:fu.filter(r=>r.step===2).length};
+  return {live:true,
+    total_leads:+f.total_leads||0,left_to_send:+f.left_to_send||0,sent:+f.sent||0,
+    delivered:(+f.sent||0)-(+f.bounced||0),bounced:+f.bounced||0,replied:+f.replied||0,booked:+f.booked||0,
+    in_followup:+f.in_followup||0,dead:+f.dead||0,
+    daily:(daily||[]).map(d=>+d.sends),
+    mbx:(mbx||[]).map(m=>({mb:m.mailbox,sent:+m.sent||0,replied:+m.replied||0,booked:+m.booked||0})),
+    sendDays:days||[],deadList:dead||[],fuCounts};
+}
+async function boot(){
+  let funnel=null;
+  try{funnel=(await sb("v_funnel"))[0];}catch(e){}
+  if(funnel&&(+funnel.sent)>0){
+    try{DATA=await loadLive();MODE="live";}catch(e){DATA=buildDemo(funnel?+funnel.total_leads:17152);MODE="demo";}
+  }else{
+    DATA=buildDemo(funnel?+funnel.total_leads:17152);MODE="demo";
+  }
+  setMode();
+  go((location.hash||"#overview").slice(1));
+}
+
+/* nav + controls */
+$("#nav").addEventListener("click",e=>{const a=e.target.closest("a");if(a){e.preventDefault();go(a.dataset.view);}});
+$("#menubtn").onclick=()=>$("#rail").classList.toggle("open");
+$("#refresh").onclick=()=>boot();
+$("#theme").onclick=()=>{let cur=null;try{cur=localStorage.getItem("ady-theme");}catch(e){}const isLight=document.documentElement.getAttribute("data-theme")==="light"||(!document.documentElement.getAttribute("data-theme")&&false);const next=document.documentElement.getAttribute("data-theme")==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",next);try{localStorage.setItem("ady-theme",next);}catch(e){}};
+(function(){let cur=null;try{cur=localStorage.getItem("ady-theme");}catch(e){}if(cur==="light")document.documentElement.setAttribute("data-theme","light");})();
+window.addEventListener("hashchange",()=>{const v=(location.hash||"#overview").slice(1);if(VIEWS[v])go(v);});
+boot();
 </script>
-
 </body>
 </html>
