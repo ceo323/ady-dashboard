@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ADy Outreach</title>
+<title>Internship Outreach</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
@@ -257,14 +257,22 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 }
 @media(max-width:480px){.kpis{grid-template-columns:repeat(2,1fr)}.topbar h1{font-size:17px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.startstop{display:inline-flex;align-items:center;gap:8px;font-family:var(--ui);font-weight:700;font-size:12.5px;padding:7px 14px;border-radius:30px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer;transition:.13s}
+.startstop .d{width:8px;height:8px;border-radius:50%}
+.startstop.on{color:var(--good);background:var(--good-dim);border-color:transparent}
+.startstop.on .d{background:var(--good);box-shadow:0 0 0 0 var(--good);animation:ping 2.4s ease-out infinite}
+.startstop.off{color:#d64545;background:rgba(214,69,69,.12);border-color:transparent}
+.startstop.off .d{background:#d64545}
+.startstop:hover{border-color:var(--ink-3)}
+.startstop[disabled]{opacity:.6;cursor:default}
 </style>
 </head>
 <body>
 <div class="app">
   <aside class="rail" id="rail">
     <div class="brand">
-      <div class="emblem">ADy</div>
-      <div class="wm">ADy Outreach<small>Control Room</small></div>
+      <div class="emblem">SB</div>
+      <div class="wm">Internship Outreach<small>Srikar Bommakanti</small></div>
     </div>
     <nav class="nav" id="nav">
       <div class="nav-label">Operations</div>
@@ -287,7 +295,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     </nav>
     <div class="rail-foot">
       <div class="pulse" id="pulse"><span class="dot"></span><span id="pulse-txt">Connecting…</span></div>
-      <div class="goal-mini">Goal · <b id="goal-txt">0 / 17</b> calls booked
+      <div class="goal-mini">Goal · <b id="goal-txt">0 / 3</b> interviews
         <div class="bar"><div class="fill" id="goal-fill" style="width:0%"></div></div>
       </div>
     </div>
@@ -299,6 +307,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <h1 id="pg-title">Overview</h1>
       <span class="sub" id="pg-date"></span>
       <span class="spacer"></span>
+      <button class="startstop" id="startstop" title="Start or stop the whole outreach">…</button>
       <span class="chip" id="mode-chip">…</span>
       <button class="iconbtn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.3M21 12a9 9 0 0 1-15.5 6.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg></button>
       <button class="iconbtn" id="theme" aria-label="Theme"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg></button>
@@ -318,7 +327,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
         </div>
       </div>
       <div class="panel" style="margin-bottom:16px">
-        <div class="panel-h"><h2>Emails sent per day</h2><span class="note">3 inboxes · ramping to 150/day</span></div>
+        <div class="panel-h"><h2>Emails sent per day</h2><span class="note">1 inbox · 30/day</span></div>
         <div class="chart"><svg class="trend" id="trend" viewBox="0 0 760 210" preserveAspectRatio="none"></svg><div class="tip" id="trendtip"></div></div>
       </div>
       <div class="panel">
@@ -381,11 +390,9 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 const SB_URL="https://vqzdhhpgqicurottmkdq.supabase.co";
 const SB_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxemRoaHBncWljdXJvdHRta2RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2OTA4ODMsImV4cCI6MjEwNzI2Njg4M30.zq32fc77tdcDbSUNUqX-VTRsMoJkyzebwn0KZO0s53E";
 const MAILBOXES=[
-  {key:"space",full:"founder@adystudios.space"},
-  {key:"online",full:"founder@adystudios.online"},
-  {key:"sbs",full:"founder@adyaistudios.sbs"},
+  {key:"bits",full:"f20240750@pilani.bits-pilani.ac.in"},
 ];
-const GOAL_CALLS=17;
+const GOAL_CALLS=3;
 
 /* ======================= HELPERS ======================= */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -401,6 +408,11 @@ function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a
 async function sb(view,qs=""){
   const r=await fetch(`${SB_URL}/rest/v1/${view}?${qs||"select=*"}`,{headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
   if(!r.ok)throw new Error(view+" "+r.status);
+  return r.json();
+}
+async function setOutreach(active){
+  const r=await fetch(`${SB_URL}/rest/v1/rpc/set_outreach`,{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify({active})});
+  if(!r.ok)throw new Error("set_outreach "+r.status);
   return r.json();
 }
 
@@ -464,7 +476,7 @@ function buildDemo(totalLeads){
   const reasons=["Bounced","Bounced","Bounced","Unsubscribed","No reply after day 10","No reply after day 10","Undeliverable"];
   for(let k=0;k<58;k++){const rr=pick(reasons);const dt=new Date(today);dt.setDate(today.getDate()-Math.floor(rng()*18));deadArr.push({email:email(),mailbox:pick(MAILBOXES).key,reason:rr,date:dt});}
 
-  return {live:false,total_leads:totalLeads||17152,left_to_send:(totalLeads||17152)-sent,sent,delivered,bounced,replied,booked,in_followup:inFollow,dead:deadArr.length,daily,mbx,log,fu,deadList:deadArr,today,DAYS};
+  return {live:false,outreach_active:true,total_leads:totalLeads||276,left_to_send:(totalLeads||17152)-sent,sent,delivered,bounced,replied,booked,in_followup:inFollow,dead:deadArr.length,daily,mbx,log,fu,deadList:deadArr,today,DAYS};
 }
 
 /* ======================= STATE ======================= */
@@ -483,20 +495,20 @@ function renderOverview(){
     {k:"Replied",c:"var(--good)",v:fmt(D.replied),m:rr.toFixed(1)+"% reply rate"},
     {k:"In follow-up",c:"var(--warn)",v:fmt(D.in_followup),m:"being re-touched"},
     {k:"Dead list",c:"var(--dead)",v:fmt(D.dead),m:"do not contact"},
-    {k:"Calls booked",c:"var(--accent)",v:fmt(D.booked),m:(D.replied?br.toFixed(0)+"% of replies":"—"),hero:true},
+    {k:"Interviews",c:"var(--accent)",v:fmt(D.booked),m:(D.replied?br.toFixed(0)+"% of replies":"—"),hero:true},
   ];
   $("#kpis").innerHTML=K.map(x=>`<div class="kpi ${x.hero?'hero':''}"><div class="k">${x.c?`<span class="dotc" style="background:${x.c}"></span>`:""}${x.k}</div><div class="v">${x.v}</div><div class="m">${x.m}</div></div>`).join("");
 
   // funnel
-  const steps=[["Delivered",delivered,delivered,"var(--info)"],["Replied",D.replied,delivered,"var(--good)"],["Booked a call",D.booked,delivered,"var(--accent)"]];
+  const steps=[["Delivered",delivered,delivered,"var(--info)"],["Replied",D.replied,delivered,"var(--good)"],["Interview",D.booked,delivered,"var(--accent)"]];
   $("#funnel").innerHTML=steps.map(([n,v,base,col])=>{const share=pct(v,base),w=v>0?Math.max(share,1.5):0;return `<div class="fstep"><span class="n">${n}</span><div class="ftrack"><div class="fbar" style="width:${w}%;background:${col}"></div></div><span class="fv">${fmt(v)}<span class="p">${n==="Delivered"?(delivered?"100%":"0%"):share.toFixed(1)+"%"}</span></span></div>`;}).join("");
 
   // conversion metrics
   $("#conv").innerHTML=`
     <div style="display:flex;flex-direction:column;gap:14px">
       ${convRow("Reply rate",rr.toFixed(1)+"%","of delivered emails",rr,6)}
-      ${convRow("Reply → booking",br.toFixed(0)+"%",fmt(D.booked)+" of "+fmt(D.replied)+" replies booked",br,40)}
-      ${convRow("Progress to goal",D.booked+" / "+GOAL_CALLS,"calls booked toward 5 clients",pct(D.booked,GOAL_CALLS),100)}
+      ${convRow("Reply → interview",br.toFixed(0)+"%",fmt(D.booked)+" of "+fmt(D.replied)+" replies converted",br,40)}
+      ${convRow("Progress to goal",D.booked+" / "+GOAL_CALLS,"interviews landed",pct(D.booked,GOAL_CALLS),100)}
     </div>`;
 
   renderTrend(D.daily);
@@ -649,7 +661,14 @@ function setMode(){
   $("#nav-dead").textContent=fmt(DATA.dead||0);
   $("#goal-txt").textContent=(DATA.booked||0)+" / "+GOAL_CALLS;
   $("#goal-fill").style.width=Math.min((DATA.booked||0)/GOAL_CALLS*100,100)+"%";
+  renderStartStop();
   const t=new Date();$("#pg-date").textContent=dLabel(t);
+}
+function renderStartStop(){
+  const b=$("#startstop"); if(!b)return;
+  const on=DATA.outreach_active!==false;
+  b.className="startstop "+(on?"on":"off");
+  b.innerHTML=`<span class="d"></span>${on?"Running · Stop":"Stopped · Start"}`;
 }
 async function loadLive(){
   const [funnel,daily,mbx,days]=await Promise.all([sb("v_funnel"),sb("v_daily_sends"),sb("v_mailbox_performance"),sb("v_send_days")]);
@@ -657,7 +676,7 @@ async function loadLive(){
   const fu=await sb("v_followup_queue","select=step");
   const dead=await sb("v_dead_list");
   const fuCounts={1:fu.filter(r=>r.step===1).length,2:fu.filter(r=>r.step===2).length};
-  return {live:true,
+  return {live:true,outreach_active:(f.outreach_active!==false),
     total_leads:+f.total_leads||0,left_to_send:+f.left_to_send||0,sent:+f.sent||0,
     delivered:(+f.sent||0)-(+f.bounced||0),bounced:+f.bounced||0,replied:+f.replied||0,booked:+f.booked||0,
     in_followup:+f.in_followup||0,dead:+f.dead||0,
@@ -668,10 +687,10 @@ async function loadLive(){
 async function boot(){
   let funnel=null;
   try{funnel=(await sb("v_funnel"))[0];}catch(e){}
-  if(funnel&&(+funnel.sent)>0){
-    try{DATA=await loadLive();MODE="live";}catch(e){DATA=buildDemo(funnel?+funnel.total_leads:17152);MODE="demo";}
+  if(funnel){
+    try{DATA=await loadLive();MODE="live";}catch(e){DATA=buildDemo(+funnel.total_leads||276);MODE="demo";}
   }else{
-    DATA=buildDemo(funnel?+funnel.total_leads:17152);MODE="demo";
+    DATA=buildDemo(276);MODE="demo";
   }
   setMode();
   go((location.hash||"#overview").slice(1));
@@ -681,6 +700,15 @@ async function boot(){
 $("#nav").addEventListener("click",e=>{const a=e.target.closest("a");if(a){e.preventDefault();go(a.dataset.view);}});
 $("#menubtn").onclick=()=>$("#rail").classList.toggle("open");
 $("#refresh").onclick=()=>boot();
+$("#startstop").onclick=async()=>{
+  const b=$("#startstop"); if(b.hasAttribute("disabled"))return;
+  const turningOn=!(DATA.outreach_active!==false);
+  const msg=turningOn?"Start the outreach? n8n will resume sending up to 30 emails each weekday at 10 AM.":"Stop the outreach? n8n will send nothing until you start it again. (Any emails already in progress for today finish.)";
+  if(!confirm(msg))return;
+  b.setAttribute("disabled","");b.innerHTML=`<span class="d"></span>…`;
+  try{await setOutreach(turningOn);DATA.outreach_active=turningOn;}catch(e){alert("Could not change state: "+e.message);}
+  b.removeAttribute("disabled");renderStartStop();
+};
 $("#theme").onclick=()=>{const dark=document.documentElement.getAttribute("data-theme")==="dark";if(dark){document.documentElement.removeAttribute("data-theme");}else{document.documentElement.setAttribute("data-theme","dark");}try{localStorage.setItem("ady-theme",dark?"light":"dark");}catch(e){}};
 (function(){let cur=null;try{cur=localStorage.getItem("ady-theme");}catch(e){}if(cur==="dark")document.documentElement.setAttribute("data-theme","dark");})();
 window.addEventListener("hashchange",()=>{const v=(location.hash||"#overview").slice(1);if(VIEWS[v])go(v);});
