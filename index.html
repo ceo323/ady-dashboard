@@ -142,7 +142,7 @@ body{
 .view[hidden]{display:none}
 
 /* ---------- KPI console ---------- */
-.kpis{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow)}
+.kpis{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow)}
 .kpi{background:var(--surface);padding:15px 16px 14px;min-width:0;transition:background .13s}
 .kpi:hover{background:var(--surface-2)}
 .kpi .k{font-size:11px;font-weight:600;letter-spacing:.03em;color:var(--ink-3);display:flex;align-items:center;gap:6px}
@@ -197,7 +197,20 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .pill.dead{color:var(--dead);background:var(--dead-dim)}
 .pill.first{color:var(--ink-2);background:var(--line-soft)}
 .pill.d7{color:var(--warn);background:var(--warn-dim)}
+.pill.d3{color:var(--warn);background:var(--warn-dim)}
 .pill.d10{color:var(--d10);background:var(--d10-dim)}
+.pill.success{color:#fff;background:#6c47d6}
+.pill.success .pd{background:#fff}
+
+/* action buttons in follow-up table */
+.act-group{display:flex;gap:5px;flex-wrap:wrap}
+.actbtn{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:var(--ui);font-weight:600;font-size:11px;padding:4px 9px;border-radius:6px;cursor:pointer;transition:.12s;white-space:nowrap}
+.actbtn:hover{border-color:var(--ink-3);color:var(--ink);background:var(--surface-2)}
+.actbtn.danger{color:#d64545;border-color:rgba(214,69,69,.25)}
+.actbtn.danger:hover{background:rgba(214,69,69,.08);border-color:#d64545}
+.actbtn.success-btn{color:#6c47d6;border-color:rgba(108,71,214,.25)}
+.actbtn.success-btn:hover{background:rgba(108,71,214,.08);border-color:#6c47d6}
+.actbtn[disabled]{opacity:.4;cursor:default;pointer-events:none}
 
 /* tabs */
 .tabs{display:inline-flex;gap:3px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;margin-bottom:16px}
@@ -292,6 +305,10 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>
         Dead List <span class="count" id="nav-dead">0</span>
       </a>
+      <a data-view="success">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+        Success <span class="count" id="nav-success">0</span>
+      </a>
     </nav>
     <div class="rail-foot">
       <div class="pulse" id="pulse"><span class="dot"></span><span id="pulse-txt">Connecting…</span></div>
@@ -327,7 +344,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
         </div>
       </div>
       <div class="panel" style="margin-bottom:16px">
-        <div class="panel-h"><h2>Emails sent per day</h2><span class="note">1 inbox · 30/day</span></div>
+        <div class="panel-h"><h2>Emails sent per day</h2><span class="note">1 inbox · 50/day</span></div>
         <div class="chart"><svg class="trend" id="trend" viewBox="0 0 760 210" preserveAspectRatio="none"></svg><div class="tip" id="trendtip"></div></div>
       </div>
       <div class="panel">
@@ -361,13 +378,13 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     <section class="view" id="v-followups" hidden>
       <div class="cadence">
         <div class="step">Day 0 · <b>1st email</b></div><span class="arrow">→</span>
-        <div class="step">No reply by day 7 · <b>7th-day follow-up</b></div><span class="arrow">→</span>
-        <div class="step">Still nothing by day 10 · <b>10th-day follow-up</b></div><span class="arrow">→</span>
-        <div class="step">No reply after day 10 · <b>dead list</b></div>
+        <div class="step">No reply by day 3 · <b>3rd-day follow-up</b></div><span class="arrow">→</span>
+        <div class="step">Still nothing by day 7 · <b>7th-day follow-up</b></div><span class="arrow">→</span>
+        <div class="step">No reply after day 7 · <b>dead list</b></div>
       </div>
       <div class="tabs" id="fu-tabs"></div>
       <div class="tablewrap">
-        <table id="futable"><thead><tr><th>Email</th><th>Inbox</th><th>First contacted</th><th class="num">Waiting</th><th>Next send</th><th>Status</th></tr></thead><tbody></tbody></table>
+        <table id="futable"><thead><tr><th>Email</th><th>Inbox</th><th>First contacted</th><th class="num">Waiting</th><th>Phase</th><th>Actions</th></tr></thead><tbody></tbody></table>
       </div>
     </section>
 
@@ -375,11 +392,22 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     <section class="view" id="v-dead" hidden>
       <div class="banner">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>
-        <div>Addresses here are <b>never contacted again</b>. They bounced, unsubscribed, were undeliverable, or went silent after the 10th-day follow-up. The sender skips every address on this list.</div>
+        <div>Addresses here are <b>never contacted again</b>. They bounced, unsubscribed, were undeliverable, or went silent after the 7th-day follow-up. The sender skips every address on this list.</div>
       </div>
       <div class="tabs" id="dead-tabs"></div>
       <div class="tablewrap">
         <table id="deadtable"><thead><tr><th>Email</th><th>Inbox</th><th>Reason</th><th>Date</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <!-- SUCCESS -->
+    <section class="view" id="v-success" hidden>
+      <div class="banner" style="background:rgba(108,71,214,.08);border-color:rgba(108,71,214,.2)">
+        <svg viewBox="0 0 24 24" style="stroke:#6c47d6"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+        <div>Leads that responded positively. They've either booked a call, forwarded to the right person, or expressed interest. <b>These are wins.</b></div>
+      </div>
+      <div class="tablewrap">
+        <table id="successtable"><thead><tr><th>Email</th><th>Company</th><th>Moved on</th><th>Actions</th></tr></thead><tbody></tbody></table>
       </div>
     </section>
   </main>
@@ -415,11 +443,22 @@ async function setOutreach(active){
   if(!r.ok)throw new Error("set_outreach "+r.status);
   return r.json();
 }
+async function sbRpc(fn,body){
+  const r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify(body)});
+  if(!r.ok){const t=await r.text();throw new Error(fn+" "+r.status+": "+t);}
+  return r.json();
+}
+async function moveLeadStatus(email,newStatus){
+  return sbRpc("move_lead_status",{p_email:email,p_new_status:newStatus});
+}
+async function setFollowUpPhase(email,newPhase){
+  return sbRpc("set_follow_up_phase",{p_email:email,p_phase:newPhase});
+}
 
 /* status display mapping */
-const STATUS_LABEL={sent:["Sent","sent"],waiting:["Waiting","waiting"],in_followup:["In follow-up","followup"],replied:["Replied","replied"],booked:["Call booked","booked"],bounced:["Bounced","dead"],unsubscribed:["Unsubscribed","dead"],closed:["Closed","dead"]};
+const STATUS_LABEL={sent:["Sent","sent"],waiting:["Waiting","waiting"],in_followup:["In follow-up","followup"],replied:["Replied","replied"],booked:["Call booked","booked"],bounced:["Bounced","dead"],unsubscribed:["Unsubscribed","dead"],closed:["Closed","dead"],success:["Success","success"],followed_up:["Followed up","followup"]};
 function statusPill(code){const s=STATUS_LABEL[code]||["Waiting","waiting"];return `<span class="pill ${s[1]}"><span class="pd"></span>${s[0]}</span>`;}
-const NATURE={first:["1st email","first"],day7:["7th-day","d7"],day10:["10th-day","d10"]};
+const NATURE={first:["1st email","first"],day3:["3rd-day","d3"],day7:["7th-day","d7"],day10:["10th-day","d10"]};
 function naturePill(code){const n=NATURE[code]||NATURE.first;return `<span class="pill ${n[1]}">${n[0]}</span>`;}
 
 /* ======================= DEMO DATA ======================= */
@@ -473,7 +512,7 @@ function buildDemo(totalLeads){
   for(let k=0;k<46;k++){const step=rng()<0.68?1:2;const first=new Date(today);first.setDate(today.getDate()-(step===1?7+Math.floor(rng()*2):10+Math.floor(rng()*2)));const next=new Date(today);next.setDate(today.getDate()+Math.floor(rng()*3));fu.push({email:email(),mailbox:pick(MAILBOXES).key,step,first,next,waiting:Math.round((today-first)/864e5)});}
   // dead list
   const deadArr=[];
-  const reasons=["Bounced","Bounced","Bounced","Unsubscribed","No reply after day 10","No reply after day 10","Undeliverable"];
+  const reasons=["Bounced","Bounced","Bounced","Unsubscribed","No reply after day 7","No reply after day 7","Undeliverable"];
   for(let k=0;k<58;k++){const rr=pick(reasons);const dt=new Date(today);dt.setDate(today.getDate()-Math.floor(rng()*18));deadArr.push({email:email(),mailbox:pick(MAILBOXES).key,reason:rr,date:dt});}
 
   return {live:false,outreach_active:true,total_leads:totalLeads||276,left_to_send:(totalLeads||17152)-sent,sent,delivered,bounced,replied,booked,in_followup:inFollow,dead:deadArr.length,daily,mbx,log,fu,deadList:deadArr,today,DAYS};
@@ -495,6 +534,7 @@ function renderOverview(){
     {k:"Replied",c:"var(--good)",v:fmt(D.replied),m:rr.toFixed(1)+"% reply rate"},
     {k:"In follow-up",c:"var(--warn)",v:fmt(D.in_followup),m:"being re-touched"},
     {k:"Dead list",c:"var(--dead)",v:fmt(D.dead),m:"do not contact"},
+    {k:"Success",c:"#6c47d6",v:fmt(MODE==="live"?(D.success_count||0):(DATA.successList||[]).length),m:"positive responses"},
     {k:"Interviews",c:"var(--accent)",v:fmt(D.booked),m:(D.replied?br.toFixed(0)+"% of replies":"—"),hero:true},
   ];
   $("#kpis").innerHTML=K.map(x=>`<div class="kpi ${x.hero?'hero':''}"><div class="k">${x.c?`<span class="dotc" style="background:${x.c}"></span>`:""}${x.k}</div><div class="v">${x.v}</div><div class="m">${x.m}</div></div>`).join("");
@@ -603,12 +643,17 @@ async function fuData(step){
 }
 async function renderFollowups(){
   const c7=countOf("fu",1),c10=countOf("fu",2);
-  $("#fu-tabs").innerHTML=`<button class="${fuTab===1?'on':''}" data-s="1">7th-day follow-up <span class="c">${c7}</span></button><button class="${fuTab===2?'on accent':''}" data-s="2">10th-day follow-up <span class="c">${c10}</span></button>`;
+  $("#fu-tabs").innerHTML=`<button class="${fuTab===1?'on':''}" data-s="1">3rd-day follow-up <span class="c">${c7}</span></button><button class="${fuTab===2?'on accent':''}" data-s="2">7th-day follow-up <span class="c">${c10}</span></button>`;
   $$("#fu-tabs button").forEach(b=>b.onclick=()=>{fuTab=+b.dataset.s;renderFollowups();});
   const body=$("#futable tbody");body.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">Loading…</td></tr>`;
   const rows=await fuData(fuTab);
   if(!rows.length){body.innerHTML=`<tr><td colspan="6"><div class="empty"><div class="big">No one in this queue</div>Leads land here automatically when a reply hasn't come in.</div></td></tr>`;return;}
-  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td class="monocell">${r.mailbox}</td><td class="monocell">${r.first?dLabel(r.first):"—"}</td><td class="num monocell">${r.waiting!=null?r.waiting+"d":"—"}</td><td class="monocell">${r.next?dLabel(r.next):"—"}</td><td>${naturePill(r.step===1?"day7":"day10")}</td></tr>`).join("");
+  body.innerHTML=rows.map(r=>{
+    const phaseLabel=r.step===1?"day3":"day7";
+    const otherStep=r.step===1?2:1;
+    const otherLabel=r.step===1?"Move to 7-day":"Move to 3-day";
+    return `<tr><td class="mail">${r.email}</td><td class="monocell">${r.mailbox}</td><td class="monocell">${r.first?dLabel(r.first):"—"}</td><td class="num monocell">${r.waiting!=null?r.waiting+"d":"—"}</td><td>${naturePill(phaseLabel)}</td><td><div class="act-group"><button class="actbtn success-btn" onclick="doMoveSuccess(this,'${r.email}')">Success</button><button class="actbtn" onclick="doChangePhase(this,'${r.email}',${otherStep})">${otherLabel}</button><button class="actbtn danger" onclick="doMoveDead(this,'${r.email}')">Dead</button></div></td></tr>`;
+  }).join("");
 }
 
 /* ======================= RENDER: DEAD LIST ======================= */
@@ -628,6 +673,54 @@ function renderDead(){
     :`<tr><td colspan="4"><div class="empty"><div class="big">Clean list</div>No dead addresses in this group yet.</div></td></tr>`;
 }
 
+/* ======================= ACTION HANDLERS ======================= */
+async function doMoveDead(btn,email){
+  btn.disabled=true;btn.textContent="...";
+  try{
+    if(MODE==="live"){await moveLeadStatus(email,"dead");}
+    else{/* demo: remove from fu array */DATA.fu=DATA.fu.filter(r=>r.email!==email);DATA.deadList.push({email,mailbox:"bits",reason:"Manual move",date:new Date()});DATA.dead=DATA.deadList.length;}
+    renderFollowups();setMode();
+  }catch(e){alert("Failed: "+e.message);btn.disabled=false;btn.textContent="Dead";}
+}
+async function doMoveSuccess(btn,email){
+  btn.disabled=true;btn.textContent="...";
+  try{
+    if(MODE==="live"){await moveLeadStatus(email,"success");}
+    else{DATA.fu=DATA.fu.filter(r=>r.email!==email);if(!DATA.successList)DATA.successList=[];DATA.successList.push({email,company:email.split("@")[1],date:new Date()});}
+    renderFollowups();setMode();
+  }catch(e){alert("Failed: "+e.message);btn.disabled=false;btn.textContent="Success";}
+}
+async function doChangePhase(btn,email,newPhase){
+  btn.disabled=true;btn.textContent="...";
+  try{
+    if(MODE==="live"){await setFollowUpPhase(email,newPhase);}
+    else{const r=DATA.fu.find(x=>x.email===email);if(r)r.step=newPhase;}
+    renderFollowups();
+  }catch(e){alert("Failed: "+e.message);btn.disabled=false;btn.textContent=newPhase===1?"Move to 3-day":"Move to 7-day";}
+}
+async function doRemoveSuccess(btn,email){
+  btn.disabled=true;btn.textContent="...";
+  try{
+    if(MODE==="live"){await moveLeadStatus(email,"dead");}
+    else{DATA.successList=(DATA.successList||[]).filter(r=>r.email!==email);DATA.deadList.push({email,mailbox:"bits",reason:"Removed from success",date:new Date()});DATA.dead=DATA.deadList.length;}
+    renderSuccess();setMode();
+  }catch(e){alert("Failed: "+e.message);btn.disabled=false;btn.textContent="Move to dead";}
+}
+
+/* ======================= RENDER: SUCCESS ======================= */
+async function renderSuccess(){
+  const body=$("#successtable tbody");
+  body.innerHTML=`<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">Loading...</td></tr>`;
+  let rows=[];
+  if(MODE==="live"){
+    try{rows=await sb("v_success_list");rows=rows.map(r=>({email:r.email,company:r.company||r.email.split("@")[1],date:r.moved_on?new Date(r.moved_on):null}));}catch(e){rows=[];}
+  }else{
+    rows=(DATA.successList||[]).map(r=>({email:r.email,company:r.company||r.email.split("@")[1],date:r.date}));
+  }
+  if(!rows.length){body.innerHTML=`<tr><td colspan="4"><div class="empty"><div class="big">No success leads yet</div>Move leads here from the follow-ups view when they respond positively.</div></td></tr>`;return;}
+  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td class="monocell">${r.company}</td><td class="monocell">${r.date?dLabel(r.date):"—"}</td><td><button class="actbtn danger" onclick="doRemoveSuccess(this,'${r.email}')">Move to dead</button></td></tr>`).join("");
+}
+
 /* counts for nav/tabs */
 function countOf(kind,step){
   if(MODE==="demo"){if(kind==="fu")return DATA.fu.filter(r=>r.step===step).length;}
@@ -636,7 +729,7 @@ function countOf(kind,step){
 }
 
 /* ======================= ROUTER ======================= */
-const VIEWS={overview:"Overview",log:"Send Log",followups:"Follow-ups",dead:"Dead List"};
+const VIEWS={overview:"Overview",log:"Send Log",followups:"Follow-ups",dead:"Dead List",success:"Success"};
 function go(view){
   if(!VIEWS[view])view="overview";
   $$(".nav a").forEach(a=>a.classList.toggle("active",a.dataset.view===view));
@@ -648,6 +741,7 @@ function go(view){
   else if(view==="log")renderLog();
   else if(view==="followups")renderFollowups();
   else if(view==="dead")renderDead();
+  else if(view==="success")renderSuccess();
 }
 
 /* ======================= BOOT ======================= */
@@ -659,6 +753,8 @@ function setMode(){
   $("#pulse-txt").textContent=sample?"Sample mode":"Live · Supabase";
   $("#nav-fu").textContent=fmt(DATA.in_followup||0);
   $("#nav-dead").textContent=fmt(DATA.dead||0);
+  const sc=MODE==="live"?(DATA.success_count||0):(DATA.successList||[]).length;
+  $("#nav-success").textContent=fmt(sc);
   $("#goal-txt").textContent=(DATA.booked||0)+" / "+GOAL_CALLS;
   $("#goal-fill").style.width=Math.min((DATA.booked||0)/GOAL_CALLS*100,100)+"%";
   renderStartStop();
@@ -675,14 +771,16 @@ async function loadLive(){
   const f=funnel[0]||{};
   const fu=await sb("v_followup_queue","select=step");
   const dead=await sb("v_dead_list");
+  let successList=[];let success_count=0;
+  try{successList=await sb("v_success_list");success_count=successList.length;}catch(e){}
   const fuCounts={1:fu.filter(r=>r.step===1).length,2:fu.filter(r=>r.step===2).length};
   return {live:true,outreach_active:(f.outreach_active!==false),
     total_leads:+f.total_leads||0,left_to_send:+f.left_to_send||0,sent:+f.sent||0,
     delivered:(+f.sent||0)-(+f.bounced||0),bounced:+f.bounced||0,replied:+f.replied||0,booked:+f.booked||0,
-    in_followup:+f.in_followup||0,dead:+f.dead||0,
+    in_followup:+f.in_followup||0,dead:+f.dead||0,success_count,
     daily:(daily||[]).map(d=>+d.sends),
     mbx:(mbx||[]).map(m=>({mb:m.mailbox,sent:+m.sent||0,replied:+m.replied||0,booked:+m.booked||0})),
-    sendDays:days||[],deadList:dead||[],fuCounts};
+    sendDays:days||[],deadList:dead||[],successList,fuCounts};
 }
 async function boot(){
   let funnel=null;
@@ -703,7 +801,7 @@ $("#refresh").onclick=()=>boot();
 $("#startstop").onclick=async()=>{
   const b=$("#startstop"); if(b.hasAttribute("disabled"))return;
   const turningOn=!(DATA.outreach_active!==false);
-  const msg=turningOn?"Start the outreach? n8n will resume sending up to 30 emails each weekday at 10 AM.":"Stop the outreach? n8n will send nothing until you start it again. (Any emails already in progress for today finish.)";
+  const msg=turningOn?"Start the outreach? n8n will resume sending up to 50 emails each weekday at 10 AM.":"Stop the outreach? n8n will send nothing until you start it again. (Any emails already in progress for today finish.)";
   if(!confirm(msg))return;
   b.setAttribute("disabled","");b.innerHTML=`<span class="d"></span>…`;
   try{await setOutreach(turningOn);DATA.outreach_active=turningOn;}catch(e){alert("Could not change state: "+e.message);}
