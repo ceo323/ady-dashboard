@@ -391,6 +391,10 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
         <div class="panel-h"><h2>Mailbox performance</h2><span class="note">reply rate on delivered</span></div>
         <div class="tablewrap" style="border:0"><table id="mbx"><thead><tr><th>Inbox</th><th class="num">Sent</th><th class="num">Replied</th><th class="num">Reply rate</th><th class="num">Booked</th></tr></thead><tbody></tbody></table></div>
       </div>
+      <div class="panel" id="daily-breakdown-panel" style="margin-top:16px">
+        <div class="panel-h"><h2>Daily breakdown</h2><span class="note">originals vs follow-ups, per day</span></div>
+        <div class="tablewrap" style="border:0"><table id="daily-breakdown"><thead><tr><th>Date</th><th class="num">Original</th><th class="num">Follow-up</th><th class="num">Total sent</th><th class="num">Bounces</th><th class="num">Dead</th><th class="num">Dead (orig)</th><th class="num">Dead (f/u)</th></tr></thead><tbody></tbody></table></div>
+      </div>
       <div class="foot" id="foot"></div>
     </section>
 
@@ -485,12 +489,16 @@ async function sb(view,qs=""){
 async function setOutreach(active){
   const r=await fetch(`${SB_URL}/rest/v1/rpc/set_outreach`,{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify({active})});
   if(!r.ok)throw new Error("set_outreach "+r.status);
-  return r.json();
+  const text=await r.text();
+  if(!text) return null;
+  return JSON.parse(text);
 }
 async function sbRpc(fn,body){
   const r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify(body)});
   if(!r.ok){const t=await r.text();throw new Error(fn+" "+r.status+": "+t);}
-  return r.json();
+  const text=await r.text();
+  if(!text) return null;
+  return JSON.parse(text);
 }
 async function moveLeadStatus(email,newStatus){
   return sbRpc("move_lead_status",{p_email:email,p_new_status:newStatus});
@@ -599,6 +607,18 @@ function renderOverview(){
   // mailbox
   const rates=D.mbx.map(m=>pct(m.replied,m.sent)),best=Math.max(0,...rates);
   $("#mbx tbody").innerHTML=D.mbx.map((m,i)=>`<tr><td class="mail">${m.mb}</td><td class="num monocell">${fmt(m.sent)}</td><td class="num monocell">${fmt(m.replied)}</td><td class="num monocell">${rates[i].toFixed(1)}% ${rates[i]===best&&best>0?'<span class="pill replied" style="margin-left:6px"><span class="pd"></span>best</span>':''}</td><td class="num monocell">${fmt(m.booked)}</td></tr>`).join("");
+
+  // daily breakdown
+  const dbPanel=$("#daily-breakdown-panel");
+  if(MODE==="live"&&D.dailyBreakdown&&D.dailyBreakdown.length){
+    dbPanel.style.display="";
+    $("#daily-breakdown tbody").innerHTML=D.dailyBreakdown.map(d=>{
+      const dt=d.send_date||"";
+      return `<tr><td>${dt}</td><td class="num monocell">${d.original_sends||0}</td><td class="num monocell">${d.followup_sends||0}</td><td class="num monocell">${d.total_sends||0}</td><td class="num monocell">${d.bounces||0}</td><td class="num monocell">${d.dead_total||0}</td><td class="num monocell">${d.dead_from_original||0}</td><td class="num monocell">${d.dead_from_followup||0}</td></tr>`;
+    }).join("");
+  }else{
+    dbPanel.style.display="none";
+  }
 
   $("#foot").innerHTML=MODE==="live"
     ?`Live from Supabase · reading aggregate views only, no individual lead is exposed by the public key.`
@@ -811,7 +831,7 @@ function renderStartStop(){
   b.innerHTML=`<span class="d"></span>${on?"Running · Stop":"Stopped · Start"}`;
 }
 async function loadLive(){
-  const [funnel,daily,mbx,days]=await Promise.all([sb("v_funnel"),sb("v_daily_sends"),sb("v_mailbox_performance"),sb("v_send_days")]);
+  const [funnel,daily,mbx,days,dailyBreakdown]=await Promise.all([sb("v_funnel"),sb("v_daily_sends"),sb("v_mailbox_performance"),sb("v_send_days"),sb("v_daily_breakdown")]);
   const f=funnel[0]||{};
   const fu=await sb("v_followup_queue","select=step");
   const dead=await sb("v_dead_list");
@@ -824,7 +844,7 @@ async function loadLive(){
     in_followup:+f.in_followup||0,dead:+f.dead||0,success_count,
     daily:(daily||[]).map(d=>+d.sends),
     mbx:(mbx||[]).map(m=>({mb:m.mailbox,sent:+m.sent||0,replied:+m.replied||0,booked:+m.booked||0})),
-    sendDays:days||[],deadList:dead||[],successList,fuCounts};
+    sendDays:days||[],deadList:dead||[],successList,fuCounts,dailyBreakdown:dailyBreakdown||[]};
 }
 async function boot(){
   let funnel=null;
