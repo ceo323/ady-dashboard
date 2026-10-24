@@ -254,6 +254,45 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .empty{padding:48px 20px;text-align:center;color:var(--ink-3);font-size:13px}
 .empty .big{font-family:var(--disp);font-weight:700;color:var(--ink-2);font-size:15px;margin-bottom:6px}
 
+/* search bar */
+.searchbar{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.searchbar input{flex:1;font-family:var(--ui);font-size:13px;padding:9px 14px 9px 36px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface);color:var(--ink);outline:none;transition:border-color .15s}
+.searchbar input::placeholder{color:var(--ink-4)}
+.searchbar input:focus{border-color:var(--accent)}
+.searchbar .si{position:relative}
+.searchbar .si svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--ink-4);fill:none;pointer-events:none}
+.searchbar .si{flex:1;display:flex}
+.searchbar .si input{width:100%}
+.searchbar .clear-btn{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink-3);font-family:var(--ui);font-size:12px;padding:8px 12px;border-radius:var(--radius-s);cursor:pointer;white-space:nowrap;transition:.12s}
+.searchbar .clear-btn:hover{color:var(--ink);border-color:var(--ink-3)}
+
+/* PIN modal + bulk send */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:grid;place-items:center;backdrop-filter:blur(3px)}
+.modal-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px 30px;width:360px;max-width:92vw;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.modal-box h3{font-family:var(--disp);font-weight:700;font-size:17px;margin:0 0 6px}
+.modal-box p{font-size:13px;color:var(--ink-2);margin:0 0 18px}
+.modal-box input{width:100%;font-family:var(--mono);font-size:16px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface-2);color:var(--ink);text-align:center;letter-spacing:.3em;outline:none}
+.modal-box input:focus{border-color:var(--accent)}
+.modal-box .mbtn-row{display:flex;gap:8px;margin-top:16px}
+.modal-box .mbtn{flex:1;appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:var(--ui);font-weight:600;font-size:13px;padding:10px;border-radius:var(--radius-s);cursor:pointer;transition:.12s}
+.modal-box .mbtn:hover{color:var(--ink);border-color:var(--ink-3)}
+.modal-box .mbtn.primary{background:#d64545;color:#fff;border-color:transparent}
+.modal-box .mbtn.primary:hover{background:#c23838}
+.modal-box .mbtn.primary[disabled]{opacity:.5;cursor:default}
+.modal-box .merr{color:#d64545;font-size:12px;margin-top:8px;min-height:16px}
+
+.bulk-bar{margin-bottom:16px;padding:14px 16px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.bulk-bar .bh{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.bulk-bar .bh b{font-family:var(--disp);font-weight:700;font-size:14px}
+.bulk-bar .bh .bc{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.bulk-bar .btrack{height:8px;background:var(--line-soft);border-radius:6px;overflow:hidden}
+.bulk-bar .bfill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:6px;transition:width .3s}
+.bulk-bar .bsub{font-size:11.5px;color:var(--ink-3);margin-top:6px;display:flex;justify-content:space-between}
+.nuke-btn{appearance:none;border:1px solid rgba(214,69,69,.3);background:rgba(214,69,69,.08);color:#d64545;font-family:var(--ui);font-weight:700;font-size:12.5px;padding:7px 14px;border-radius:30px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.13s}
+.nuke-btn:hover{background:rgba(214,69,69,.15);border-color:#d64545}
+.nuke-btn[disabled]{opacity:.5;cursor:default}
+.nuke-btn svg{width:15px;height:15px;stroke:currentColor;fill:none}
+
 .foot{color:var(--ink-4);font-size:11.5px;margin-top:26px;padding-top:16px;border-top:1px solid var(--line-soft)}
 
 /* mobile */
@@ -324,6 +363,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <h1 id="pg-title">Overview</h1>
       <span class="sub" id="pg-date"></span>
       <span class="spacer"></span>
+      <button class="nuke-btn" id="nuke-btn" title="Send to every lead in the database"><svg viewBox="0 0 24 24" stroke-width="1.7"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>All or Nothing</button>
       <button class="startstop" id="startstop" title="Start or stop the whole outreach">…</button>
       <span class="chip" id="mode-chip">…</span>
       <button class="iconbtn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.3M21 12a9 9 0 0 1-15.5 6.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg></button>
@@ -368,6 +408,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
         </div>
         <div class="count-b"><b id="day-count">0</b> sent</div>
       </div>
+      <div class="searchbar" id="log-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email, domain, or company..." oninput="filterTable('logtable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('logtable','')">Clear</button></div>
       <div class="tablewrap logtable">
         <table id="logtable"><thead><tr><th>Email</th><th>Nature</th><th>Status</th><th class="num">Time</th></tr></thead><tbody></tbody></table>
       </div>
@@ -383,6 +424,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
         <div class="step">No reply after day 7 · <b>dead list</b></div>
       </div>
       <div class="tabs" id="fu-tabs"></div>
+      <div class="searchbar" id="fu-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email, domain, or company..." oninput="filterTable('futable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('futable','')">Clear</button></div>
       <div class="tablewrap">
         <table id="futable"><thead><tr><th>Email</th><th>Inbox</th><th>First contacted</th><th class="num">Waiting</th><th>Phase</th><th>Actions</th></tr></thead><tbody></tbody></table>
       </div>
@@ -395,6 +437,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
         <div>Addresses here are <b>never contacted again</b>. They bounced, unsubscribed, were undeliverable, or went silent after the 7th-day follow-up. The sender skips every address on this list.</div>
       </div>
       <div class="tabs" id="dead-tabs"></div>
+      <div class="searchbar" id="dead-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email, domain, or reason..." oninput="filterTable('deadtable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('deadtable','')">Clear</button></div>
       <div class="tablewrap">
         <table id="deadtable"><thead><tr><th>Email</th><th>Inbox</th><th>Reason</th><th>Date</th></tr></thead><tbody></tbody></table>
       </div>
@@ -406,6 +449,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
         <svg viewBox="0 0 24 24" style="stroke:#6c47d6"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
         <div>Leads that responded positively. They've either booked a call, forwarded to the right person, or expressed interest. <b>These are wins.</b></div>
       </div>
+      <div class="searchbar" id="success-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email or company..." oninput="filterTable('successtable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('successtable','')">Clear</button></div>
       <div class="tablewrap">
         <table id="successtable"><thead><tr><th>Email</th><th>Company</th><th>Moved on</th><th>Actions</th></tr></thead><tbody></tbody></table>
       </div>
@@ -810,6 +854,109 @@ $("#startstop").onclick=async()=>{
 $("#theme").onclick=()=>{const dark=document.documentElement.getAttribute("data-theme")==="dark";if(dark){document.documentElement.removeAttribute("data-theme");}else{document.documentElement.setAttribute("data-theme","dark");}try{localStorage.setItem("ady-theme",dark?"light":"dark");}catch(e){}};
 (function(){let cur=null;try{cur=localStorage.getItem("ady-theme");}catch(e){}if(cur==="dark")document.documentElement.setAttribute("data-theme","dark");})();
 window.addEventListener("hashchange",()=>{const v=(location.hash||"#overview").slice(1);if(VIEWS[v])go(v);});
+/* ======================= SEARCH FILTER ======================= */
+function filterTable(tableId,query){
+  const q=query.trim().toLowerCase();
+  const rows=document.querySelectorAll("#"+tableId+" tbody tr");
+  rows.forEach(tr=>{
+    if(!q){tr.style.display="";return;}
+    const text=tr.textContent.toLowerCase();
+    tr.style.display=text.includes(q)?"":"none";
+  });
+}
+
+/* ======================= ALL OR NOTHING (BULK SEND) ======================= */
+let bulkRunning=false,bulkAbort=false;
+
+function showPinModal(){
+  if(bulkRunning)return;
+  const bg=document.createElement("div");bg.className="modal-bg";bg.id="pin-modal";
+  bg.innerHTML=`<div class="modal-box"><h3>All or Nothing</h3><p>This sends a cold email to every lead in the database with a 2-minute gap between each. Enter PIN to proceed.</p><input id="pin-input" type="password" maxlength="4" placeholder="----" autocomplete="off"><div class="merr" id="pin-err"></div><div class="mbtn-row"><button class="mbtn" onclick="closePinModal()">Cancel</button><button class="mbtn primary" id="pin-go" onclick="verifyPin()">Launch</button></div></div>`;
+  document.body.appendChild(bg);
+  bg.querySelector("#pin-input").focus();
+  bg.querySelector("#pin-input").addEventListener("keydown",e=>{if(e.key==="Enter")verifyPin();if(e.key==="Escape")closePinModal();});
+  bg.addEventListener("click",e=>{if(e.target===bg)closePinModal();});
+}
+function closePinModal(){const m=document.getElementById("pin-modal");if(m)m.remove();}
+function verifyPin(){
+  const inp=document.getElementById("pin-input");
+  const err=document.getElementById("pin-err");
+  if(inp.value==="2006"){closePinModal();startBulkSend();}
+  else{err.textContent="Wrong PIN. Try again.";inp.value="";inp.focus();}
+}
+
+async function startBulkSend(){
+  if(bulkRunning)return;
+  bulkRunning=true;bulkAbort=false;
+  const btn=document.getElementById("nuke-btn");
+  btn.setAttribute("disabled","");
+
+  // show progress bar in overview
+  let bar=document.getElementById("bulk-bar");
+  if(!bar){bar=document.createElement("div");bar.className="bulk-bar";bar.id="bulk-bar";
+    const ov=document.getElementById("v-overview");ov.insertBefore(bar,ov.firstChild);}
+
+  bar.innerHTML=`<div class="bh"><b>Fetching lead list...</b><button class="actbtn danger" id="bulk-stop" onclick="bulkAbort=true">Stop</button></div><div class="btrack"><div class="bfill" style="width:0%"></div></div><div class="bsub"><span>Preparing...</span><span></span></div>`;
+
+  // make sure we're on overview
+  go("overview");
+
+  let leads=[];
+  try{
+    leads=await sbRpc("get_bulk_send_list",{});
+  }catch(e){
+    bar.innerHTML=`<div class="bh"><b>Failed to fetch leads</b></div><div class="bsub"><span>${e.message}</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span></div>`;
+    bulkRunning=false;btn.removeAttribute("disabled");return;
+  }
+
+  if(!leads.length){
+    bar.innerHTML=`<div class="bh"><b>No leads to send</b></div><div class="bsub"><span>All leads have already been contacted or removed.</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span></div>`;
+    bulkRunning=false;btn.removeAttribute("disabled");return;
+  }
+
+  const total=leads.length;
+  let sent=0,failed=0;
+
+  for(let i=0;i<total;i++){
+    if(bulkAbort){
+      bar.querySelector(".bh b").textContent=`Stopped at ${sent}/${total}`;
+      bar.querySelector(".bsub").innerHTML=`<span>${sent} sent, ${failed} failed, ${total-sent-failed} skipped</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span>`;
+      break;
+    }
+    const lead=leads[i];
+    const pct=((i+1)/total*100).toFixed(1);
+    bar.querySelector(".bh b").textContent=`Sending ${i+1} of ${total}...`;
+    bar.querySelector(".bfill").style.width=pct+"%";
+    bar.querySelector(".bsub").innerHTML=`<span>${lead.email}</span><span>${sent} sent, ${failed} failed</span>`;
+
+    try{
+      await fetch("https://n8n.ady.co.in/webhook/bulk-send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:lead.email,first_name:lead.first_name||"",company:lead.company||""})});
+      sent++;
+    }catch(e){failed++;}
+
+    // 2-min wait between sends (skip on last one)
+    if(i<total-1&&!bulkAbort){
+      for(let s=120;s>0&&!bulkAbort;s--){
+        const m=Math.floor(s/60),sec=s%60;
+        bar.querySelector(".bh b").textContent=`Sent ${i+1}/${total}. Next in ${m}:${String(sec).padStart(2,"0")}`;
+        await new Promise(r=>setTimeout(r,1000));
+      }
+    }
+  }
+
+  if(!bulkAbort){
+    bar.querySelector(".bh b").textContent=`Done. ${sent} of ${total} sent.`;
+    bar.querySelector(".bfill").style.width="100%";
+    bar.querySelector(".bsub").innerHTML=`<span>${sent} sent, ${failed} failed</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span>`;
+  }
+
+  bulkRunning=false;btn.removeAttribute("disabled");
+  // refresh data
+  try{if(MODE==="live"){DATA=await loadLive();setMode();renderOverview();}}catch(e){}
+}
+
+document.getElementById("nuke-btn").onclick=showPinModal;
+
 boot();
 </script>
 </body>
