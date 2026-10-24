@@ -340,6 +340,10 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4"/><path d="M12 8v4l3 2"/></svg>
         Follow-ups <span class="count" id="nav-fu">0</span>
       </a>
+      <a data-view="replied">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M9 17l-5-5 5-5"/><path d="M4 12h16"/></svg>
+        Replied <span class="count" id="nav-replied">0</span>
+      </a>
       <a data-view="dead">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>
         Dead List <span class="count" id="nav-dead">0</span>
@@ -444,6 +448,18 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <div class="searchbar" id="dead-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email, domain, or reason..." oninput="filterTable('deadtable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('deadtable','')">Clear</button></div>
       <div class="tablewrap">
         <table id="deadtable"><thead><tr><th>Email</th><th>Inbox</th><th>Reason</th><th>Date</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <!-- REPLIED -->
+    <section class="view" id="v-replied" hidden>
+      <div class="banner" style="background:var(--good-dim);border-color:rgba(18,160,111,.2)">
+        <svg viewBox="0 0 24 24" style="stroke:var(--good)"><path d="M9 17l-5-5 5-5"/><path d="M4 12h16"/></svg>
+        <div>Leads that wrote back. Includes anyone who replied or was marked as a success. <b>Follow up promptly.</b></div>
+      </div>
+      <div class="searchbar" id="replied-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email, name, or company..." oninput="filterTable('repliedtable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('repliedtable','')">Clear</button></div>
+      <div class="tablewrap">
+        <table id="repliedtable"><thead><tr><th>Email</th><th>Name</th><th>Company</th><th>Status</th><th>Sent</th><th>Replied</th></tr></thead><tbody></tbody></table>
       </div>
     </section>
 
@@ -785,6 +801,24 @@ async function renderSuccess(){
   body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td class="monocell">${r.company}</td><td class="monocell">${r.date?dLabel(r.date):"—"}</td><td><button class="actbtn danger" onclick="doRemoveSuccess(this,'${r.email}')">Move to dead</button></td></tr>`).join("");
 }
 
+/* ======================= RENDER: REPLIED LIST ======================= */
+async function renderReplied(){
+  const body=$("#repliedtable tbody");
+  body.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">Loading...</td></tr>`;
+  let rows=[];
+  if(MODE==="live"){
+    try{rows=await sb("v_replied_list");
+    }catch(e){rows=[];}
+  }else{
+    // demo: pick some replied/booked from log
+    const seen=new Set();
+    rows=DATA.log.filter(r=>(r.statusCode==="replied"||r.statusCode==="booked")&&!seen.has(r.email)&&seen.add(r.email))
+      .map(r=>({email:r.email,first_name:"",company:r.email.split("@")[1],status:r.statusCode,sent_date:isoDate(r.date),replied_date:isoDate(r.date)}));
+  }
+  if(!rows.length){body.innerHTML=`<tr><td colspan="6"><div class="empty"><div class="big">No replies yet</div>When someone writes back, they show up here automatically.</div></td></tr>`;return;}
+  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td>${r.first_name||""}</td><td class="monocell">${r.company||r.email.split("@")[1]}</td><td>${statusPill(r.status)}</td><td class="monocell">${r.sent_date||""}</td><td class="monocell">${r.replied_date||""}</td></tr>`).join("");
+}
+
 /* counts for nav/tabs */
 function countOf(kind,step){
   if(MODE==="demo"){if(kind==="fu")return DATA.fu.filter(r=>r.step===step).length;}
@@ -793,7 +827,7 @@ function countOf(kind,step){
 }
 
 /* ======================= ROUTER ======================= */
-const VIEWS={overview:"Overview",log:"Send Log",followups:"Follow-ups",dead:"Dead List",success:"Success"};
+const VIEWS={overview:"Overview",log:"Send Log",followups:"Follow-ups",replied:"Replied",dead:"Dead List",success:"Success"};
 function go(view){
   if(!VIEWS[view])view="overview";
   $$(".nav a").forEach(a=>a.classList.toggle("active",a.dataset.view===view));
@@ -804,6 +838,7 @@ function go(view){
   if(view==="overview")renderOverview();
   else if(view==="log")renderLog();
   else if(view==="followups")renderFollowups();
+  else if(view==="replied")renderReplied();
   else if(view==="dead")renderDead();
   else if(view==="success")renderSuccess();
 }
@@ -813,25 +848,45 @@ function setMode(){
   const sample=MODE==="demo";
   $("#mode-chip").className="chip "+(sample?"sample":"live");
   $("#mode-chip").innerHTML=sample?"Sample data":'<span class="d"></span>Live';
-  $("#pulse").className="pulse"+(sample?" sample":"");
-  $("#pulse-txt").textContent=sample?"Sample mode":"Live · Supabase";
+  const t=new Date();
+  const dayNum=t.getDay(); // 0=Sun..6=Sat
+  const isWeekend=(dayNum===0||dayNum===5||dayNum===6); // Fri/Sat/Sun
+  const dayDateStr=WD[dayNum]+" "+t.getDate()+" "+MONTHS[t.getMonth()];
+  if(sample){
+    $("#pulse").className="pulse sample";
+    $("#pulse-txt").textContent="Sample mode";
+  }else if(isWeekend){
+    $("#pulse").className="pulse sample";
+    $("#pulse-txt").textContent="Stopped · "+dayDateStr;
+  }else{
+    $("#pulse").className="pulse";
+    $("#pulse-txt").textContent="Live · "+dayDateStr;
+  }
   $("#nav-fu").textContent=fmt(DATA.in_followup||0);
   $("#nav-dead").textContent=fmt(DATA.dead||0);
+  const rc=MODE==="live"?(DATA.repliedList||[]).length:(DATA.replied||0);
+  $("#nav-replied").textContent=fmt(rc);
   const sc=MODE==="live"?(DATA.success_count||0):(DATA.successList||[]).length;
   $("#nav-success").textContent=fmt(sc);
   $("#goal-txt").textContent=(DATA.booked||0)+" / "+GOAL_CALLS;
   $("#goal-fill").style.width=Math.min((DATA.booked||0)/GOAL_CALLS*100,100)+"%";
   renderStartStop();
-  const t=new Date();$("#pg-date").textContent=dLabel(t);
+  $("#pg-date").textContent=dayDateStr;
 }
 function renderStartStop(){
   const b=$("#startstop"); if(!b)return;
-  const on=DATA.outreach_active!==false;
+  const dayNum=new Date().getDay();
+  const isWeekend=(dayNum===0||dayNum===5||dayNum===6);
+  const on=DATA.outreach_active!==false&&!isWeekend;
   b.className="startstop "+(on?"on":"off");
-  b.innerHTML=`<span class="d"></span>${on?"Running · Stop":"Stopped · Start"}`;
+  if(isWeekend&&DATA.outreach_active!==false){
+    b.innerHTML=`<span class="d"></span>Paused (weekend)`;
+  }else{
+    b.innerHTML=`<span class="d"></span>${on?"Running · Stop":"Stopped · Start"}`;
+  }
 }
 async function loadLive(){
-  const [funnel,daily,mbx,days,dailyBreakdown]=await Promise.all([sb("v_funnel"),sb("v_daily_sends"),sb("v_mailbox_performance"),sb("v_send_days"),sb("v_daily_breakdown")]);
+  const [funnel,daily,mbx,days,dailyBreakdown,repliedList]=await Promise.all([sb("v_funnel"),sb("v_daily_sends"),sb("v_mailbox_performance"),sb("v_send_days"),sb("v_daily_breakdown"),sb("v_replied_list")]);
   const f=funnel[0]||{};
   const fu=await sb("v_followup_queue","select=step");
   const dead=await sb("v_dead_list");
@@ -844,7 +899,7 @@ async function loadLive(){
     in_followup:+f.in_followup||0,dead:+f.dead||0,success_count,
     daily:(daily||[]).map(d=>+d.sends),
     mbx:(mbx||[]).map(m=>({mb:m.mailbox,sent:+m.sent||0,replied:+m.replied||0,booked:+m.booked||0})),
-    sendDays:days||[],deadList:dead||[],successList,fuCounts,dailyBreakdown:dailyBreakdown||[]};
+    sendDays:days||[],deadList:dead||[],successList,fuCounts,dailyBreakdown:dailyBreakdown||[],repliedList:repliedList||[]};
 }
 async function boot(){
   let funnel=null;
