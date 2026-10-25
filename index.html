@@ -9,12 +9,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
 /* ===========================================================================
-   ADy Outreach — cold-email control room
+   ADy Outreach â cold-email control room
    Identity: monochrome console (cool near-black + platinum) with one red accent.
-   Type: Archivo (numbers/titles) · Hanken Grotesk (UI) · JetBrains Mono (data).
+   Type: Archivo (numbers/titles) Â· Hanken Grotesk (UI) Â· JetBrains Mono (data).
    =========================================================================== */
 :root{
-  /* sky — light blue, white, soft clouds */
+  /* sky â light blue, white, soft clouds */
   --bg:#e9f3fd; --surface:#ffffff; --surface-2:#f2f9ff; --raise:#e4f0fc;
   --line:#d6e6f5; --line-soft:#e8f1fb;
   --ink:#15283b; --ink-2:#55708b; --ink-3:#8aa1ba; --ink-4:#b0c2d4;
@@ -354,8 +354,8 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       </a>
     </nav>
     <div class="rail-foot">
-      <div class="pulse" id="pulse"><span class="dot"></span><span id="pulse-txt">Connecting…</span></div>
-      <div class="goal-mini">Goal · <b id="goal-txt">0 / 3</b> interviews
+      <div class="pulse" id="pulse"><span class="dot"></span><span id="pulse-txt">Connectingâ¦</span></div>
+      <div class="goal-mini">Goal Â· <b id="goal-txt">0 / 3</b> interviews
         <div class="bar"><div class="fill" id="goal-fill" style="width:0%"></div></div>
       </div>
     </div>
@@ -368,8 +368,8 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <span class="sub" id="pg-date"></span>
       <span class="spacer"></span>
       <button class="nuke-btn" id="nuke-btn" title="Send to every lead in the database"><svg viewBox="0 0 24 24" stroke-width="1.7"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>All or Nothing</button>
-      <button class="startstop" id="startstop" title="Start or stop the whole outreach">…</button>
-      <span class="chip" id="mode-chip">…</span>
+      <button class="startstop" id="startstop" title="Start or stop the whole outreach">â¦</button>
+      <span class="chip" id="mode-chip">â¦</span>
       <button class="iconbtn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.3M21 12a9 9 0 0 1-15.5 6.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg></button>
       <button class="iconbtn" id="theme" aria-label="Theme"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg></button>
     </header>
@@ -379,7 +379,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <div class="kpis" id="kpis"></div>
       <div class="grid2">
         <div class="panel">
-          <div class="panel-h"><h2>Pipeline</h2><span class="note">delivered → replied → booked</span></div>
+          <div class="panel-h"><h2>Pipeline</h2><span class="note">delivered â replied â booked</span></div>
           <div class="funnel" id="funnel"></div>
         </div>
         <div class="panel">
@@ -388,7 +388,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
         </div>
       </div>
       <div class="panel" style="margin-bottom:16px">
-        <div class="panel-h"><h2>Emails sent per day</h2><span class="note">1 inbox · 50/day</span></div>
+        <div class="panel-h"><h2>Emails sent per day</h2><span class="note">1 inbox Â· 50/day</span></div>
         <div class="chart"><svg class="trend" id="trend" viewBox="0 0 760 210" preserveAspectRatio="none"></svg><div class="tip" id="trendtip"></div></div>
       </div>
       <div class="panel">
@@ -411,7 +411,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
           <button class="navbtn" id="day-next" aria-label="Older day"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
         </div>
         <div>
-          <div class="dayttl" id="day-ttl">—</div>
+          <div class="dayttl" id="day-ttl">â</div>
           <div class="daysub" id="day-sub"></div>
         </div>
         <div class="count-b"><b id="day-count">0</b> sent</div>
@@ -426,10 +426,10 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     <!-- FOLLOW-UPS -->
     <section class="view" id="v-followups" hidden>
       <div class="cadence">
-        <div class="step">Day 0 · <b>1st email</b></div><span class="arrow">→</span>
-        <div class="step">No reply by day 3 · <b>3rd-day follow-up</b></div><span class="arrow">→</span>
-        <div class="step">Still nothing by day 7 · <b>7th-day follow-up</b></div><span class="arrow">→</span>
-        <div class="step">No reply after day 7 · <b>dead list</b></div>
+        <div class="step">Day 0 Â· <b>1st email</b></div><span class="arrow">â</span>
+        <div class="step">No reply by day 3 Â· <b>3rd-day follow-up</b></div><span class="arrow">â</span>
+        <div class="step">Still nothing by day 7 Â· <b>7th-day follow-up</b></div><span class="arrow">â</span>
+        <div class="step">No reply after day 7 Â· <b>dead list</b></div>
       </div>
       <div class="tabs" id="fu-tabs"></div>
       <div class="searchbar" id="fu-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email, domain, or company..." oninput="filterTable('futable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('futable','')">Clear</button></div>
@@ -601,9 +601,9 @@ function renderOverview(){
     {k:"Bounced",c:"var(--dead)",v:fmt(D.bounced),m:(D.sent?(D.bounced/D.sent*100).toFixed(1):"0")+"% of sent"},
     {k:"Replied",c:"var(--good)",v:fmt(D.replied),m:rr.toFixed(1)+"% reply rate"},
     {k:"In follow-up",c:"var(--warn)",v:fmt(D.in_followup),m:"being re-touched"},
-    {k:"Dead list",c:"var(--dead)",v:fmt(D.dead),m:"do not contact"},
+    {k:"Dead list",c:"var(--dead)",v:fmt(MODE==="live"?(D.deadList||[]).length:(D.dead||0)),m:"do not contact"},
     {k:"Success",c:"#6c47d6",v:fmt(MODE==="live"?(D.success_count||0):(DATA.successList||[]).length),m:"positive responses"},
-    {k:"Interviews",c:"var(--accent)",v:fmt(D.booked),m:(D.replied?br.toFixed(0)+"% of replies":"—"),hero:true},
+    {k:"Interviews",c:"var(--accent)",v:fmt(D.booked),m:(D.replied?br.toFixed(0)+"% of replies":"â"),hero:true},
   ];
   $("#kpis").innerHTML=K.map(x=>`<div class="kpi ${x.hero?'hero':''}"><div class="k">${x.c?`<span class="dotc" style="background:${x.c}"></span>`:""}${x.k}</div><div class="v">${x.v}</div><div class="m">${x.m}</div></div>`).join("");
 
@@ -615,7 +615,7 @@ function renderOverview(){
   $("#conv").innerHTML=`
     <div style="display:flex;flex-direction:column;gap:14px">
       ${convRow("Reply rate",rr.toFixed(1)+"%","of delivered emails",rr,6)}
-      ${convRow("Reply → interview",br.toFixed(0)+"%",fmt(D.booked)+" of "+fmt(D.replied)+" replies converted",br,40)}
+      ${convRow("Reply â interview",br.toFixed(0)+"%",fmt(D.booked)+" of "+fmt(D.replied)+" replies converted",br,40)}
       ${convRow("Progress to goal",D.booked+" / "+GOAL_CALLS,"interviews landed",pct(D.booked,GOAL_CALLS),100)}
     </div>`;
 
@@ -637,8 +637,8 @@ function renderOverview(){
   }
 
   $("#foot").innerHTML=MODE==="live"
-    ?`Live from Supabase · reading aggregate views only, no individual lead is exposed by the public key.`
-    :`Sample data — the layout and every view with illustrative numbers. Flips to your real figures automatically once n8n starts sending.`;
+    ?`Live from Supabase Â· reading aggregate views only, no individual lead is exposed by the public key.`
+    :`Sample data â the layout and every view with illustrative numbers. Flips to your real figures automatically once n8n starts sending.`;
 }
 function convRow(label,big,sub,p,max){
   const w=Math.min(p/max*100,100);
@@ -647,7 +647,7 @@ function convRow(label,big,sub,p,max){
 function renderTrend(data){
   const svg=$("#trend"),tip=$("#trendtip");svg.innerHTML="";
   const W=760,H=210,pl=34,pr=10,pt=14,pb=26;
-  if(!data||!data.length||data.every(v=>!v)){svg.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" class="axl" style="font-size:12px">No sends logged yet — fills in once n8n starts sending</text>`;return;}
+  if(!data||!data.length||data.every(v=>!v)){svg.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" class="axl" style="font-size:12px">No sends logged yet â fills in once n8n starts sending</text>`;return;}
   const n=data.length,maxV=Math.max(150,Math.ceil(Math.max(...data)/50)*50);
   const X=i=>pl+(n===1?0.5:i/(n-1))*(W-pl-pr),Y=v=>pt+(1-v/maxV)*(H-pt-pb);
   const NS="http://www.w3.org/2000/svg",mk=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
@@ -662,7 +662,7 @@ function renderTrend(data){
   svg.appendChild(mk("circle",{cx:X(n-1),cy:Y(data[n-1]),r:3.5,fill:"var(--accent)",stroke:"var(--surface)","stroke-width":2}));
   const hov=mk("line",{y1:pt,y2:H-pb,stroke:"var(--ink-3)","stroke-width":1,"stroke-dasharray":"3 3",opacity:0}),hd=mk("circle",{r:3.5,fill:"var(--accent)",stroke:"var(--surface)","stroke-width":2,opacity:0});
   svg.appendChild(hov);svg.appendChild(hd);
-  svg.onpointermove=e=>{const r=svg.getBoundingClientRect(),px=(e.clientX-r.left)/r.width*W;let i=Math.round((px-pl)/((W-pl-pr)/Math.max(1,n-1)));i=Math.max(0,Math.min(n-1,i));hov.setAttribute("x1",X(i));hov.setAttribute("x2",X(i));hov.setAttribute("opacity",1);hd.setAttribute("cx",X(i));hd.setAttribute("cy",Y(data[i]));hd.setAttribute("opacity",1);tip.style.opacity=1;tip.style.left=X(i)/W*r.width+"px";tip.style.top=Y(data[i])/H*r.height+"px";tip.textContent="Day "+(i+1)+" · "+data[i]+" sent";};
+  svg.onpointermove=e=>{const r=svg.getBoundingClientRect(),px=(e.clientX-r.left)/r.width*W;let i=Math.round((px-pl)/((W-pl-pr)/Math.max(1,n-1)));i=Math.max(0,Math.min(n-1,i));hov.setAttribute("x1",X(i));hov.setAttribute("x2",X(i));hov.setAttribute("opacity",1);hd.setAttribute("cx",X(i));hd.setAttribute("cy",Y(data[i]));hd.setAttribute("opacity",1);tip.style.opacity=1;tip.style.left=X(i)/W*r.width+"px";tip.style.top=Y(data[i])/H*r.height+"px";tip.textContent="Day "+(i+1)+" Â· "+data[i]+" sent";};
   svg.onpointerleave=()=>{hov.setAttribute("opacity",0);hd.setAttribute("opacity",0);tip.style.opacity=0;};
 }
 
@@ -699,7 +699,7 @@ async function renderLog(){
   if(logDayIdx==null||!days.find(d=>d.dayIdx===logDayIdx))logDayIdx=days[0].dayIdx;
   const idx=days.findIndex(d=>d.dayIdx===logDayIdx),day=days[idx];
   $("#day-ttl").textContent="Day "+day.dayIdx;
-  $("#day-sub").textContent=dLabel(day.date)+(idx===0?" · latest":"");
+  $("#day-sub").textContent=dLabel(day.date)+(idx===0?" Â· latest":"");
   $("#day-count").textContent=fmt(day.count);
   $("#day-prev").disabled=idx===0; $("#day-next").disabled=idx===days.length-1;
   $("#day-prev").onclick=()=>{if(idx>0){logDayIdx=days[idx-1].dayIdx;renderLog();}};
@@ -708,7 +708,7 @@ async function renderLog(){
   $("#pager").innerHTML=days.map(d=>`<button class="${d.dayIdx===logDayIdx?'on':''}" data-d="${d.dayIdx}">Day ${d.dayIdx}<span>${d.count} sent</span></button>`).join("");
   $$("#pager button").forEach(b=>b.onclick=()=>{logDayIdx=+b.dataset.d;renderLog();});
   // rows
-  const body=$("#logtable tbody");body.innerHTML=`<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">Loading…</td></tr>`;
+  const body=$("#logtable tbody");body.innerHTML=`<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">Loadingâ¦</td></tr>`;
   const rows=await logRows(day);
   body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td>${naturePill(r.touch)}</td><td>${statusPill(r.statusCode)}</td><td class="num monocell">${r.time}</td></tr>`).join("")
     ||`<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">No sends on this day for this inbox.</td></tr>`;
@@ -725,14 +725,14 @@ async function renderFollowups(){
   const c7=countOf("fu",1),c10=countOf("fu",2);
   $("#fu-tabs").innerHTML=`<button class="${fuTab===1?'on':''}" data-s="1">3rd-day follow-up <span class="c">${c7}</span></button><button class="${fuTab===2?'on accent':''}" data-s="2">7th-day follow-up <span class="c">${c10}</span></button>`;
   $$("#fu-tabs button").forEach(b=>b.onclick=()=>{fuTab=+b.dataset.s;renderFollowups();});
-  const body=$("#futable tbody");body.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">Loading…</td></tr>`;
+  const body=$("#futable tbody");body.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">Loadingâ¦</td></tr>`;
   const rows=await fuData(fuTab);
   if(!rows.length){body.innerHTML=`<tr><td colspan="6"><div class="empty"><div class="big">No one in this queue</div>Leads land here automatically when a reply hasn't come in.</div></td></tr>`;return;}
   body.innerHTML=rows.map(r=>{
     const phaseLabel=r.step===1?"day3":"day7";
     const otherStep=r.step===1?2:1;
     const otherLabel=r.step===1?"Move to 7-day":"Move to 3-day";
-    return `<tr><td class="mail">${r.email}</td><td class="monocell">${r.mailbox}</td><td class="monocell">${r.first?dLabel(r.first):"—"}</td><td class="num monocell">${r.waiting!=null?r.waiting+"d":"—"}</td><td>${naturePill(phaseLabel)}</td><td><div class="act-group"><button class="actbtn success-btn" onclick="doMoveSuccess(this,'${r.email}')">Success</button><button class="actbtn" onclick="doChangePhase(this,'${r.email}',${otherStep})">${otherLabel}</button><button class="actbtn danger" onclick="doMoveDead(this,'${r.email}')">Dead</button></div></td></tr>`;
+    return `<tr><td class="mail">${r.email}</td><td class="monocell">${r.mailbox}</td><td class="monocell">${r.first?dLabel(r.first):"â"}</td><td class="num monocell">${r.waiting!=null?r.waiting+"d":"â"}</td><td>${naturePill(phaseLabel)}</td><td><div class="act-group"><button class="actbtn success-btn" onclick="doMoveSuccess(this,'${r.email}')">Success</button><button class="actbtn" onclick="doChangePhase(this,'${r.email}',${otherStep})">${otherLabel}</button><button class="actbtn danger" onclick="doMoveDead(this,'${r.email}')">Dead</button></div></td></tr>`;
   }).join("");
 }
 
@@ -749,7 +749,7 @@ function renderDead(){
   $$("#dead-tabs button").forEach(b=>b.onclick=()=>{deadTab=b.dataset.k;renderDead();});
   const rows=deadRows(),body=$("#deadtable tbody");
   const reasonPill=rsn=>{const l=rsn.toLowerCase();const cls=l.includes("unsub")?"d7":l.includes("no reply")?"waiting":"dead";return `<span class="pill ${cls}">${rsn}</span>`;};
-  body.innerHTML=rows.length?rows.map(r=>`<tr><td class="mail">${r.email}</td><td class="monocell">${r.mailbox}</td><td>${reasonPill(r.reason)}</td><td class="monocell">${r.date?dLabel(r.date):"—"}</td></tr>`).join("")
+  body.innerHTML=rows.length?rows.map(r=>`<tr><td class="mail">${r.email}</td><td class="monocell">${r.mailbox}</td><td>${reasonPill(r.reason)}</td><td class="monocell">${r.date?dLabel(r.date):"â"}</td></tr>`).join("")
     :`<tr><td colspan="4"><div class="empty"><div class="big">Clean list</div>No dead addresses in this group yet.</div></td></tr>`;
 }
 
@@ -798,7 +798,7 @@ async function renderSuccess(){
     rows=(DATA.successList||[]).map(r=>({email:r.email,company:r.company||r.email.split("@")[1],date:r.date}));
   }
   if(!rows.length){body.innerHTML=`<tr><td colspan="4"><div class="empty"><div class="big">No success leads yet</div>Move leads here from the follow-ups view when they respond positively.</div></td></tr>`;return;}
-  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td class="monocell">${r.company}</td><td class="monocell">${r.date?dLabel(r.date):"—"}</td><td><button class="actbtn danger" onclick="doRemoveSuccess(this,'${r.email}')">Move to dead</button></td></tr>`).join("");
+  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td class="monocell">${r.company}</td><td class="monocell">${r.date?dLabel(r.date):"â"}</td><td><button class="actbtn danger" onclick="doRemoveSuccess(this,'${r.email}')">Move to dead</button></td></tr>`).join("");
 }
 
 /* ======================= RENDER: REPLIED LIST ======================= */
@@ -857,13 +857,13 @@ function setMode(){
     $("#pulse-txt").textContent="Sample mode";
   }else if(isWeekend){
     $("#pulse").className="pulse sample";
-    $("#pulse-txt").textContent="Stopped · "+dayDateStr;
+    $("#pulse-txt").textContent="Stopped Â· "+dayDateStr;
   }else{
     $("#pulse").className="pulse";
-    $("#pulse-txt").textContent="Live · "+dayDateStr;
+    $("#pulse-txt").textContent="Live Â· "+dayDateStr;
   }
   $("#nav-fu").textContent=fmt(DATA.in_followup||0);
-  $("#nav-dead").textContent=fmt(DATA.dead||0);
+  $("#nav-dead").textContent=fmt(MODE==="live"?(DATA.deadList||[]).length:(DATA.dead||0));
   const rc=MODE==="live"?(DATA.repliedList||[]).length:(DATA.replied||0);
   $("#nav-replied").textContent=fmt(rc);
   const sc=MODE==="live"?(DATA.success_count||0):(DATA.successList||[]).length;
@@ -882,7 +882,7 @@ function renderStartStop(){
   if(isWeekend&&DATA.outreach_active!==false){
     b.innerHTML=`<span class="d"></span>Paused (weekend)`;
   }else{
-    b.innerHTML=`<span class="d"></span>${on?"Running · Stop":"Stopped · Start"}`;
+    b.innerHTML=`<span class="d"></span>${on?"Running Â· Stop":"Stopped Â· Start"}`;
   }
 }
 async function loadLive(){
@@ -922,7 +922,7 @@ $("#startstop").onclick=async()=>{
   const turningOn=!(DATA.outreach_active!==false);
   const msg=turningOn?"Start the outreach? n8n will resume sending up to 50 emails each weekday at 10 AM.":"Stop the outreach? n8n will send nothing until you start it again. (Any emails already in progress for today finish.)";
   if(!confirm(msg))return;
-  b.setAttribute("disabled","");b.innerHTML=`<span class="d"></span>…`;
+  b.setAttribute("disabled","");b.innerHTML=`<span class="d"></span>â¦`;
   try{await setOutreach(turningOn);DATA.outreach_active=turningOn;}catch(e){alert("Could not change state: "+e.message);}
   b.removeAttribute("disabled");renderStartStop();
 };
