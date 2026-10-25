@@ -545,7 +545,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       </div>
       <div class="searchbar" id="replied-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email, name, or company..." oninput="filterTable('repliedtable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('repliedtable','')">Clear</button></div>
       <div class="tablewrap">
-        <table id="repliedtable"><thead><tr><th>Email</th><th>Name</th><th>Company</th><th>Status</th><th>Sent</th><th>Replied</th></tr></thead><tbody></tbody></table>
+        <table id="repliedtable"><thead><tr><th>Email</th><th>Name</th><th>Company</th><th>Status</th><th>Sent</th><th>Replied</th><th>Notes</th></tr></thead><tbody></tbody></table>
       </div>
     </section>
 
@@ -565,7 +565,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     <section class="view" id="v-notes" hidden>
       <div class="banner" style="background:var(--accent-dim);border-color:rgba(31,143,255,.15)">
         <svg viewBox="0 0 24 24" style="stroke:var(--accent)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
-        <div>Personal notes for your outreach campaign. Stored locally in your browser.</div>
+        <div>Personal notes for your outreach campaign. Synced to your account, available on every device.</div>
       </div>
       <div class="notes-wrap" id="notes-wrap"></div>
       <div class="notes-input">
@@ -606,6 +606,21 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     </section>
 
   </main>
+</div>
+
+<div class="modal-bg" id="lead-notes-modal" style="display:none">
+  <div class="modal-box" style="width:460px">
+    <h3 id="lnm-title">Notes</h3>
+    <p>Personal notes for this lead, visible only to you.</p>
+    <div class="notes-wrap" id="lnm-wrap"></div>
+    <div class="notes-input">
+      <input type="text" id="lnm-input" placeholder="Type a note and press Enter...">
+      <button id="lnm-add" onclick="addLeadNote()">Add</button>
+    </div>
+    <div class="mbtn-row">
+      <button class="mbtn" onclick="closeLeadNotes()">Close</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -925,35 +940,41 @@ async function doRemoveSuccess(btn,email){
 }
 
 /* ======================= RENDER: SUCCESS ======================= */
+function notesBtn(email){
+  const n=leadNoteCounts[email]||0;
+  return `<button class="actbtn" onclick="openLeadNotes('${email.replace(/'/g,"\\'")}')">Notes${n?' ('+n+')':''}</button>`;
+}
 async function renderSuccess(){
   const body=$("#successtable tbody");
   body.innerHTML=`<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">Loading...</td></tr>`;
   let rows=[];
   if(MODE==="live"){
     try{rows=await sb("v_success_list");rows=rows.map(r=>({email:r.email,company:r.company||r.email.split("@")[1],date:r.moved_on?new Date(r.moved_on):null}));}catch(e){rows=[];}
+    await loadLeadNoteCounts();
   }else{
     rows=(DATA.successList||[]).map(r=>({email:r.email,company:r.company||r.email.split("@")[1],date:r.date}));
   }
   if(!rows.length){body.innerHTML=`<tr><td colspan="4"><div class="empty"><div class="big">No success leads yet</div>Move leads here from the follow-ups view when they respond positively.</div></td></tr>`;return;}
-  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td class="monocell">${r.company}</td><td class="monocell">${r.date?dLabel(r.date):"-"}</td><td><button class="actbtn danger" onclick="doRemoveSuccess(this,'${r.email}')">Move to dead</button></td></tr>`).join("");
+  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td class="monocell">${r.company}</td><td class="monocell">${r.date?dLabel(r.date):"-"}</td><td style="display:flex;gap:6px">${notesBtn(r.email)}<button class="actbtn danger" onclick="doRemoveSuccess(this,'${r.email}')">Move to dead</button></td></tr>`).join("");
 }
 
 /* ======================= RENDER: REPLIED LIST ======================= */
 async function renderReplied(){
   const body=$("#repliedtable tbody");
-  body.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">Loading...</td></tr>`;
+  body.innerHTML=`<tr><td colspan="7" class="muted" style="text-align:center;padding:24px">Loading...</td></tr>`;
   let rows=[];
   if(MODE==="live"){
     try{rows=await sb("v_replied_list");
     }catch(e){rows=[];}
+    await loadLeadNoteCounts();
   }else{
     // demo: pick some replied/booked from log
     const seen=new Set();
     rows=DATA.log.filter(r=>(r.statusCode==="replied"||r.statusCode==="booked")&&!seen.has(r.email)&&seen.add(r.email))
       .map(r=>({email:r.email,first_name:"",company:r.email.split("@")[1],status:r.statusCode,sent_date:isoDate(r.date),replied_date:isoDate(r.date)}));
   }
-  if(!rows.length){body.innerHTML=`<tr><td colspan="6"><div class="empty"><div class="big">No replies yet</div>When someone writes back, they show up here automatically.</div></td></tr>`;return;}
-  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td>${r.first_name||""}</td><td class="monocell">${r.company||r.email.split("@")[1]}</td><td>${statusPill(r.status)}</td><td class="monocell">${r.sent_date||""}</td><td class="monocell">${r.replied_date||""}</td></tr>`).join("");
+  if(!rows.length){body.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="big">No replies yet</div>When someone writes back, they show up here automatically.</div></td></tr>`;return;}
+  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td>${r.first_name||""}</td><td class="monocell">${r.company||r.email.split("@")[1]}</td><td>${statusPill(r.status)}</td><td class="monocell">${r.sent_date||""}</td><td class="monocell">${r.replied_date||""}</td><td>${notesBtn(r.email)}</td></tr>`).join("");
 }
 
 /* counts for nav/tabs */
@@ -979,45 +1000,111 @@ async function renderBounced(){
   body.innerHTML=rows.map(r=>{const bd=r.bounced_at?isoDate(new Date(r.bounced_at)):"";return `<tr><td class="mail">${r.email}</td><td>${r.first_name||""}</td><td class="monocell">${r.company||r.email.split("@")[1]}</td><td>${statusPill(r.status)}</td><td class="monocell">${bd}</td></tr>`;}).join("");
 }
 
-/* ======================= RENDER: NOTES ======================= */
-function notesKey(){return "ady-notes"+(activeProfileId?"-"+activeProfileId:"");}
-function renderNotes(){
-  let notes=[];
-  try{notes=JSON.parse(localStorage.getItem(notesKey())||"[]");}catch(e){}
+/* ======================= RENDER: NOTES (synced via Supabase) ======================= */
+function escapeHtml(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function fmtNoteTs(iso){
+  const d=new Date(iso);
+  return d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear()+", "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+}
+async function loadGeneralNotes(){
+  if(!activeProfileId)return [];
+  try{return await sb("v_notes","select=*&lead_email=is.null&order=created_at.asc");}catch(e){return [];}
+}
+async function renderNotes(){
   const wrap=$("#notes-wrap");
+  wrap.innerHTML='<div class="empty"><div class="big">Loading...</div></div>';
+  const notes=await loadGeneralNotes();
   if(!notes.length){
     wrap.innerHTML='<div class="empty"><div class="big">No notes yet</div>Type something below and hit Enter.</div>';
   }else{
-    wrap.innerHTML=notes.map((n,i)=>{
-      const d=new Date(n.ts);
-      const ts=d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear()+", "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
-      return `<div class="note-item"><div class="note-meta"><span>${ts}</span><button class="note-del" onclick="deleteNote(${i})">x</button></div><div class="note-text">${n.text.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</div></div>`;
-    }).join("");
+    wrap.innerHTML=notes.map(n=>`<div class="note-item"><div class="note-meta"><span>${fmtNoteTs(n.created_at)}</span><button class="note-del" onclick="deleteNote('${n.id}')">x</button></div><div class="note-text">${escapeHtml(n.body)}</div></div>`).join("");
     wrap.scrollTop=wrap.scrollHeight;
   }
+  try{$("#nav-notes").textContent=fmt(notes.length);}catch(e){}
   const inp=$("#note-input");
   inp.onkeydown=e=>{if(e.key==="Enter"&&inp.value.trim())addNote();};
   $("#note-add").onclick=addNote;
 }
-function addNote(){
+async function addNote(){
   const inp=$("#note-input");
   const text=inp.value.trim();
-  if(!text)return;
-  let notes=[];
-  try{notes=JSON.parse(localStorage.getItem(notesKey())||"[]");}catch(e){}
-  notes.push({text,ts:Date.now()});
-  try{localStorage.setItem(notesKey(),JSON.stringify(notes));}catch(e){}
-  inp.value="";
-  renderNotes();
-  try{const nc=notes.length;$("#nav-notes").textContent=fmt(nc);}catch(e){}
+  if(!text||!activeProfileId)return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/notes`,{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify({profile_id:activeProfileId,lead_email:null,body:text})});
+    if(!r.ok)throw new Error("save "+r.status);
+    inp.value="";
+    await renderNotes();
+  }catch(e){alert("Failed to save note: "+e.message);}
 }
-function deleteNote(idx){
+async function deleteNote(id){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/notes?id=eq.${id}`,{method:"DELETE",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
+    if(!r.ok)throw new Error("delete "+r.status);
+    await renderNotes();
+  }catch(e){alert("Failed to delete note: "+e.message);}
+}
+
+/* ======================= LEAD NOTES (per-email, Replied/Success) ======================= */
+let leadNotesEmail=null;
+let leadNoteCounts={};
+async function loadLeadNoteCounts(){
+  if(!activeProfileId){leadNoteCounts={};return;}
+  try{
+    const rows=await sb("v_notes","select=lead_email&lead_email=not.is.null");
+    const m={};
+    rows.forEach(r=>{m[r.lead_email]=(m[r.lead_email]||0)+1;});
+    leadNoteCounts=m;
+  }catch(e){leadNoteCounts={};}
+}
+function openLeadNotes(email){
+  leadNotesEmail=email;
+  $("#lnm-title").textContent=email;
+  $("#lead-notes-modal").style.display="flex";
+  const inp=$("#lnm-input");
+  inp.value="";
+  inp.onkeydown=e=>{if(e.key==="Enter"&&inp.value.trim())addLeadNote();};
+  renderLeadNotes();
+}
+function closeLeadNotes(){
+  $("#lead-notes-modal").style.display="none";
+  leadNotesEmail=null;
+}
+async function renderLeadNotes(){
+  const wrap=$("#lnm-wrap");
+  wrap.innerHTML='<div class="empty"><div class="big">Loading...</div></div>';
+  if(!leadNotesEmail)return;
   let notes=[];
-  try{notes=JSON.parse(localStorage.getItem(notesKey())||"[]");}catch(e){}
-  notes.splice(idx,1);
-  try{localStorage.setItem(notesKey(),JSON.stringify(notes));}catch(e){}
-  renderNotes();
-  try{$("#nav-notes").textContent=fmt(notes.length);}catch(e){}
+  try{notes=await sb("v_notes",`select=*&lead_email=eq.${encodeURIComponent(leadNotesEmail)}&order=created_at.asc`);}catch(e){notes=[];}
+  if(!notes.length){
+    wrap.innerHTML='<div class="empty"><div class="big">No notes for this lead yet</div></div>';
+  }else{
+    wrap.innerHTML=notes.map(n=>`<div class="note-item"><div class="note-meta"><span>${fmtNoteTs(n.created_at)}</span><button class="note-del" onclick="deleteLeadNote('${n.id}')">x</button></div><div class="note-text">${escapeHtml(n.body)}</div></div>`).join("");
+    wrap.scrollTop=wrap.scrollHeight;
+  }
+}
+async function addLeadNote(){
+  const inp=$("#lnm-input");
+  const text=inp.value.trim();
+  if(!text||!leadNotesEmail||!activeProfileId)return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/notes`,{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify({profile_id:activeProfileId,lead_email:leadNotesEmail,body:text})});
+    if(!r.ok)throw new Error("save "+r.status);
+    inp.value="";
+    await renderLeadNotes();
+    await loadLeadNoteCounts();
+    if($("#v-replied")&&!$("#v-replied").hidden)renderReplied();
+    if($("#v-success")&&!$("#v-success").hidden)renderSuccess();
+  }catch(e){alert("Failed to save note: "+e.message);}
+}
+async function deleteLeadNote(id){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/notes?id=eq.${id}`,{method:"DELETE",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
+    if(!r.ok)throw new Error("delete "+r.status);
+    await renderLeadNotes();
+    await loadLeadNoteCounts();
+    if($("#v-replied")&&!$("#v-replied").hidden)renderReplied();
+    if($("#v-success")&&!$("#v-success").hidden)renderSuccess();
+  }catch(e){alert("Failed to delete note: "+e.message);}
 }
 
 /* ======================= MAIL TEMPLATES ======================= */
@@ -1038,7 +1125,7 @@ function renderTplForm(){
   $("#tpl-subject").value=t.subject||"";
   $("#tpl-body").value=t.body||"";
   $("#tpl-filename").textContent=t.resume_filename?t.resume_filename:"No file attached";
-  $("#tpl-file-remove").style.display=t.resume_base64?"":"none";
+  $("#tpl-file-remove").style.display=(t.resume_filename||t.resume_base64)?"":"none";
   $("#tpl-status").textContent="";
   $("#tpl-status").className="tpl-status";
   pendingFile=null;
@@ -1229,7 +1316,8 @@ function setMode(){
   $("#nav-replied").textContent=fmt(rc);
   const sc=MODE==="live"?(DATA.success_count||0):(DATA.successList||[]).length;
   $("#nav-success").textContent=fmt(sc);
-  try{const nc=JSON.parse(localStorage.getItem(notesKey())||"[]").length;$("#nav-notes").textContent=fmt(nc);}catch(e){$("#nav-notes").textContent="0";}
+  loadGeneralNotes().then(notes=>{try{$("#nav-notes").textContent=fmt(notes.length);}catch(e){}}).catch(()=>{});
+  loadLeadNoteCounts();
   renderStartStop();
   $("#pg-date").textContent=dayDateStr;
 }
