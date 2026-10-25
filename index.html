@@ -849,7 +849,7 @@ async function renderBounced(){
       .map(r=>({email:r.email,first_name:"",company:r.email.split("@")[1],status:"bounced",bounced_at:isoDate(r.date)}));
   }
   if(!rows.length){body.innerHTML=`<tr><td colspan="5"><div class="empty"><div class="big">No bounces yet</div>Bounced emails appear here automatically.</div></td></tr>`;return;}
-  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td>${r.first_name||""}</td><td class="monocell">${r.company||r.email.split("@")[1]}</td><td>${statusPill(r.status)}</td><td class="monocell">${r.bounced_at||""}</td></tr>`).join("");
+  body.innerHTML=rows.map(r=>{const bd=r.bounced_at?isoDate(new Date(r.bounced_at)):"";return `<tr><td class="mail">${r.email}</td><td>${r.first_name||""}</td><td class="monocell">${r.company||r.email.split("@")[1]}</td><td>${statusPill(r.status)}</td><td class="monocell">${bd}</td></tr>`;}).join("");
 }
 
 /* ======================= ROUTER ======================= */
