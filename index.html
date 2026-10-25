@@ -331,10 +331,13 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .notes-input button{appearance:none;border:1px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--ui);font-weight:600;font-size:13px;padding:10px 18px;border-radius:var(--radius-s);cursor:pointer;transition:.12s}
 .notes-input button:hover{opacity:.88}
 
-/* ---------- ADD LEADS ---------- */
-.csv-area{width:100%;font-family:var(--mono);font-size:12px;padding:12px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface-2);color:var(--ink);resize:vertical;outline:none;line-height:1.6}
-.csv-area:focus{border-color:var(--accent)}
-.csv-area::placeholder{color:var(--ink-4)}
+/* ---------- PROFILE PICKER ---------- */
+.profile-picker{padding:10px 14px;border-bottom:1px solid var(--rail-line)}
+.profile-picker select{width:100%;font-family:var(--ui);font-size:13px;font-weight:600;padding:8px 10px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface-2);color:var(--ink);cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238aa1ba' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.profile-picker select:focus{border-color:var(--accent)}
+.profile-actions{display:flex;gap:4px;margin-top:6px}
+.profile-actions button{flex:1;font-family:var(--ui);font-size:11px;font-weight:600;padding:5px 0;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface-2);color:var(--ink-2);cursor:pointer;transition:.12s}
+.profile-actions button:hover{background:var(--raise);color:var(--ink)}
 </style>
 </head>
 <body>
@@ -343,6 +346,14 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     <div class="brand">
       <div class="emblem">SB</div>
       <div class="wm">Internship Outreach<small>Srikar Bommakanti</small></div>
+    </div>
+    <div class="profile-picker" id="profile-picker">
+      <select id="profile-select"></select>
+      <div class="profile-actions">
+        <button id="profile-new">+ New</button>
+        <button id="profile-rename">Rename</button>
+        <button id="profile-delete">Delete</button>
+      </div>
     </div>
     <nav class="nav" id="nav">
       <div class="nav-label">Operations</div>
@@ -378,10 +389,6 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <a data-view="notes">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
         Notes <span class="count" id="nav-notes">0</span>
-      </a>
-      <a data-view="addleads">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-        Add Leads
       </a>
     </nav>
     <div class="rail-foot">
@@ -529,23 +536,6 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       </div>
     </section>
 
-    <!-- ADD LEADS -->
-    <section class="view" id="v-addleads" hidden>
-      <div class="banner" style="background:var(--info-dim);border-color:rgba(92,130,167,.2)">
-        <svg viewBox="0 0 24 24" style="stroke:var(--info)"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-        <div>Add new leads to your outreach database. Paste CSV data with columns: <b>email, first_name, company</b> (comma-separated, one lead per line). The first row is skipped if it looks like a header.</div>
-      </div>
-      <div class="panel" style="margin-bottom:16px">
-        <div class="panel-h"><h2>Paste CSV data</h2><span class="note">email, first_name, company</span></div>
-        <textarea id="csv-input" class="csv-area" rows="8" placeholder="john@acme.com, John, Acme Inc&#10;jane@startup.co, Jane, StartupCo&#10;alex@bigcorp.com, Alex, BigCorp"></textarea>
-        <div style="margin-top:12px;display:flex;gap:8px">
-          <button class="actbtn" id="csv-parse-btn" onclick="parseCSV()">Parse and Preview</button>
-          <button class="actbtn" onclick="document.getElementById('csv-input').value='';document.getElementById('csv-preview').innerHTML='';document.getElementById('csv-result').innerHTML=''">Clear</button>
-        </div>
-      </div>
-      <div id="csv-preview"></div>
-      <div id="csv-result"></div>
-    </section>
   </main>
 </div>
 
@@ -570,7 +560,11 @@ function isoDate(d){return d.toISOString().slice(0,10);}
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 
 async function sb(view,qs=""){
-  const r=await fetch(`${SB_URL}/rest/v1/${view}?${qs||"select=*"}`,{headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
+  let q=qs||"select=*";
+  if(activeProfileId&&view!=="v_profiles"&&view!=="profiles"&&view!=="settings"){
+    q+=`&profile_id=eq.${activeProfileId}`;
+  }
+  const r=await fetch(`${SB_URL}/rest/v1/${view}?${q}`,{headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
   if(!r.ok)throw new Error(view+" "+r.status);
   return r.json();
 }
@@ -916,9 +910,10 @@ async function renderBounced(){
 }
 
 /* ======================= RENDER: NOTES ======================= */
+function notesKey(){return "ady-notes"+(activeProfileId?"-"+activeProfileId:"");}
 function renderNotes(){
   let notes=[];
-  try{notes=JSON.parse(localStorage.getItem("ady-notes")||"[]");}catch(e){}
+  try{notes=JSON.parse(localStorage.getItem(notesKey())||"[]");}catch(e){}
   const wrap=$("#notes-wrap");
   if(!notes.length){
     wrap.innerHTML='<div class="empty"><div class="big">No notes yet</div>Type something below and hit Enter.</div>';
@@ -939,72 +934,96 @@ function addNote(){
   const text=inp.value.trim();
   if(!text)return;
   let notes=[];
-  try{notes=JSON.parse(localStorage.getItem("ady-notes")||"[]");}catch(e){}
+  try{notes=JSON.parse(localStorage.getItem(notesKey())||"[]");}catch(e){}
   notes.push({text,ts:Date.now()});
-  try{localStorage.setItem("ady-notes",JSON.stringify(notes));}catch(e){}
+  try{localStorage.setItem(notesKey(),JSON.stringify(notes));}catch(e){}
   inp.value="";
   renderNotes();
   try{const nc=notes.length;$("#nav-notes").textContent=fmt(nc);}catch(e){}
 }
 function deleteNote(idx){
   let notes=[];
-  try{notes=JSON.parse(localStorage.getItem("ady-notes")||"[]");}catch(e){}
+  try{notes=JSON.parse(localStorage.getItem(notesKey())||"[]");}catch(e){}
   notes.splice(idx,1);
-  try{localStorage.setItem("ady-notes",JSON.stringify(notes));}catch(e){}
+  try{localStorage.setItem(notesKey(),JSON.stringify(notes));}catch(e){}
   renderNotes();
   try{$("#nav-notes").textContent=fmt(notes.length);}catch(e){}
 }
 
-/* ======================= RENDER: ADD LEADS ======================= */
-let parsedLeads=[];
-function renderAddLeads(){
-  // nothing to render on load, the section is static HTML
-}
-function parseCSV(){
-  const raw=$("#csv-input").value.trim();
-  if(!raw){$("#csv-preview").innerHTML='<div class="empty">Paste CSV data above first.</div>';return;}
-  const lines=raw.split("\n").map(l=>l.trim()).filter(l=>l);
-  parsedLeads=[];
-  const firstLine=lines[0].toLowerCase();
-  const startIdx=(firstLine.includes("email")&&(firstLine.includes("name")||firstLine.includes("company")))?1:0;
-  for(let i=startIdx;i<lines.length;i++){
-    const parts=lines[i].split(",").map(s=>s.trim());
-    if(parts.length>=1&&parts[0].includes("@")){
-      parsedLeads.push({email:parts[0],first_name:parts[1]||"",company:parts[2]||parts[0].split("@")[1]});
-    }
-  }
-  if(!parsedLeads.length){
-    $("#csv-preview").innerHTML='<div class="empty"><div class="big">No valid leads found</div>Make sure each line has an email address.</div>';
-    return;
-  }
-  let html=`<div class="panel" style="margin-bottom:16px"><div class="panel-h"><h2>Preview</h2><span class="note">${parsedLeads.length} leads parsed</span></div>`;
-  html+=`<div class="tablewrap" style="border:0;max-height:400px;overflow-y:auto"><table id="csv-table"><thead><tr><th>Email</th><th>Name</th><th>Company</th></tr></thead><tbody>`;
-  html+=parsedLeads.map(r=>`<tr><td class="mail">${r.email.replace(/</g,"&lt;")}</td><td>${(r.first_name||"").replace(/</g,"&lt;")}</td><td class="monocell">${(r.company||"").replace(/</g,"&lt;")}</td></tr>`).join("");
-  html+=`</tbody></table></div>`;
-  html+=`<div style="margin-top:12px"><button class="actbtn success-btn" onclick="submitLeads()" id="submit-leads-btn">Add ${parsedLeads.length} leads to database</button></div></div>`;
-  $("#csv-preview").innerHTML=html;
-  $("#csv-result").innerHTML="";
-}
-async function submitLeads(){
-  if(!parsedLeads.length)return;
-  const btn=$("#submit-leads-btn");
-  btn.disabled=true;btn.textContent="Adding...";
+/* ======================= PROFILES ======================= */
+let allProfiles=[];
+let activeProfileId=null;
+
+async function loadProfiles(){
   try{
-    const result=await sbRpc("bulk_insert_leads",{leads:parsedLeads});
-    const count=typeof result==="number"?result:parsedLeads.length;
-    $("#csv-result").innerHTML=`<div class="banner" style="background:var(--good-dim);border-color:rgba(18,160,111,.2)"><svg viewBox="0 0 24 24" style="stroke:var(--good)"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg><div><b>${count}</b> leads added successfully. Duplicates were skipped.</div></div>`;
-    parsedLeads=[];
-    $("#csv-input").value="";
-    $("#csv-preview").innerHTML="";
-    try{if(MODE==="live"){DATA=await loadLive();setMode();}}catch(e){}
-  }catch(e){
-    $("#csv-result").innerHTML=`<div class="banner" style="background:rgba(214,69,69,.08);border-color:rgba(214,69,69,.2)"><svg viewBox="0 0 24 24" style="stroke:#d64545"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg><div>Failed to add leads: ${e.message}</div></div>`;
-    btn.disabled=false;btn.textContent=`Add ${parsedLeads.length} leads to database`;
+    allProfiles=await sb("v_profiles");
+  }catch(e){allProfiles=[];}
+  renderProfilePicker();
+}
+function renderProfilePicker(){
+  const sel=$("#profile-select");
+  if(!allProfiles.length){sel.innerHTML='<option value="">No profiles</option>';return;}
+  sel.innerHTML=allProfiles.map(p=>`<option value="${p.id}"${p.id===activeProfileId?' selected':''}>${p.name}</option>`).join("");
+  if(!activeProfileId&&allProfiles.length){
+    const saved=getSavedProfileId();
+    if(saved&&allProfiles.find(p=>p.id===saved)){activeProfileId=saved;}
+    else{activeProfileId=allProfiles[0].id;}
+    sel.value=activeProfileId;
   }
+}
+function getSavedProfileId(){try{return localStorage.getItem("ady-profile");}catch(e){return null;}}
+function saveProfileId(id){try{localStorage.setItem("ady-profile",id);}catch(e){}}
+
+async function switchProfile(id){
+  activeProfileId=id;
+  saveProfileId(id);
+  const p=allProfiles.find(x=>x.id===id);
+  if(p)$(".wm").innerHTML=p.name+'<small>Srikar Bommakanti</small>';
+  try{DATA=await loadLive();MODE="live";}catch(e){DATA=buildDemo(276);MODE="demo";}
+  setMode();
+  go((location.hash||"#overview").slice(1));
+}
+async function createProfile(){
+  const name=prompt("New profile name:");
+  if(!name||!name.trim())return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/profiles`,{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json",Prefer:"return=representation"},body:JSON.stringify({name:name.trim()})});
+    if(!r.ok)throw new Error("create "+r.status);
+    const rows=await r.json();
+    if(rows&&rows.length){
+      await loadProfiles();
+      switchProfile(rows[0].id);
+    }
+  }catch(e){alert("Failed to create profile: "+e.message);}
+}
+async function renameProfile(){
+  if(!activeProfileId)return;
+  const cur=allProfiles.find(p=>p.id===activeProfileId);
+  const name=prompt("Rename profile:",cur?cur.name:"");
+  if(!name||!name.trim())return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/profiles?id=eq.${activeProfileId}`,{method:"PATCH",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify({name:name.trim()})});
+    if(!r.ok)throw new Error("rename "+r.status);
+    await loadProfiles();
+    const p=allProfiles.find(x=>x.id===activeProfileId);
+    if(p)$(".wm").innerHTML=p.name+'<small>Srikar Bommakanti</small>';
+  }catch(e){alert("Failed to rename: "+e.message);}
+}
+async function deleteProfile(){
+  if(!activeProfileId)return;
+  if(allProfiles.length<=1){alert("Cannot delete the only profile.");return;}
+  const cur=allProfiles.find(p=>p.id===activeProfileId);
+  if(!confirm(`Delete profile "${cur?cur.name:""}"? This does NOT delete the leads in it, but you will lose access to them from this dashboard.`))return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/profiles?id=eq.${activeProfileId}`,{method:"DELETE",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
+    if(!r.ok){const t=await r.text();throw new Error(t);}
+    await loadProfiles();
+    if(allProfiles.length)switchProfile(allProfiles[0].id);
+  }catch(e){alert("Failed to delete: "+e.message);}
 }
 
 /* ======================= ROUTER ======================= */
-const VIEWS={overview:"Overview",log:"Send Log",followups:"Follow-ups",bounced:"Bounced",replied:"Replied",dead:"Dead List",success:"Success",notes:"Notes",addleads:"Add Leads"};
+const VIEWS={overview:"Overview",log:"Send Log",followups:"Follow-ups",bounced:"Bounced",replied:"Replied",dead:"Dead List",success:"Success",notes:"Notes"};
 function go(view){
   if(!VIEWS[view])view="overview";
   $$(".nav a").forEach(a=>a.classList.toggle("active",a.dataset.view===view));
@@ -1020,7 +1039,6 @@ function go(view){
   else if(view==="dead")renderDead();
   else if(view==="success")renderSuccess();
   else if(view==="notes")renderNotes();
-  else if(view==="addleads")renderAddLeads();
 }
 
 /* ======================= BOOT ======================= */
@@ -1049,7 +1067,7 @@ function setMode(){
   $("#nav-replied").textContent=fmt(rc);
   const sc=MODE==="live"?(DATA.success_count||0):(DATA.successList||[]).length;
   $("#nav-success").textContent=fmt(sc);
-  try{const nc=JSON.parse(localStorage.getItem("ady-notes")||"[]").length;$("#nav-notes").textContent=fmt(nc);}catch(e){$("#nav-notes").textContent="0";}
+  try{const nc=JSON.parse(localStorage.getItem(notesKey())||"[]").length;$("#nav-notes").textContent=fmt(nc);}catch(e){$("#nav-notes").textContent="0";}
   renderStartStop();
   $("#pg-date").textContent=dayDateStr;
 }
@@ -1088,6 +1106,16 @@ async function loadLive(){
     sendDays:days||[],deadList:dead||[],successList,fuCounts,dailyBreakdown:dailyBreakdown||[],repliedList:repliedList||[],bouncedList:bouncedList||[]};
 }
 async function boot(){
+  await loadProfiles();
+  const saved=getSavedProfileId();
+  if(saved&&allProfiles.find(p=>p.id===saved)){activeProfileId=saved;}
+  else if(allProfiles.length){activeProfileId=allProfiles[0].id;}
+  if(activeProfileId){
+    saveProfileId(activeProfileId);
+    const sel=$("#profile-select");if(sel)sel.value=activeProfileId;
+    const p=allProfiles.find(x=>x.id===activeProfileId);
+    if(p)$(".wm").innerHTML=p.name+'<small>Srikar Bommakanti</small>';
+  }
   let funnel=null;
   try{funnel=(await sb("v_funnel"))[0];}catch(e){}
   if(funnel){
@@ -1115,6 +1143,10 @@ $("#startstop").onclick=async()=>{
 $("#theme").onclick=()=>{const dark=document.documentElement.getAttribute("data-theme")==="dark";if(dark){document.documentElement.removeAttribute("data-theme");}else{document.documentElement.setAttribute("data-theme","dark");}try{localStorage.setItem("ady-theme",dark?"light":"dark");}catch(e){}};
 (function(){let cur=null;try{cur=localStorage.getItem("ady-theme");}catch(e){}if(cur==="dark")document.documentElement.setAttribute("data-theme","dark");})();
 window.addEventListener("hashchange",()=>{const v=(location.hash||"#overview").slice(1);if(VIEWS[v])go(v);});
+$("#profile-select").addEventListener("change",e=>{if(e.target.value)switchProfile(e.target.value);});
+$("#profile-new").addEventListener("click",createProfile);
+$("#profile-rename").addEventListener("click",renameProfile);
+$("#profile-delete").addEventListener("click",deleteProfile);
 /* ======================= SEARCH FILTER ======================= */
 function filterTable(tableId,query){
   const q=query.trim().toLowerCase();
