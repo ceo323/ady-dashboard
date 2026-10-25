@@ -338,6 +338,32 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .profile-actions{display:flex;gap:4px;margin-top:6px}
 .profile-actions button{flex:1;font-family:var(--ui);font-size:11px;font-weight:600;padding:5px 0;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface-2);color:var(--ink-2);cursor:pointer;transition:.12s}
 .profile-actions button:hover{background:var(--raise);color:var(--ink)}
+
+/* ---------- MAIL TEMPLATES ---------- */
+.field{margin-bottom:16px}
+.field label{display:block;font-weight:600;font-size:12px;color:var(--ink-2);margin-bottom:6px}
+.field input[type=text],.field textarea{width:100%;font-family:var(--ui);font-size:13.5px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface);color:var(--ink);outline:none;resize:vertical}
+.field input[type=text]:focus,.field textarea:focus{border-color:var(--accent)}
+.tpl-file-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tpl-file-row span{font-size:13px;color:var(--ink-2);font-family:var(--mono)}
+.tpl-file-row button{appearance:none;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);font-family:var(--ui);font-weight:600;font-size:12px;padding:7px 14px;border-radius:var(--radius-s);cursor:pointer;transition:.12s}
+.tpl-file-row button:hover{background:var(--raise);color:var(--ink)}
+.tpl-vars{font-size:12px;color:var(--ink-3);margin-bottom:16px}
+.tpl-vars code{font-family:var(--mono);background:var(--surface-2);padding:1px 5px;border-radius:4px}
+.tpl-save{appearance:none;border:1px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--ui);font-weight:600;font-size:13px;padding:10px 20px;border-radius:var(--radius-s);cursor:pointer;transition:.12s}
+.tpl-save:hover{opacity:.88}
+.tpl-save[disabled]{opacity:.5;cursor:default}
+.tpl-status{margin-left:10px;font-size:12px;color:var(--good)}
+.tpl-status.err{color:#d64545}
+
+/* ---------- DAILY LIMIT ---------- */
+.dl-row{display:flex;align-items:center;gap:10px}
+.dl-row input{width:100px;font-family:var(--mono);font-size:14px;font-weight:600;padding:9px 12px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface);color:var(--ink);outline:none}
+.dl-row input:focus{border-color:var(--accent)}
+.dl-row button{appearance:none;border:1px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--ui);font-weight:600;font-size:13px;padding:9px 18px;border-radius:var(--radius-s);cursor:pointer;transition:.12s}
+.dl-row button:hover{opacity:.88}
+.dl-status{font-size:12px;color:var(--good)}
+.dl-status.err{color:#d64545}
 </style>
 </head>
 <body>
@@ -390,6 +416,10 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
         Notes <span class="count" id="nav-notes">0</span>
       </a>
+      <a data-view="templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M4 4h16v16H4z"/><path d="M4 8h16"/><path d="M8 12h8M8 16h5"/></svg>
+        Mail Templates
+      </a>
     </nav>
     <div class="rail-foot">
       <div class="pulse" id="pulse"><span class="dot"></span><span id="pulse-txt">Connecting...</span></div>
@@ -412,6 +442,14 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 
     <!-- OVERVIEW -->
     <section class="view" id="v-overview">
+      <div class="panel" id="daily-limit-panel" style="margin-bottom:16px">
+        <div class="panel-h"><h2>Daily send limit</h2><span class="note">max new emails sent per day, this profile</span></div>
+        <div class="dl-row">
+          <input type="number" id="dl-input" min="1" max="500">
+          <button id="dl-save">Save</button>
+          <span class="dl-status" id="dl-status"></span>
+        </div>
+      </div>
       <div class="kpis" id="kpis"></div>
       <div class="grid2">
         <div class="panel">
@@ -533,6 +571,37 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <div class="notes-input">
         <input type="text" id="note-input" placeholder="Type a note and press Enter...">
         <button id="note-add">Add</button>
+      </div>
+    </section>
+
+    <!-- MAIL TEMPLATES -->
+    <section class="view" id="v-templates" hidden>
+      <div class="banner" style="background:var(--accent-dim);border-color:rgba(31,143,255,.15)">
+        <svg viewBox="0 0 24 24" style="stroke:var(--accent)"><path d="M4 4h16v16H4z"/><path d="M4 8h16"/><path d="M8 12h8M8 16h5"/></svg>
+        <div>Edit the subject, body, and attachment n8n uses for each stage of this profile's sequence. Saved changes apply to the next run, automatically.</div>
+      </div>
+      <div class="tabs" id="tpl-tabs"></div>
+      <div class="panel" id="tpl-panel">
+        <div class="field">
+          <label>Subject</label>
+          <input type="text" id="tpl-subject" placeholder="Email subject">
+        </div>
+        <div class="field">
+          <label>Body</label>
+          <textarea id="tpl-body" rows="12" placeholder="Email body"></textarea>
+        </div>
+        <div class="field">
+          <label>Attachment</label>
+          <div class="tpl-file-row">
+            <span id="tpl-filename">No file attached</span>
+            <input type="file" id="tpl-file-input" accept=".pdf,.doc,.docx" hidden>
+            <button type="button" id="tpl-file-btn">Upload file</button>
+            <button type="button" id="tpl-file-remove" style="display:none">Remove</button>
+          </div>
+        </div>
+        <div class="tpl-vars">Use <code>{{first_name}}</code> and <code>{{company}}</code> as placeholders, replaced automatically per lead.</div>
+        <button class="tpl-save" id="tpl-save">Save template</button>
+        <span class="tpl-status" id="tpl-status"></span>
       </div>
     </section>
 
@@ -702,6 +771,7 @@ function renderOverview(){
   $("#foot").innerHTML=MODE==="live"
     ?`Live from Supabase - reading aggregate views only, no individual lead is exposed by the public key.`
     :`Sample data - the layout and every view with illustrative numbers. Flips to your real figures automatically once n8n starts sending.`;
+  renderDailyLimit();
 }
 function convRow(label,big,sub,p,max){
   const w=Math.min(p/max*100,100);
@@ -950,6 +1020,97 @@ function deleteNote(idx){
   try{$("#nav-notes").textContent=fmt(notes.length);}catch(e){}
 }
 
+/* ======================= MAIL TEMPLATES ======================= */
+let allTemplates=[];
+let activeTplType="original";
+let pendingFile=null; // {filename,base64} | "REMOVE" | null
+async function loadTemplates(){
+  try{allTemplates=await sb("v_email_templates");}catch(e){allTemplates=[];}
+}
+function renderTplTabs(){
+  const tabs=$("#tpl-tabs");
+  const types=[["original","Original"],["day3","Day 3"],["day7","Day 7"]];
+  tabs.innerHTML=types.map(([k,label])=>`<button type="button" class="tab${k===activeTplType?' active':''}" data-tpl="${k}" style="appearance:none;border:0;background:${k===activeTplType?'var(--accent)':'transparent'};color:${k===activeTplType?'#fff':'var(--ink-2)'};font-family:var(--ui);font-weight:600;font-size:12.5px;padding:7px 16px;border-radius:7px;cursor:pointer">${label}</button>`).join("");
+  $$("#tpl-tabs button").forEach(b=>b.onclick=()=>{activeTplType=b.dataset.tpl;renderTplTabs();renderTplForm();});
+}
+function renderTplForm(){
+  const t=allTemplates.find(x=>x.template_type===activeTplType)||{subject:"",body:"",resume_filename:"",resume_base64:null};
+  $("#tpl-subject").value=t.subject||"";
+  $("#tpl-body").value=t.body||"";
+  $("#tpl-filename").textContent=t.resume_filename?t.resume_filename:"No file attached";
+  $("#tpl-file-remove").style.display=t.resume_base64?"":"none";
+  $("#tpl-status").textContent="";
+  $("#tpl-status").className="tpl-status";
+  pendingFile=null;
+}
+function renderTemplates(){
+  renderTplTabs();
+  renderTplForm();
+  $("#tpl-file-btn").onclick=()=>$("#tpl-file-input").click();
+  $("#tpl-file-input").onchange=e=>{
+    const f=e.target.files[0];
+    if(!f)return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const b64=String(reader.result).split(",")[1];
+      pendingFile={filename:f.name,base64:b64};
+      $("#tpl-filename").textContent=f.name+" (not saved yet)";
+      $("#tpl-file-remove").style.display="";
+    };
+    reader.readAsDataURL(f);
+  };
+  $("#tpl-file-remove").onclick=()=>{
+    pendingFile="REMOVE";
+    $("#tpl-filename").textContent="No file attached (not saved yet)";
+  };
+  $("#tpl-save").onclick=saveTemplate;
+}
+async function saveTemplate(){
+  if(!activeProfileId){alert("No active profile");return;}
+  const btn=$("#tpl-save"),status=$("#tpl-status");
+  btn.disabled=true;status.textContent="Saving...";status.className="tpl-status";
+  const payload={profile_id:activeProfileId,template_type:activeTplType,subject:$("#tpl-subject").value,body:$("#tpl-body").value};
+  if(pendingFile==="REMOVE"){payload.resume_filename=null;payload.resume_base64=null;}
+  else if(pendingFile){payload.resume_filename=pendingFile.filename;payload.resume_base64=pendingFile.base64;}
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/email_templates?on_conflict=profile_id,template_type`,{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=representation"},body:JSON.stringify(payload)});
+    if(!r.ok){const t=await r.text();throw new Error(t);}
+    await loadTemplates();
+    pendingFile=null;
+    renderTplForm();
+    status.textContent="Saved";status.className="tpl-status";
+  }catch(e){status.textContent="Failed: "+e.message;status.className="tpl-status err";}
+  finally{btn.disabled=false;}
+}
+async function renderTemplatesView(){
+  await loadTemplates();
+  renderTemplates();
+}
+
+/* ======================= DAILY LIMIT ======================= */
+function renderDailyLimit(){
+  const inp=$("#dl-input");
+  if(!inp)return;
+  const p=allProfiles.find(x=>x.id===activeProfileId);
+  inp.value=p&&p.daily_limit!=null?p.daily_limit:50;
+  $("#dl-status").textContent="";
+  $("#dl-status").className="dl-status";
+  $("#dl-save").onclick=saveDailyLimit;
+}
+async function saveDailyLimit(){
+  if(!activeProfileId)return;
+  const val=parseInt($("#dl-input").value,10);
+  const status=$("#dl-status");
+  if(!val||val<1){status.textContent="Enter a valid number";status.className="dl-status err";return;}
+  status.textContent="Saving...";status.className="dl-status";
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/profiles?id=eq.${activeProfileId}`,{method:"PATCH",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify({daily_limit:val})});
+    if(!r.ok)throw new Error("save "+r.status);
+    await loadProfiles();
+    status.textContent="Saved";status.className="dl-status";
+  }catch(e){status.textContent="Failed: "+e.message;status.className="dl-status err";}
+}
+
 /* ======================= PROFILES ======================= */
 let allProfiles=[];
 let activeProfileId=null;
@@ -1023,7 +1184,7 @@ async function deleteProfile(){
 }
 
 /* ======================= ROUTER ======================= */
-const VIEWS={overview:"Overview",log:"Send Log",followups:"Follow-ups",bounced:"Bounced",replied:"Replied",dead:"Dead List",success:"Success",notes:"Notes"};
+const VIEWS={overview:"Overview",log:"Send Log",followups:"Follow-ups",bounced:"Bounced",replied:"Replied",dead:"Dead List",success:"Success",notes:"Notes",templates:"Mail Templates"};
 function go(view){
   if(!VIEWS[view])view="overview";
   $$(".nav a").forEach(a=>a.classList.toggle("active",a.dataset.view===view));
@@ -1039,6 +1200,7 @@ function go(view){
   else if(view==="dead")renderDead();
   else if(view==="success")renderSuccess();
   else if(view==="notes")renderNotes();
+  else if(view==="templates")renderTemplatesView();
 }
 
 /* ======================= BOOT ======================= */
