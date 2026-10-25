@@ -316,6 +316,25 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .startstop.off .d{background:#d64545}
 .startstop:hover{border-color:var(--ink-3)}
 .startstop[disabled]{opacity:.6;cursor:default}
+
+/* ---------- NOTES ---------- */
+.notes-wrap{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto;padding:4px 0;margin-bottom:14px}
+.note-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-s);padding:11px 14px}
+.note-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.note-meta span{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.note-del{appearance:none;border:0;background:transparent;color:var(--ink-4);cursor:pointer;font-size:14px;padding:0 4px;line-height:1;border-radius:4px}
+.note-del:hover{color:#d64545;background:rgba(214,69,69,.08)}
+.note-text{font-size:13.5px;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+.notes-input{display:flex;gap:8px}
+.notes-input input{flex:1;font-family:var(--ui);font-size:13px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface);color:var(--ink);outline:none}
+.notes-input input:focus{border-color:var(--accent)}
+.notes-input button{appearance:none;border:1px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--ui);font-weight:600;font-size:13px;padding:10px 18px;border-radius:var(--radius-s);cursor:pointer;transition:.12s}
+.notes-input button:hover{opacity:.88}
+
+/* ---------- ADD LEADS ---------- */
+.csv-area{width:100%;font-family:var(--mono);font-size:12px;padding:12px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface-2);color:var(--ink);resize:vertical;outline:none;line-height:1.6}
+.csv-area:focus{border-color:var(--accent)}
+.csv-area::placeholder{color:var(--ink-4)}
 </style>
 </head>
 <body>
@@ -354,6 +373,15 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <a data-view="success">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
         Success <span class="count" id="nav-success">0</span>
+      </a>
+      <div class="nav-label">Tools</div>
+      <a data-view="notes">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+        Notes <span class="count" id="nav-notes">0</span>
+      </a>
+      <a data-view="addleads">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        Add Leads
       </a>
     </nav>
     <div class="rail-foot">
@@ -486,6 +514,37 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <div class="tablewrap">
         <table id="successtable"><thead><tr><th>Email</th><th>Company</th><th>Moved on</th><th>Actions</th></tr></thead><tbody></tbody></table>
       </div>
+    </section>
+
+    <!-- NOTES -->
+    <section class="view" id="v-notes" hidden>
+      <div class="banner" style="background:var(--accent-dim);border-color:rgba(31,143,255,.15)">
+        <svg viewBox="0 0 24 24" style="stroke:var(--accent)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+        <div>Personal notes for your outreach campaign. Stored locally in your browser.</div>
+      </div>
+      <div class="notes-wrap" id="notes-wrap"></div>
+      <div class="notes-input">
+        <input type="text" id="note-input" placeholder="Type a note and press Enter...">
+        <button id="note-add">Add</button>
+      </div>
+    </section>
+
+    <!-- ADD LEADS -->
+    <section class="view" id="v-addleads" hidden>
+      <div class="banner" style="background:var(--info-dim);border-color:rgba(92,130,167,.2)">
+        <svg viewBox="0 0 24 24" style="stroke:var(--info)"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        <div>Add new leads to your outreach database. Paste CSV data with columns: <b>email, first_name, company</b> (comma-separated, one lead per line). The first row is skipped if it looks like a header.</div>
+      </div>
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-h"><h2>Paste CSV data</h2><span class="note">email, first_name, company</span></div>
+        <textarea id="csv-input" class="csv-area" rows="8" placeholder="john@acme.com, John, Acme Inc&#10;jane@startup.co, Jane, StartupCo&#10;alex@bigcorp.com, Alex, BigCorp"></textarea>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="actbtn" id="csv-parse-btn" onclick="parseCSV()">Parse and Preview</button>
+          <button class="actbtn" onclick="document.getElementById('csv-input').value='';document.getElementById('csv-preview').innerHTML='';document.getElementById('csv-result').innerHTML=''">Clear</button>
+        </div>
+      </div>
+      <div id="csv-preview"></div>
+      <div id="csv-result"></div>
     </section>
   </main>
 </div>
@@ -729,7 +788,11 @@ async function fuData(step){
   if(MODE==="demo")return DATA.fu.filter(r=>r.step===step);
   const rows=await sb("v_followup_queue",`select=*&step=eq.${step}&order=next_send_at.asc`);
   const today=new Date();
-  return rows.map(r=>({email:r.email,mailbox:(MAILBOXES.find(m=>m.full===r.mailbox)||{}).key||r.mailbox,step:r.step,first:r.first_contacted?new Date(r.first_contacted+"T00:00:00"):null,next:r.next_send_at?new Date(r.next_send_at):null,waiting:r.first_contacted?Math.round((today-new Date(r.first_contacted))/864e5):null}));
+  const excludeEmails=new Set([
+    ...(DATA.repliedList||[]).map(r=>r.email),
+    ...(DATA.successList||[]).map(r=>r.email)
+  ]);
+  return rows.filter(r=>!excludeEmails.has(r.email)).map(r=>({email:r.email,mailbox:(MAILBOXES.find(m=>m.full===r.mailbox)||{}).key||r.mailbox,step:r.step,first:r.first_contacted?new Date(r.first_contacted+"T00:00:00"):null,next:r.next_send_at?new Date(r.next_send_at):null,waiting:r.first_contacted?Math.round((today-new Date(r.first_contacted))/864e5):null}));
 }
 async function renderFollowups(){
   const c7=countOf("fu",1),c10=countOf("fu",2);
@@ -852,8 +915,96 @@ async function renderBounced(){
   body.innerHTML=rows.map(r=>{const bd=r.bounced_at?isoDate(new Date(r.bounced_at)):"";return `<tr><td class="mail">${r.email}</td><td>${r.first_name||""}</td><td class="monocell">${r.company||r.email.split("@")[1]}</td><td>${statusPill(r.status)}</td><td class="monocell">${bd}</td></tr>`;}).join("");
 }
 
+/* ======================= RENDER: NOTES ======================= */
+function renderNotes(){
+  let notes=[];
+  try{notes=JSON.parse(localStorage.getItem("ady-notes")||"[]");}catch(e){}
+  const wrap=$("#notes-wrap");
+  if(!notes.length){
+    wrap.innerHTML='<div class="empty"><div class="big">No notes yet</div>Type something below and hit Enter.</div>';
+  }else{
+    wrap.innerHTML=notes.map((n,i)=>{
+      const d=new Date(n.ts);
+      const ts=d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear()+", "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+      return `<div class="note-item"><div class="note-meta"><span>${ts}</span><button class="note-del" onclick="deleteNote(${i})">x</button></div><div class="note-text">${n.text.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</div></div>`;
+    }).join("");
+    wrap.scrollTop=wrap.scrollHeight;
+  }
+  const inp=$("#note-input");
+  inp.onkeydown=e=>{if(e.key==="Enter"&&inp.value.trim())addNote();};
+  $("#note-add").onclick=addNote;
+}
+function addNote(){
+  const inp=$("#note-input");
+  const text=inp.value.trim();
+  if(!text)return;
+  let notes=[];
+  try{notes=JSON.parse(localStorage.getItem("ady-notes")||"[]");}catch(e){}
+  notes.push({text,ts:Date.now()});
+  try{localStorage.setItem("ady-notes",JSON.stringify(notes));}catch(e){}
+  inp.value="";
+  renderNotes();
+  try{const nc=notes.length;$("#nav-notes").textContent=fmt(nc);}catch(e){}
+}
+function deleteNote(idx){
+  let notes=[];
+  try{notes=JSON.parse(localStorage.getItem("ady-notes")||"[]");}catch(e){}
+  notes.splice(idx,1);
+  try{localStorage.setItem("ady-notes",JSON.stringify(notes));}catch(e){}
+  renderNotes();
+  try{$("#nav-notes").textContent=fmt(notes.length);}catch(e){}
+}
+
+/* ======================= RENDER: ADD LEADS ======================= */
+let parsedLeads=[];
+function renderAddLeads(){
+  // nothing to render on load, the section is static HTML
+}
+function parseCSV(){
+  const raw=$("#csv-input").value.trim();
+  if(!raw){$("#csv-preview").innerHTML='<div class="empty">Paste CSV data above first.</div>';return;}
+  const lines=raw.split("\n").map(l=>l.trim()).filter(l=>l);
+  parsedLeads=[];
+  const firstLine=lines[0].toLowerCase();
+  const startIdx=(firstLine.includes("email")&&(firstLine.includes("name")||firstLine.includes("company")))?1:0;
+  for(let i=startIdx;i<lines.length;i++){
+    const parts=lines[i].split(",").map(s=>s.trim());
+    if(parts.length>=1&&parts[0].includes("@")){
+      parsedLeads.push({email:parts[0],first_name:parts[1]||"",company:parts[2]||parts[0].split("@")[1]});
+    }
+  }
+  if(!parsedLeads.length){
+    $("#csv-preview").innerHTML='<div class="empty"><div class="big">No valid leads found</div>Make sure each line has an email address.</div>';
+    return;
+  }
+  let html=`<div class="panel" style="margin-bottom:16px"><div class="panel-h"><h2>Preview</h2><span class="note">${parsedLeads.length} leads parsed</span></div>`;
+  html+=`<div class="tablewrap" style="border:0;max-height:400px;overflow-y:auto"><table id="csv-table"><thead><tr><th>Email</th><th>Name</th><th>Company</th></tr></thead><tbody>`;
+  html+=parsedLeads.map(r=>`<tr><td class="mail">${r.email.replace(/</g,"&lt;")}</td><td>${(r.first_name||"").replace(/</g,"&lt;")}</td><td class="monocell">${(r.company||"").replace(/</g,"&lt;")}</td></tr>`).join("");
+  html+=`</tbody></table></div>`;
+  html+=`<div style="margin-top:12px"><button class="actbtn success-btn" onclick="submitLeads()" id="submit-leads-btn">Add ${parsedLeads.length} leads to database</button></div></div>`;
+  $("#csv-preview").innerHTML=html;
+  $("#csv-result").innerHTML="";
+}
+async function submitLeads(){
+  if(!parsedLeads.length)return;
+  const btn=$("#submit-leads-btn");
+  btn.disabled=true;btn.textContent="Adding...";
+  try{
+    const result=await sbRpc("bulk_insert_leads",{leads:parsedLeads});
+    const count=typeof result==="number"?result:parsedLeads.length;
+    $("#csv-result").innerHTML=`<div class="banner" style="background:var(--good-dim);border-color:rgba(18,160,111,.2)"><svg viewBox="0 0 24 24" style="stroke:var(--good)"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg><div><b>${count}</b> leads added successfully. Duplicates were skipped.</div></div>`;
+    parsedLeads=[];
+    $("#csv-input").value="";
+    $("#csv-preview").innerHTML="";
+    try{if(MODE==="live"){DATA=await loadLive();setMode();}}catch(e){}
+  }catch(e){
+    $("#csv-result").innerHTML=`<div class="banner" style="background:rgba(214,69,69,.08);border-color:rgba(214,69,69,.2)"><svg viewBox="0 0 24 24" style="stroke:#d64545"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg><div>Failed to add leads: ${e.message}</div></div>`;
+    btn.disabled=false;btn.textContent=`Add ${parsedLeads.length} leads to database`;
+  }
+}
+
 /* ======================= ROUTER ======================= */
-const VIEWS={overview:"Overview",log:"Send Log",followups:"Follow-ups",bounced:"Bounced",replied:"Replied",dead:"Dead List",success:"Success"};
+const VIEWS={overview:"Overview",log:"Send Log",followups:"Follow-ups",bounced:"Bounced",replied:"Replied",dead:"Dead List",success:"Success",notes:"Notes",addleads:"Add Leads"};
 function go(view){
   if(!VIEWS[view])view="overview";
   $$(".nav a").forEach(a=>a.classList.toggle("active",a.dataset.view===view));
@@ -868,6 +1019,8 @@ function go(view){
   else if(view==="replied")renderReplied();
   else if(view==="dead")renderDead();
   else if(view==="success")renderSuccess();
+  else if(view==="notes")renderNotes();
+  else if(view==="addleads")renderAddLeads();
 }
 
 /* ======================= BOOT ======================= */
@@ -896,6 +1049,7 @@ function setMode(){
   $("#nav-replied").textContent=fmt(rc);
   const sc=MODE==="live"?(DATA.success_count||0):(DATA.successList||[]).length;
   $("#nav-success").textContent=fmt(sc);
+  try{const nc=JSON.parse(localStorage.getItem("ady-notes")||"[]").length;$("#nav-notes").textContent=fmt(nc);}catch(e){$("#nav-notes").textContent="0";}
   renderStartStop();
   $("#pg-date").textContent=dayDateStr;
 }
@@ -914,15 +1068,21 @@ function renderStartStop(){
 async function loadLive(){
   const [funnel,daily,mbx,days,dailyBreakdown,repliedList,bouncedList]=await Promise.all([sb("v_funnel"),sb("v_daily_sends"),sb("v_mailbox_performance"),sb("v_send_days"),sb("v_daily_breakdown"),sb("v_replied_list"),sb("v_bounced_list")]);
   const f=funnel[0]||{};
-  const fu=await sb("v_followup_queue","select=step");
+  const fu=await sb("v_followup_queue","select=step,email");
   const dead=await sb("v_dead_list");
   let successList=[];let success_count=0;
   try{successList=await sb("v_success_list");success_count=successList.length;}catch(e){}
-  const fuCounts={1:fu.filter(r=>r.step===1).length,2:fu.filter(r=>r.step===2).length};
+  const excludeEmails=new Set([
+    ...(repliedList||[]).map(r=>r.email),
+    ...(successList||[]).map(r=>r.email)
+  ]);
+  const filteredFu=fu.filter(r=>!excludeEmails.has(r.email));
+  const fuCounts={1:filteredFu.filter(r=>r.step===1).length,2:filteredFu.filter(r=>r.step===2).length};
+  const filteredFuTotal=filteredFu.length;
   return {live:true,outreach_active:(f.outreach_active!==false),
     total_leads:+f.total_leads||0,left_to_send:+f.left_to_send||0,sent:+f.sent||0,
     delivered:(+f.sent||0)-(+f.bounced||0),bounced:+f.bounced||0,replied:+f.replied||0,booked:+f.booked||0,
-    in_followup:+f.in_followup||0,dead:+f.dead||0,success_count,
+    in_followup:filteredFuTotal,dead:+f.dead||0,success_count,
     daily:(daily||[]).map(d=>+d.sends),
     mbx:(mbx||[]).map(m=>({mb:m.mailbox,sent:+m.sent||0,replied:+m.replied||0,booked:+m.booked||0})),
     sendDays:days||[],deadList:dead||[],successList,fuCounts,dailyBreakdown:dailyBreakdown||[],repliedList:repliedList||[],bouncedList:bouncedList||[]};
