@@ -134,6 +134,8 @@ body{
 .iconbtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);display:grid;place-items:center;cursor:pointer;transition:.13s}
 .iconbtn:hover{color:var(--ink);border-color:var(--ink-3)}
 .iconbtn svg{width:16px;height:16px;stroke:currentColor;fill:none}
+#refresh.spinning svg{animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 .view{padding:24px 28px 56px;max-width:1240px}
 .view[hidden]{display:none}
@@ -374,7 +376,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <div class="kpis" id="kpis"></div>
       <div class="grid2">
         <div class="panel">
-          <div class="panel-h"><h2>Pipeline</h2><span class="note">delivered > replied > booked</span></div>
+          <div class="panel-h"><h2>Pipeline</h2><span class="note">delivered > replied</span></div>
           <div class="funnel" id="funnel"></div>
         </div>
         <div class="panel">
@@ -906,7 +908,7 @@ async function boot(){
 /* nav + controls */
 $("#nav").addEventListener("click",e=>{const a=e.target.closest("a");if(a){e.preventDefault();go(a.dataset.view);}});
 $("#menubtn").onclick=()=>$("#rail").classList.toggle("open");
-$("#refresh").onclick=()=>boot();
+$("#refresh").onclick=async()=>{const b=$("#refresh");b.classList.add("spinning");try{await boot();}finally{b.classList.remove("spinning");}};
 $("#startstop").onclick=async()=>{
   const b=$("#startstop"); if(b.hasAttribute("disabled"))return;
   const turningOn=!(DATA.outreach_active!==false);
