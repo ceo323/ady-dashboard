@@ -343,6 +343,10 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M9 17l-5-5 5-5"/><path d="M4 12h16"/></svg>
         Replied <span class="count" id="nav-replied">0</span>
       </a>
+      <a data-view="bounced">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M12 2v8m0 0l3-3m-3 3L9 7"/><path d="M4 12a8 8 0 1 0 16 0"/></svg>
+        Bounced <span class="count" id="nav-bounced">0</span>
+      </a>
       <a data-view="dead">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>
         Dead List <span class="count" id="nav-dead">0</span>
@@ -445,6 +449,18 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <div class="searchbar" id="dead-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email, domain, or reason..." oninput="filterTable('deadtable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('deadtable','')">Clear</button></div>
       <div class="tablewrap">
         <table id="deadtable"><thead><tr><th>Email</th><th>Inbox</th><th>Reason</th><th>Date</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <!-- BOUNCED -->
+    <section class="view" id="v-bounced" hidden>
+      <div class="banner" style="background:var(--warn-dim);border-color:rgba(208,138,26,.2)">
+        <svg viewBox="0 0 24 24" style="stroke:var(--warn)"><path d="M12 2v8m0 0l3-3m-3 3L9 7"/><path d="M4 12a8 8 0 1 0 16 0"/></svg>
+        <div>Emails that bounced back. These addresses could not be reached and are automatically added to the dead list.</div>
+      </div>
+      <div class="searchbar" id="bounced-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email, name, or company..." oninput="filterTable('bouncedtable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('bouncedtable','')">Clear</button></div>
+      <div class="tablewrap">
+        <table id="bouncedtable"><thead><tr><th>Email</th><th>Name</th><th>Company</th><th>Status</th><th>Bounced</th></tr></thead><tbody></tbody></table>
       </div>
     </section>
 
@@ -820,8 +836,24 @@ function countOf(kind,step){
   return 0;
 }
 
+/* ======================= RENDER: BOUNCED LIST ======================= */
+async function renderBounced(){
+  const body=$("#bouncedtable tbody");
+  body.innerHTML=`<tr><td colspan="5" class="muted" style="text-align:center;padding:24px">Loading...</td></tr>`;
+  let rows=[];
+  if(MODE==="live"){
+    try{rows=await sb("v_bounced_list");}catch(e){rows=[];}
+  }else{
+    const seen=new Set();
+    rows=DATA.log.filter(r=>r.statusCode==="bounced"&&!seen.has(r.email)&&seen.add(r.email))
+      .map(r=>({email:r.email,first_name:"",company:r.email.split("@")[1],status:"bounced",bounced_at:isoDate(r.date)}));
+  }
+  if(!rows.length){body.innerHTML=`<tr><td colspan="5"><div class="empty"><div class="big">No bounces yet</div>Bounced emails appear here automatically.</div></td></tr>`;return;}
+  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td>${r.first_name||""}</td><td class="monocell">${r.company||r.email.split("@")[1]}</td><td>${statusPill(r.status)}</td><td class="monocell">${r.bounced_at||""}</td></tr>`).join("");
+}
+
 /* ======================= ROUTER ======================= */
-const VIEWS={overview:"Overview",log:"Send Log",followups:"Follow-ups",replied:"Replied",dead:"Dead List",success:"Success"};
+const VIEWS={overview:"Overview",log:"Send Log",followups:"Follow-ups",bounced:"Bounced",replied:"Replied",dead:"Dead List",success:"Success"};
 function go(view){
   if(!VIEWS[view])view="overview";
   $$(".nav a").forEach(a=>a.classList.toggle("active",a.dataset.view===view));
@@ -832,6 +864,7 @@ function go(view){
   if(view==="overview")renderOverview();
   else if(view==="log")renderLog();
   else if(view==="followups")renderFollowups();
+  else if(view==="bounced")renderBounced();
   else if(view==="replied")renderReplied();
   else if(view==="dead")renderDead();
   else if(view==="success")renderSuccess();
@@ -857,6 +890,7 @@ function setMode(){
     $("#pulse-txt").textContent="Live, "+dayDateStr;
   }
   $("#nav-fu").textContent=fmt(DATA.in_followup||0);
+  $("#nav-bounced").textContent=fmt(MODE==="live"?(DATA.bouncedList||[]).length:(DATA.bounced||0));
   $("#nav-dead").textContent=fmt(MODE==="live"?(DATA.deadList||[]).length:(DATA.dead||0));
   const rc=MODE==="live"?(DATA.repliedList||[]).length:(DATA.replied||0);
   $("#nav-replied").textContent=fmt(rc);
@@ -878,7 +912,7 @@ function renderStartStop(){
   }
 }
 async function loadLive(){
-  const [funnel,daily,mbx,days,dailyBreakdown,repliedList]=await Promise.all([sb("v_funnel"),sb("v_daily_sends"),sb("v_mailbox_performance"),sb("v_send_days"),sb("v_daily_breakdown"),sb("v_replied_list")]);
+  const [funnel,daily,mbx,days,dailyBreakdown,repliedList,bouncedList]=await Promise.all([sb("v_funnel"),sb("v_daily_sends"),sb("v_mailbox_performance"),sb("v_send_days"),sb("v_daily_breakdown"),sb("v_replied_list"),sb("v_bounced_list")]);
   const f=funnel[0]||{};
   const fu=await sb("v_followup_queue","select=step");
   const dead=await sb("v_dead_list");
@@ -891,7 +925,7 @@ async function loadLive(){
     in_followup:+f.in_followup||0,dead:+f.dead||0,success_count,
     daily:(daily||[]).map(d=>+d.sends),
     mbx:(mbx||[]).map(m=>({mb:m.mailbox,sent:+m.sent||0,replied:+m.replied||0,booked:+m.booked||0})),
-    sendDays:days||[],deadList:dead||[],successList,fuCounts,dailyBreakdown:dailyBreakdown||[],repliedList:repliedList||[]};
+    sendDays:days||[],deadList:dead||[],successList,fuCounts,dailyBreakdown:dailyBreakdown||[],repliedList:repliedList||[],bouncedList:bouncedList||[]};
 }
 async function boot(){
   let funnel=null;
@@ -908,7 +942,7 @@ async function boot(){
 /* nav + controls */
 $("#nav").addEventListener("click",e=>{const a=e.target.closest("a");if(a){e.preventDefault();go(a.dataset.view);}});
 $("#menubtn").onclick=()=>$("#rail").classList.toggle("open");
-$("#refresh").onclick=async()=>{const b=$("#refresh");b.classList.add("spinning");try{await boot();}finally{b.classList.remove("spinning");}};
+$("#refresh").onclick=()=>location.reload();
 $("#startstop").onclick=async()=>{
   const b=$("#startstop"); if(b.hasAttribute("disabled"))return;
   const turningOn=!(DATA.outreach_active!==false);
