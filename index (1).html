@@ -1,0 +1,1506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Internship Outreach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* ===========================================================================
+   ADy Outreach - cold-email control room
+   Identity: monochrome console (cool near-black + platinum) with one red accent.
+   Type: Archivo (numbers/titles), Hanken Grotesk (UI), JetBrains Mono (data).
+   =========================================================================== */
+:root{
+  /* sky - light blue, white, soft clouds */
+  --bg:#e9f3fd; --surface:#ffffff; --surface-2:#f2f9ff; --raise:#e4f0fc;
+  --line:#d6e6f5; --line-soft:#e8f1fb;
+  --ink:#15283b; --ink-2:#55708b; --ink-3:#8aa1ba; --ink-4:#b0c2d4;
+  --accent:#1f8fff; --accent-2:#5aabff; --accent-dim:rgba(31,143,255,.12);
+  --silver:#7e97b1;
+  --good:#12a06f; --good-dim:rgba(18,160,111,.12);
+  --warn:#d08a1a; --warn-dim:rgba(208,138,26,.14);
+  --info:#5c82a7; --info-dim:rgba(92,130,167,.13);
+  --d10:#e2742f; --d10-dim:rgba(226,116,47,.13);
+  --dead:#8597ab; --dead-dim:rgba(133,151,171,.14);
+  --shadow:0 1px 2px rgba(23,65,120,.05),0 10px 30px rgba(23,70,130,.07);
+  --rail-bg:linear-gradient(185deg,#d6ecff 0%,#eaf5ff 42%,#ffffff 100%);
+  --rail-ink:#16324c; --rail-ink2:#5d779a; --rail-line:#d4e6f6;
+  --rail-hover:#eaf4ff; --rail-active-bg:#deefff; --rail-active-ink:#0d3a6b;
+  --rail-chip-bg:#e9f2fc; --cloud:rgba(255,255,255,.9); --cloud-op:.55;
+  --radius:12px; --radius-s:8px;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ui:"Hanken Grotesk",system-ui,-apple-system,sans-serif;
+  --disp:"Archivo",system-ui,sans-serif;
+  --rail-w:236px;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  /* night sky */
+  --bg:#0a1322; --surface:#111d31; --surface-2:#16233a; --raise:#1d2d46;
+  --line:#25364e; --line-soft:#1a2740;
+  --ink:#e7f0fb; --ink-2:#9bb0c9; --ink-3:#62788f; --ink-4:#47586d;
+  --accent:#3b9dff; --accent-2:#6fb8ff; --accent-dim:rgba(59,157,255,.17);
+  --silver:#8aa0b8;
+  --good:#2fcf93; --good-dim:rgba(47,207,147,.14);
+  --warn:#e6b14a; --warn-dim:rgba(230,177,74,.14);
+  --info:#6f93b5; --info-dim:rgba(111,147,181,.16);
+  --d10:#f08a4a; --d10-dim:rgba(240,138,74,.16);
+  --dead:#7e90a5; --dead-dim:rgba(126,144,165,.15);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px rgba(0,0,0,.35);
+  --rail-bg:linear-gradient(185deg,#0f1c31 0%,#0b1526 100%);
+  --rail-ink:#dce8f6; --rail-ink2:#93a8c2; --rail-line:#20304a;
+  --rail-hover:#16233a; --rail-active-bg:#1c2d46; --rail-active-ink:#ffffff;
+  --rail-chip-bg:#1b2940; --cloud:rgba(150,185,230,.1); --cloud-op:.5;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--ui);
+  font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+::selection{background:var(--accent-dim)}
+/* scrollbars */
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-thumb{background:var(--raise);border-radius:8px;border:2px solid var(--bg)}
+*::-webkit-scrollbar-track{background:transparent}
+
+.app{display:grid;grid-template-columns:var(--rail-w) 1fr;min-height:100%}
+
+/* ---------- RAIL (sky with soft clouds) ---------- */
+.rail{
+  background:var(--rail-bg); border-right:1px solid var(--rail-line);
+  display:flex;flex-direction:column; position:sticky;top:0;height:100vh;
+  padding:0; z-index:20; overflow:hidden;
+}
+.rail::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:var(--cloud-op);
+  background:
+   radial-gradient(54px 30px at 44px 130px,var(--cloud),transparent 72%),
+   radial-gradient(84px 42px at 150px 100px,var(--cloud),transparent 72%),
+   radial-gradient(40px 24px at 96px 112px,var(--cloud),transparent 72%),
+   radial-gradient(70px 38px at 60px 360px,var(--cloud),transparent 72%),
+   radial-gradient(60px 32px at 180px 300px,var(--cloud),transparent 72%);}
+.rail>*{position:relative;z-index:1}
+.brand{display:flex;align-items:center;gap:11px;padding:22px 20px 20px}
+.emblem{
+  width:34px;height:34px;border-radius:50%;flex:none;position:relative;
+  background:var(--raise); border:1px solid var(--line); display:grid;place-items:center;
+  font-family:var(--disp);font-weight:800;font-size:12.5px;letter-spacing:.3px;color:var(--accent);
+  box-shadow:0 2px 8px rgba(31,143,255,.14);
+}
+.emblem::after{content:"";position:absolute;right:4px;top:6px;width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.brand .wm{font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:-.01em;color:var(--rail-ink)}
+.brand .wm small{display:block;font-family:var(--ui);font-weight:600;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--rail-ink2);margin-top:2px}
+
+.nav{display:flex;flex-direction:column;gap:2px;padding:8px 12px;flex:1}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--rail-ink2);opacity:.8;padding:14px 10px 6px}
+.nav a{
+  display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:var(--radius-s);
+  color:var(--rail-ink2);text-decoration:none;font-weight:600;font-size:13.5px;cursor:pointer;
+  transition:background .13s,color .13s;position:relative;
+}
+.nav a svg{width:18px;height:18px;flex:none;stroke:currentColor;opacity:.85}
+.nav a .count{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--rail-ink2);background:var(--rail-chip-bg);padding:1px 7px;border-radius:20px}
+.nav a:hover{background:var(--rail-hover);color:var(--rail-ink)}
+.nav a.active{background:var(--rail-active-bg);color:var(--rail-active-ink)}
+.nav a.active::before{content:"";position:absolute;left:-12px;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--accent)}
+.nav a.active svg{opacity:1;stroke:var(--accent)}
+.nav a.active .count{color:var(--rail-active-ink);background:color-mix(in srgb,var(--accent) 16%,transparent)}
+
+.rail-foot{border-top:1px solid var(--rail-line);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.pulse{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--rail-ink2)}
+.pulse .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 0 var(--good);animation:ping 2.4s ease-out infinite}
+.pulse.sample .dot{background:var(--warn);animation:none}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(18,160,111,.5)}70%{box-shadow:0 0 0 7px rgba(18,160,111,0)}100%{box-shadow:0 0 0 0 rgba(18,160,111,0)}}
+/* goal-mini removed */
+
+/* ---------- MAIN ---------- */
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{
+  display:flex;align-items:center;gap:14px;padding:18px 28px;border-bottom:1px solid var(--line-soft);
+  position:sticky;top:0;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(8px);z-index:10;
+}
+.topbar h1{font-family:var(--disp);font-weight:700;font-size:20px;letter-spacing:-.015em;margin:0}
+.topbar .sub{color:var(--ink-3);font-size:12.5px;margin-left:2px}
+.topbar .spacer{flex:1}
+.chip{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;padding:6px 11px;border-radius:30px;border:1px solid var(--line)}
+.chip.live{color:var(--good);background:var(--good-dim);border-color:transparent}
+.chip.live .d{width:7px;height:7px;border-radius:50%;background:var(--good)}
+.chip.sample{color:var(--warn);background:var(--warn-dim);border-color:transparent}
+.iconbtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);display:grid;place-items:center;cursor:pointer;transition:.13s}
+.iconbtn:hover{color:var(--ink);border-color:var(--ink-3)}
+.iconbtn svg{width:16px;height:16px;stroke:currentColor;fill:none}
+#refresh.spinning svg{animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.view{padding:24px 28px 56px;max-width:1240px}
+.view[hidden]{display:none}
+
+/* ---------- KPI console ---------- */
+.kpis{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow)}
+.kpi{background:var(--surface);padding:15px 16px 14px;min-width:0;transition:background .13s}
+.kpi:hover{background:var(--surface-2)}
+.kpi .k{font-size:11px;font-weight:600;letter-spacing:.03em;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.kpi .k .dotc{width:6px;height:6px;border-radius:2px}
+.kpi .v{font-family:var(--disp);font-weight:800;font-size:25px;letter-spacing:-.02em;margin-top:8px;line-height:1;font-variant-numeric:tabular-nums}
+.kpi .m{font-size:11.5px;color:var(--ink-3);margin-top:6px}
+.kpi.hero .v{color:var(--accent)}
+
+.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;margin-bottom:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px;min-width:0;box-shadow:var(--shadow)}
+.panel-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px}
+.panel-h h2{font-family:var(--disp);font-weight:700;font-size:14px;letter-spacing:.01em;margin:0}
+.panel-h .note{font-size:11.5px;color:var(--ink-3)}
+
+/* funnel */
+.funnel{display:flex;flex-direction:column;gap:11px}
+.fstep{display:grid;grid-template-columns:96px 1fr auto;align-items:center;gap:12px}
+.fstep .n{font-size:12.5px;color:var(--ink-2)}
+.ftrack{height:26px;background:var(--line-soft);border-radius:7px;overflow:hidden}
+.fbar{height:100%;border-radius:7px;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+.fstep .fv{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+.fstep .fv .p{color:var(--ink-3);margin-left:6px}
+
+/* chart */
+.chart{position:relative}
+svg.trend{display:block;width:100%;height:auto}
+.axl{fill:var(--ink-3);font-family:var(--mono);font-size:9.5px}
+.tip{position:absolute;pointer-events:none;opacity:0;transform:translate(-50%,-115%);background:var(--raise);color:var(--ink);border:1px solid var(--line);font-family:var(--mono);font-size:11px;padding:5px 9px;border-radius:7px;white-space:nowrap;transition:opacity .08s;z-index:5}
+
+/* tables */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);padding:12px 16px;border-bottom:1px solid var(--line);background:var(--surface-2);position:sticky;top:0}
+tbody td{padding:12px 16px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr{transition:background .1s}
+tbody tr:hover{background:var(--surface-2)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.mail{font-family:var(--mono);font-size:12.5px;color:var(--ink)}
+.muted{color:var(--ink-3)}
+.monocell{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+
+/* pills */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;line-height:1.3}
+.pill .pd{width:6px;height:6px;border-radius:50%}
+.pill.sent{color:var(--info);background:var(--info-dim)}
+.pill.waiting{color:var(--ink-2);background:var(--dead-dim)}
+.pill.followup{color:var(--warn);background:var(--warn-dim)}
+.pill.replied{color:var(--good);background:var(--good-dim)}
+.pill.booked{color:#fff;background:var(--accent)}
+.pill.booked .pd{background:#fff}
+.pill.dead{color:var(--dead);background:var(--dead-dim)}
+.pill.first{color:var(--ink-2);background:var(--line-soft)}
+.pill.d7{color:var(--warn);background:var(--warn-dim)}
+.pill.d3{color:var(--warn);background:var(--warn-dim)}
+.pill.d10{color:var(--d10);background:var(--d10-dim)}
+.pill.success{color:#fff;background:#6c47d6}
+.pill.success .pd{background:#fff}
+
+/* action buttons in follow-up table */
+.act-group{display:flex;gap:5px;flex-wrap:wrap}
+.actbtn{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:var(--ui);font-weight:600;font-size:11px;padding:4px 9px;border-radius:6px;cursor:pointer;transition:.12s;white-space:nowrap}
+.actbtn:hover{border-color:var(--ink-3);color:var(--ink);background:var(--surface-2)}
+.actbtn.danger{color:#d64545;border-color:rgba(214,69,69,.25)}
+.actbtn.danger:hover{background:rgba(214,69,69,.08);border-color:#d64545}
+.actbtn.success-btn{color:#6c47d6;border-color:rgba(108,71,214,.25)}
+.actbtn.success-btn:hover{background:rgba(108,71,214,.08);border-color:#6c47d6}
+.actbtn[disabled]{opacity:.4;cursor:default;pointer-events:none}
+
+/* tabs */
+.tabs{display:inline-flex;gap:3px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;margin-bottom:16px}
+.tabs button{appearance:none;border:0;background:transparent;color:var(--ink-2);font-family:var(--ui);font-weight:600;font-size:12.5px;padding:7px 14px;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.12s}
+.tabs button .c{font-family:var(--mono);font-size:11px;opacity:.8}
+.tabs button:hover{color:var(--ink)}
+.tabs button.on{background:var(--raise);color:var(--ink)}
+.tabs button.on.accent{background:var(--accent);color:#fff}
+
+/* day log header */
+.logbar{display:flex;align-items:center;gap:14px;padding:14px 18px;border:1px solid var(--line);border-bottom:0;border-radius:var(--radius) var(--radius) 0 0;background:var(--surface-2)}
+.logbar .daynav{display:flex;align-items:center;gap:8px}
+.logbar .dayttl{font-family:var(--disp);font-weight:700;font-size:15px}
+.logbar .daysub{font-size:12px;color:var(--ink-3);margin-top:1px}
+.logbar .count-b{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.logbar .count-b b{color:var(--ink);font-size:15px}
+.navbtn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);display:grid;place-items:center;cursor:pointer}
+.navbtn:hover:not(:disabled){color:var(--ink);border-color:var(--ink-3)}
+.navbtn:disabled{opacity:.35;cursor:default}
+.navbtn svg{width:15px;height:15px;stroke:currentColor;fill:none}
+.logtable{border-radius:0 0 var(--radius) var(--radius)}
+
+/* day pager */
+.pager{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.pager button{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:var(--mono);font-size:11.5px;padding:6px 11px;border-radius:8px;cursor:pointer;transition:.12s;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:62px}
+.pager button span{font-size:9.5px;color:var(--ink-4)}
+.pager button:hover{border-color:var(--ink-3);color:var(--ink)}
+.pager button.on{background:var(--raise);color:var(--ink);border-color:var(--ink-3)}
+.pager button.on span{color:var(--accent)}
+
+/* banner */
+.banner{display:flex;gap:11px;align-items:flex-start;padding:13px 16px;border-radius:var(--radius);background:var(--dead-dim);border:1px solid var(--line);margin-bottom:16px;font-size:13px;color:var(--ink-2)}
+.banner svg{width:18px;height:18px;flex:none;stroke:var(--dead);fill:none;margin-top:1px}
+.banner b{color:var(--ink)}
+
+.cadence{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;font-size:12.5px;color:var(--ink-3)}
+.cadence .step{display:flex;align-items:center;gap:8px;padding:8px 13px;border:1px solid var(--line);border-radius:30px;background:var(--surface)}
+.cadence .step b{color:var(--ink);font-family:var(--mono);font-size:12px}
+.cadence .arrow{color:var(--ink-4);align-self:center}
+
+.empty{padding:48px 20px;text-align:center;color:var(--ink-3);font-size:13px}
+.empty .big{font-family:var(--disp);font-weight:700;color:var(--ink-2);font-size:15px;margin-bottom:6px}
+
+/* search bar */
+.searchbar{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.searchbar input{flex:1;font-family:var(--ui);font-size:13px;padding:9px 14px 9px 36px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface);color:var(--ink);outline:none;transition:border-color .15s}
+.searchbar input::placeholder{color:var(--ink-4)}
+.searchbar input:focus{border-color:var(--accent)}
+.searchbar .si{position:relative}
+.searchbar .si svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--ink-4);fill:none;pointer-events:none}
+.searchbar .si{flex:1;display:flex}
+.searchbar .si input{width:100%}
+.searchbar .clear-btn{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink-3);font-family:var(--ui);font-size:12px;padding:8px 12px;border-radius:var(--radius-s);cursor:pointer;white-space:nowrap;transition:.12s}
+.searchbar .clear-btn:hover{color:var(--ink);border-color:var(--ink-3)}
+
+/* PIN modal + bulk send */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:grid;place-items:center;backdrop-filter:blur(3px)}
+.modal-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px 30px;width:360px;max-width:92vw;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.modal-box h3{font-family:var(--disp);font-weight:700;font-size:17px;margin:0 0 6px}
+.modal-box p{font-size:13px;color:var(--ink-2);margin:0 0 18px}
+.modal-box input{width:100%;font-family:var(--mono);font-size:16px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface-2);color:var(--ink);text-align:center;letter-spacing:.3em;outline:none}
+.modal-box input:focus{border-color:var(--accent)}
+.modal-box .mbtn-row{display:flex;gap:8px;margin-top:16px}
+.modal-box .mbtn{flex:1;appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:var(--ui);font-weight:600;font-size:13px;padding:10px;border-radius:var(--radius-s);cursor:pointer;transition:.12s}
+.modal-box .mbtn:hover{color:var(--ink);border-color:var(--ink-3)}
+.modal-box .mbtn.primary{background:#d64545;color:#fff;border-color:transparent}
+.modal-box .mbtn.primary:hover{background:#c23838}
+.modal-box .mbtn.primary[disabled]{opacity:.5;cursor:default}
+.modal-box .merr{color:#d64545;font-size:12px;margin-top:8px;min-height:16px}
+
+.bulk-bar{margin-bottom:16px;padding:14px 16px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.bulk-bar .bh{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.bulk-bar .bh b{font-family:var(--disp);font-weight:700;font-size:14px}
+.bulk-bar .bh .bc{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.bulk-bar .btrack{height:8px;background:var(--line-soft);border-radius:6px;overflow:hidden}
+.bulk-bar .bfill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:6px;transition:width .3s}
+.bulk-bar .bsub{font-size:11.5px;color:var(--ink-3);margin-top:6px;display:flex;justify-content:space-between}
+.nuke-btn{appearance:none;border:1px solid rgba(214,69,69,.3);background:rgba(214,69,69,.08);color:#d64545;font-family:var(--ui);font-weight:700;font-size:12.5px;padding:7px 14px;border-radius:30px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.13s}
+.nuke-btn:hover{background:rgba(214,69,69,.15);border-color:#d64545}
+.nuke-btn[disabled]{opacity:.5;cursor:default}
+.nuke-btn svg{width:15px;height:15px;stroke:currentColor;fill:none}
+
+.foot{color:var(--ink-4);font-size:11.5px;margin-top:26px;padding-top:16px;border-top:1px solid var(--line-soft)}
+
+/* mobile */
+.menubtn{display:none}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(4,1fr)}.grid2{grid-template-columns:1fr}}
+@media(max-width:860px){
+  .app{grid-template-columns:1fr}
+  .rail{position:fixed;left:0;top:0;bottom:0;width:260px;transform:translateX(-100%);transition:transform .2s;height:100%}
+  .rail.open{transform:none;box-shadow:0 0 0 2000px rgba(0,0,0,.5)}
+  .menubtn{display:grid}
+  .view{padding:18px 16px 48px}
+  .topbar{padding:14px 16px}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:480px){.kpis{grid-template-columns:repeat(2,1fr)}.topbar h1{font-size:17px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.startstop{display:inline-flex;align-items:center;gap:8px;font-family:var(--ui);font-weight:700;font-size:12.5px;padding:7px 14px;border-radius:30px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer;transition:.13s}
+.startstop .d{width:8px;height:8px;border-radius:50%}
+.startstop.on{color:var(--good);background:var(--good-dim);border-color:transparent}
+.startstop.on .d{background:var(--good);box-shadow:0 0 0 0 var(--good);animation:ping 2.4s ease-out infinite}
+.startstop.off{color:#d64545;background:rgba(214,69,69,.12);border-color:transparent}
+.startstop.off .d{background:#d64545}
+.startstop:hover{border-color:var(--ink-3)}
+.startstop[disabled]{opacity:.6;cursor:default}
+
+/* ---------- NOTES ---------- */
+.notes-wrap{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto;padding:4px 0;margin-bottom:14px}
+.note-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-s);padding:11px 14px}
+.note-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.note-meta span{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.note-del{appearance:none;border:0;background:transparent;color:var(--ink-4);cursor:pointer;font-size:14px;padding:0 4px;line-height:1;border-radius:4px}
+.note-del:hover{color:#d64545;background:rgba(214,69,69,.08)}
+.note-text{font-size:13.5px;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+.notes-input{display:flex;gap:8px}
+.notes-input input{flex:1;font-family:var(--ui);font-size:13px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface);color:var(--ink);outline:none}
+.notes-input input:focus{border-color:var(--accent)}
+.notes-input button{appearance:none;border:1px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--ui);font-weight:600;font-size:13px;padding:10px 18px;border-radius:var(--radius-s);cursor:pointer;transition:.12s}
+.notes-input button:hover{opacity:.88}
+
+/* ---------- PROFILE PICKER ---------- */
+.profile-picker{padding:10px 14px;border-bottom:1px solid var(--rail-line)}
+.profile-picker select{width:100%;font-family:var(--ui);font-size:13px;font-weight:600;padding:8px 10px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface-2);color:var(--ink);cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238aa1ba' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.profile-picker select:focus{border-color:var(--accent)}
+.profile-actions{display:flex;gap:4px;margin-top:6px}
+.profile-actions button{flex:1;font-family:var(--ui);font-size:11px;font-weight:600;padding:5px 0;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface-2);color:var(--ink-2);cursor:pointer;transition:.12s}
+.profile-actions button:hover{background:var(--raise);color:var(--ink)}
+
+/* ---------- MAIL TEMPLATES ---------- */
+.field{margin-bottom:16px}
+.field label{display:block;font-weight:600;font-size:12px;color:var(--ink-2);margin-bottom:6px}
+.field input[type=text],.field textarea{width:100%;font-family:var(--ui);font-size:13.5px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface);color:var(--ink);outline:none;resize:vertical}
+.field input[type=text]:focus,.field textarea:focus{border-color:var(--accent)}
+.tpl-file-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tpl-file-row span{font-size:13px;color:var(--ink-2);font-family:var(--mono)}
+.tpl-file-row button{appearance:none;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);font-family:var(--ui);font-weight:600;font-size:12px;padding:7px 14px;border-radius:var(--radius-s);cursor:pointer;transition:.12s}
+.tpl-file-row button:hover{background:var(--raise);color:var(--ink)}
+.tpl-vars{font-size:12px;color:var(--ink-3);margin-bottom:16px}
+.tpl-vars code{font-family:var(--mono);background:var(--surface-2);padding:1px 5px;border-radius:4px}
+.tpl-save{appearance:none;border:1px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--ui);font-weight:600;font-size:13px;padding:10px 20px;border-radius:var(--radius-s);cursor:pointer;transition:.12s}
+.tpl-save:hover{opacity:.88}
+.tpl-save[disabled]{opacity:.5;cursor:default}
+.tpl-status{margin-left:10px;font-size:12px;color:var(--good)}
+.tpl-status.err{color:#d64545}
+
+/* ---------- DAILY LIMIT ---------- */
+.dl-row{display:flex;align-items:center;gap:10px}
+.dl-row input{width:100px;font-family:var(--mono);font-size:14px;font-weight:600;padding:9px 12px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface);color:var(--ink);outline:none}
+.dl-row input:focus{border-color:var(--accent)}
+.dl-row button{appearance:none;border:1px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--ui);font-weight:600;font-size:13px;padding:9px 18px;border-radius:var(--radius-s);cursor:pointer;transition:.12s}
+.dl-row button:hover{opacity:.88}
+.dl-status{font-size:12px;color:var(--good)}
+.dl-status.err{color:#d64545}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" id="rail">
+    <div class="brand">
+      <div class="emblem">SB</div>
+      <div class="wm">Internship Outreach<small>Srikar Bommakanti</small></div>
+    </div>
+    <div class="profile-picker" id="profile-picker">
+      <select id="profile-select"></select>
+      <div class="profile-actions">
+        <button id="profile-new">+ New</button>
+        <button id="profile-rename">Rename</button>
+        <button id="profile-delete">Delete</button>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-label">Operations</div>
+      <a data-view="overview" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Overview
+      </a>
+      <a data-view="log">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        Send Log
+      </a>
+      <a data-view="followups">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4"/><path d="M12 8v4l3 2"/></svg>
+        Follow-ups <span class="count" id="nav-fu">0</span>
+      </a>
+      <a data-view="replied">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M9 17l-5-5 5-5"/><path d="M4 12h16"/></svg>
+        Replied <span class="count" id="nav-replied">0</span>
+      </a>
+      <a data-view="bounced">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M12 2v8m0 0l3-3m-3 3L9 7"/><path d="M4 12a8 8 0 1 0 16 0"/></svg>
+        Bounced <span class="count" id="nav-bounced">0</span>
+      </a>
+      <a data-view="dead">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>
+        Dead List <span class="count" id="nav-dead">0</span>
+      </a>
+      <a data-view="success">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+        Success <span class="count" id="nav-success">0</span>
+      </a>
+      <div class="nav-label">Tools</div>
+      <a data-view="notes">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+        Notes <span class="count" id="nav-notes">0</span>
+      </a>
+      <a data-view="templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M4 4h16v16H4z"/><path d="M4 8h16"/><path d="M8 12h8M8 16h5"/></svg>
+        Mail Templates
+      </a>
+    </nav>
+    <div class="rail-foot">
+      <div class="pulse" id="pulse"><span class="dot"></span><span id="pulse-txt">Connecting...</span></div>
+      <!-- goal section removed -->
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="iconbtn menubtn" id="menubtn" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <h1 id="pg-title">Overview</h1>
+      <span class="sub" id="pg-date"></span>
+      <span class="spacer"></span>
+      <button class="nuke-btn" id="nuke-btn" title="Send to every lead in the database"><svg viewBox="0 0 24 24" stroke-width="1.7"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>All or Nothing</button>
+      <button class="startstop" id="startstop" title="Start or stop the whole outreach">...</button>
+      <span class="chip" id="mode-chip">...</span>
+      <button class="iconbtn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.3M21 12a9 9 0 0 1-15.5 6.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg></button>
+      <button class="iconbtn" id="theme" aria-label="Theme"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg></button>
+    </header>
+
+    <!-- OVERVIEW -->
+    <section class="view" id="v-overview">
+      <div class="panel" id="daily-limit-panel" style="margin-bottom:16px">
+        <div class="panel-h"><h2>Daily send limit</h2><span class="note">max new emails sent per day, this profile</span></div>
+        <div class="dl-row">
+          <input type="number" id="dl-input" min="1" max="500">
+          <button id="dl-save">Save</button>
+          <span class="dl-status" id="dl-status"></span>
+        </div>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-h"><h2>Pipeline</h2><span class="note">delivered > replied</span></div>
+          <div class="funnel" id="funnel"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-h"><h2>Conversion</h2><span class="note">this campaign</span></div>
+          <div id="conv"></div>
+        </div>
+      </div>
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-h"><h2>Emails sent per day</h2><span class="note">1 inbox, 50/day</span></div>
+        <div class="chart"><svg class="trend" id="trend" viewBox="0 0 760 210" preserveAspectRatio="none"></svg><div class="tip" id="trendtip"></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>Mailbox performance</h2><span class="note">reply rate on delivered</span></div>
+        <div class="tablewrap" style="border:0"><table id="mbx"><thead><tr><th>Inbox</th><th class="num">Sent</th><th class="num">Replied</th><th class="num">Reply rate</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="panel" id="daily-breakdown-panel" style="margin-top:16px">
+        <div class="panel-h"><h2>Daily breakdown</h2><span class="note">originals vs follow-ups, per day</span></div>
+        <div class="tablewrap" style="border:0"><table id="daily-breakdown"><thead><tr><th>Date</th><th class="num">Original</th><th class="num">Follow-up</th><th class="num">Total sent</th><th class="num">Bounces</th><th class="num">Dead</th><th class="num">Dead (orig)</th><th class="num">Dead (f/u)</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="foot" id="foot"></div>
+    </section>
+
+    <!-- SEND LOG -->
+    <section class="view" id="v-log" hidden>
+      <div class="tabs" id="log-tabs"></div>
+      <div class="logbar">
+        <div class="daynav">
+          <button class="navbtn" id="day-prev" aria-label="Newer day"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <button class="navbtn" id="day-next" aria-label="Older day"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+        </div>
+        <div>
+          <div class="dayttl" id="day-ttl">-</div>
+          <div class="daysub" id="day-sub"></div>
+        </div>
+        <div class="count-b"><b id="day-count">0</b> sent</div>
+      </div>
+      <div class="searchbar" id="log-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email, domain, or company..." oninput="filterTable('logtable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('logtable','')">Clear</button></div>
+      <div class="tablewrap logtable">
+        <table id="logtable"><thead><tr><th>Email</th><th>Nature</th><th>Status</th><th class="num">Time</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="pager" id="pager"></div>
+    </section>
+
+    <!-- FOLLOW-UPS -->
+    <section class="view" id="v-followups" hidden>
+      <div class="cadence">
+        <div class="step">Day 0: <b>1st email</b></div><span class="arrow">&gt;</span>
+        <div class="step">No reply by day 3: <b>3rd-day follow-up</b></div><span class="arrow">&gt;</span>
+        <div class="step">Still nothing by day 7: <b>7th-day follow-up</b></div><span class="arrow">&gt;</span>
+        <div class="step">No reply after day 7: <b>dead list</b></div>
+      </div>
+      <div class="tabs" id="fu-tabs"></div>
+      <div class="searchbar" id="fu-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email, domain, or company..." oninput="filterTable('futable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('futable','')">Clear</button></div>
+      <div class="tablewrap">
+        <table id="futable"><thead><tr><th>Email</th><th>Inbox</th><th>First contacted</th><th class="num">Waiting</th><th>Phase</th><th>Actions</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <!-- DEAD LIST -->
+    <section class="view" id="v-dead" hidden>
+      <div class="banner">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>
+        <div>Addresses here are <b>never contacted again</b>. They bounced, unsubscribed, were undeliverable, or went silent after the 7th-day follow-up. The sender skips every address on this list.</div>
+      </div>
+      <div class="tabs" id="dead-tabs"></div>
+      <div class="searchbar" id="dead-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email, domain, or reason..." oninput="filterTable('deadtable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('deadtable','')">Clear</button></div>
+      <div class="tablewrap">
+        <table id="deadtable"><thead><tr><th>Email</th><th>Inbox</th><th>Reason</th><th>Date</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <!-- BOUNCED -->
+    <section class="view" id="v-bounced" hidden>
+      <div class="banner" style="background:var(--warn-dim);border-color:rgba(208,138,26,.2)">
+        <svg viewBox="0 0 24 24" style="stroke:var(--warn)"><path d="M12 2v8m0 0l3-3m-3 3L9 7"/><path d="M4 12a8 8 0 1 0 16 0"/></svg>
+        <div>Emails that bounced back. These addresses could not be reached and are automatically added to the dead list.</div>
+      </div>
+      <div class="searchbar" id="bounced-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email, name, or company..." oninput="filterTable('bouncedtable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('bouncedtable','')">Clear</button></div>
+      <div class="tablewrap">
+        <table id="bouncedtable"><thead><tr><th>Email</th><th>Name</th><th>Company</th><th>Status</th><th>Bounced</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <!-- REPLIED -->
+    <section class="view" id="v-replied" hidden>
+      <div class="banner" style="background:var(--good-dim);border-color:rgba(18,160,111,.2)">
+        <svg viewBox="0 0 24 24" style="stroke:var(--good)"><path d="M9 17l-5-5 5-5"/><path d="M4 12h16"/></svg>
+        <div>Leads that wrote back. Includes anyone who replied or was marked as a success. <b>Follow up promptly.</b></div>
+      </div>
+      <div class="searchbar" id="replied-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email, name, or company..." oninput="filterTable('repliedtable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('repliedtable','')">Clear</button></div>
+      <div class="tablewrap">
+        <table id="repliedtable"><thead><tr><th>Email</th><th>Name</th><th>Company</th><th>Status</th><th>Sent</th><th>Replied</th><th>Notes</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <!-- SUCCESS -->
+    <section class="view" id="v-success" hidden>
+      <div class="banner" style="background:rgba(108,71,214,.08);border-color:rgba(108,71,214,.2)">
+        <svg viewBox="0 0 24 24" style="stroke:#6c47d6"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+        <div>Leads that responded positively. They've either booked a call, forwarded to the right person, or expressed interest. <b>These are wins.</b></div>
+      </div>
+      <div class="searchbar" id="success-search"><div class="si"><svg viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Filter by email or company..." oninput="filterTable('successtable',this.value)"></div><button class="clear-btn" onclick="this.parentElement.querySelector('input').value='';filterTable('successtable','')">Clear</button></div>
+      <div class="tablewrap">
+        <table id="successtable"><thead><tr><th>Email</th><th>Company</th><th>Moved on</th><th>Actions</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <!-- NOTES -->
+    <section class="view" id="v-notes" hidden>
+      <div class="banner" style="background:var(--accent-dim);border-color:rgba(31,143,255,.15)">
+        <svg viewBox="0 0 24 24" style="stroke:var(--accent)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+        <div>Personal notes for your outreach campaign. Synced to your account, available on every device.</div>
+      </div>
+      <div class="notes-wrap" id="notes-wrap"></div>
+      <div class="notes-input">
+        <input type="text" id="note-input" placeholder="Type a note and press Enter...">
+        <button id="note-add">Add</button>
+      </div>
+    </section>
+
+    <!-- MAIL TEMPLATES -->
+    <section class="view" id="v-templates" hidden>
+      <div class="banner" style="background:var(--accent-dim);border-color:rgba(31,143,255,.15)">
+        <svg viewBox="0 0 24 24" style="stroke:var(--accent)"><path d="M4 4h16v16H4z"/><path d="M4 8h16"/><path d="M8 12h8M8 16h5"/></svg>
+        <div>Edit the subject, body, and attachment n8n uses for each stage of this profile's sequence. Saved changes apply to the next run, automatically.</div>
+      </div>
+      <div class="tabs" id="tpl-tabs"></div>
+      <div class="panel" id="tpl-panel">
+        <div class="field">
+          <label>Subject</label>
+          <input type="text" id="tpl-subject" placeholder="Email subject">
+        </div>
+        <div class="field">
+          <label>Body</label>
+          <textarea id="tpl-body" rows="12" placeholder="Email body"></textarea>
+        </div>
+        <div class="field">
+          <label>Attachment</label>
+          <div class="tpl-file-row">
+            <span id="tpl-filename">No file attached</span>
+            <input type="file" id="tpl-file-input" accept=".pdf,.doc,.docx" hidden>
+            <button type="button" id="tpl-file-btn">Upload file</button>
+            <button type="button" id="tpl-file-remove" style="display:none">Remove</button>
+          </div>
+        </div>
+        <div class="tpl-vars">Use <code>{{first_name}}</code> and <code>{{company}}</code> as placeholders, replaced automatically per lead.</div>
+        <button class="tpl-save" id="tpl-save">Save template</button>
+        <span class="tpl-status" id="tpl-status"></span>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="modal-bg" id="lead-notes-modal" style="display:none">
+  <div class="modal-box" style="width:460px">
+    <h3 id="lnm-title">Notes</h3>
+    <p>Personal notes for this lead, visible only to you.</p>
+    <div class="notes-wrap" id="lnm-wrap"></div>
+    <div class="notes-input">
+      <input type="text" id="lnm-input" placeholder="Type a note and press Enter...">
+      <button id="lnm-add" onclick="addLeadNote()">Add</button>
+    </div>
+    <div class="mbtn-row">
+      <button class="mbtn" onclick="closeLeadNotes()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ======================= CONFIG ======================= */
+const SB_URL="https://vqzdhhpgqicurottmkdq.supabase.co";
+const SB_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxemRoaHBncWljdXJvdHRta2RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2OTA4ODMsImV4cCI6MjEwNzI2Njg4M30.zq32fc77tdcDbSUNUqX-VTRsMoJkyzebwn0KZO0s53E";
+const MAILBOXES=[
+  {key:"bits",full:"f20240750@pilani.bits-pilani.ac.in"},
+];
+/* goal removed */
+
+/* ======================= HELPERS ======================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const fmt=n=>(n==null?"0":Number(n).toLocaleString("en-IN"));
+const pct=(a,b)=>b?a/b*100:0;
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function dLabel(d){return `${WD[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;}
+function isoDate(d){return d.toISOString().slice(0,10);}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+async function sb(view,qs=""){
+  let q=qs||"select=*";
+  if(activeProfileId&&view!=="v_profiles"&&view!=="profiles"&&view!=="settings"){
+    q+=`&profile_id=eq.${activeProfileId}`;
+  }
+  const r=await fetch(`${SB_URL}/rest/v1/${view}?${q}`,{headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
+  if(!r.ok)throw new Error(view+" "+r.status);
+  return r.json();
+}
+async function setOutreach(active){
+  const r=await fetch(`${SB_URL}/rest/v1/rpc/set_outreach`,{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify({active})});
+  if(!r.ok)throw new Error("set_outreach "+r.status);
+  const text=await r.text();
+  if(!text) return null;
+  return JSON.parse(text);
+}
+async function sbRpc(fn,body){
+  const r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify(body)});
+  if(!r.ok){const t=await r.text();throw new Error(fn+" "+r.status+": "+t);}
+  const text=await r.text();
+  if(!text) return null;
+  return JSON.parse(text);
+}
+async function moveLeadStatus(email,newStatus){
+  return sbRpc("move_lead_status",{p_email:email,p_new_status:newStatus});
+}
+async function setFollowUpPhase(email,newPhase){
+  return sbRpc("set_follow_up_phase",{p_email:email,p_phase:newPhase});
+}
+
+/* status display mapping */
+const STATUS_LABEL={sent:["Sent","sent"],waiting:["Waiting","waiting"],in_followup:["In follow-up","followup"],replied:["Replied","replied"],booked:["Call booked","booked"],bounced:["Bounced","dead"],unsubscribed:["Unsubscribed","dead"],closed:["Closed","dead"],success:["Success","success"],followed_up:["Followed up","followup"]};
+function statusPill(code){const s=STATUS_LABEL[code]||["Waiting","waiting"];return `<span class="pill ${s[1]}"><span class="pd"></span>${s[0]}</span>`;}
+const NATURE={first:["1st email","first"],day3:["3rd-day","d3"],day7:["7th-day","d7"],day10:["10th-day","d10"]};
+function naturePill(code){const n=NATURE[code]||NATURE.first;return `<span class="pill ${n[1]}">${n[0]}</span>`;}
+
+/* ======================= DEMO DATA ======================= */
+function buildDemo(totalLeads){
+  const rng=mulberry32(20261011);
+  const fn=["jordan","maya","aarav","sofia","liam","noah","ava","ethan","isla","kian","zara","omar","nina","leo","ruby","theo","elif","dev","mia","finn","asha","cole","neha","raj","tara","sam","yuki","ivan","lena","drew"];
+  const co=["brightlabel","northform","saplingco","vellum","orbitwear","mossandco","finchlabs","paperboat","lumenate","harbourgoods","thalia","kindred","novena","cedarhouse","drift","maison-k","oaklyn","superbloom","wildgrain","atelier9","foldwear","roastery","glowbar","studio-mira"];
+  const tld=[".com",".co",".shop",".studio",".co.uk",".store"];
+  const pick=a=>a[Math.floor(rng()*a.length)];
+  const email=()=>`${pick(fn)}${Math.floor(rng()*90)+10}@${pick(co)}${pick(tld)}`;
+
+  const today=new Date();today.setHours(0,0,0,0);
+  const DAYS=21;
+  function perInbox(dayIdx){ // dayIdx 1..21 oldest..today
+    if(dayIdx<=7)return 16+Math.floor(rng()*5);
+    if(dayIdx<=14)return 26+Math.floor(rng()*5);
+    return 38+Math.floor(rng()*6);
+  }
+  const log=[]; // {email,mailbox,date(Date),dayIdx,touch,statusCode,time}
+  for(let i=1;i<=DAYS;i++){
+    const date=new Date(today);date.setDate(today.getDate()-(DAYS-i));
+    for(const mb of MAILBOXES){
+      const n=perInbox(i);
+      for(let k=0;k<n;k++){
+        let touch="first";
+        if(i>=8){const r=rng();if(i>=11&&r<0.12)touch="day10";else if(r<0.18)touch="day7";}
+        // status depends on recency
+        const age=DAYS-i; let statusCode;
+        const r=rng();
+        if(age<=1){statusCode=r<0.9?"waiting":"sent";}
+        else if(age<=3){statusCode=r<0.04?"replied":r<0.06?"booked":r<0.1?"bounced":"waiting";}
+        else {statusCode=r<0.03?"replied":r<0.045?"booked":r<0.09?"bounced":r<0.5?"in_followup":"waiting";}
+        const hh=9+Math.floor(rng()*8),mm=Math.floor(rng()*60);
+        log.push({email:email(),mailbox:mb.key,date,dayIdx:i,touch,statusCode,time:`${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}`});
+      }
+    }
+  }
+  // derive
+  const sent=log.length;
+  const bounced=log.filter(r=>r.statusCode==="bounced").length;
+  const replied=log.filter(r=>r.statusCode==="replied").length;
+  const booked=log.filter(r=>r.statusCode==="booked").length;
+  const inFollow=log.filter(r=>r.statusCode==="in_followup").length;
+  const delivered=sent-bounced;
+  const daily=[];
+  for(let i=1;i<=DAYS;i++)daily.push(log.filter(r=>r.dayIdx===i).length);
+  const mbx=MAILBOXES.map(mb=>{const rows=log.filter(r=>r.mailbox===mb.key);return{mb:mb.full,sent:rows.length,replied:rows.filter(r=>r.statusCode==="replied"||r.statusCode==="booked").length,booked:rows.filter(r=>r.statusCode==="booked").length};});
+
+  // follow-up queue
+  const fu=[];
+  for(let k=0;k<46;k++){const step=rng()<0.68?1:2;const first=new Date(today);first.setDate(today.getDate()-(step===1?7+Math.floor(rng()*2):10+Math.floor(rng()*2)));const next=new Date(today);next.setDate(today.getDate()+Math.floor(rng()*3));fu.push({email:email(),mailbox:pick(MAILBOXES).key,step,first,next,waiting:Math.round((today-first)/864e5)});}
+  // dead list
+  const deadArr=[];
+  const reasons=["Bounced","Bounced","Bounced","Unsubscribed","No reply after day 7","No reply after day 7","Undeliverable"];
+  for(let k=0;k<58;k++){const rr=pick(reasons);const dt=new Date(today);dt.setDate(today.getDate()-Math.floor(rng()*18));deadArr.push({email:email(),mailbox:pick(MAILBOXES).key,reason:rr,date:dt});}
+
+  return {live:false,outreach_active:true,total_leads:totalLeads||276,left_to_send:(totalLeads||17152)-sent,sent,delivered,bounced,replied,booked,in_followup:inFollow,dead:deadArr.length,daily,mbx,log,fu,deadList:deadArr,today,DAYS};
+}
+
+/* ======================= STATE ======================= */
+let DATA=null, MODE="demo";
+let logMailbox="all", logDayIdx=null;
+let fuTab=1, deadTab="all";
+
+/* ======================= RENDER: OVERVIEW ======================= */
+function renderOverview(){
+  const D=DATA, delivered=D.delivered!=null?D.delivered:D.sent-D.bounced;
+  const rr=pct(D.replied,delivered);
+  const K=[
+    {k:"Total leads",c:null,v:fmt(D.total_leads),m:fmt(D.left_to_send)+" left to send"},
+    {k:"Sent",c:"var(--info)",v:fmt(D.sent),m:fmt(delivered)+" delivered"},
+    {k:"Bounced",c:"var(--dead)",v:fmt(D.bounced),m:(D.sent?(D.bounced/D.sent*100).toFixed(1):"0")+"% of sent"},
+    {k:"Replied",c:"var(--good)",v:fmt(D.replied),m:rr.toFixed(1)+"% reply rate"},
+    {k:"In follow-up",c:"var(--warn)",v:fmt(D.in_followup),m:"being re-touched"},
+    {k:"Dead list",c:"var(--dead)",v:fmt(MODE==="live"?(D.deadList||[]).length:(D.dead||0)),m:"do not contact"},
+    {k:"Success",c:"#6c47d6",v:fmt(MODE==="live"?(D.success_count||0):(DATA.successList||[]).length),m:"positive responses"},
+  ];
+  $("#kpis").innerHTML=K.map(x=>`<div class="kpi ${x.hero?'hero':''}"><div class="k">${x.c?`<span class="dotc" style="background:${x.c}"></span>`:""}${x.k}</div><div class="v">${x.v}</div><div class="m">${x.m}</div></div>`).join("");
+
+  // funnel
+  const steps=[["Delivered",delivered,delivered,"var(--info)"],["Replied",D.replied,delivered,"var(--good)"]];
+  $("#funnel").innerHTML=steps.map(([n,v,base,col])=>{const share=pct(v,base),w=v>0?Math.max(share,1.5):0;return `<div class="fstep"><span class="n">${n}</span><div class="ftrack"><div class="fbar" style="width:${w}%;background:${col}"></div></div><span class="fv">${fmt(v)}<span class="p">${n==="Delivered"?(delivered?"100%":"0%"):share.toFixed(1)+"%"}</span></span></div>`;}).join("");
+
+  // conversion metrics
+  $("#conv").innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:14px">
+      ${convRow("Reply rate",rr.toFixed(1)+"%","of delivered emails",rr,6)}
+    </div>`;
+
+  renderTrend(D.daily);
+  // mailbox
+  const rates=D.mbx.map(m=>pct(m.replied,m.sent)),best=Math.max(0,...rates);
+  $("#mbx tbody").innerHTML=D.mbx.map((m,i)=>`<tr><td class="mail">${m.mb}</td><td class="num monocell">${fmt(m.sent)}</td><td class="num monocell">${fmt(m.replied)}</td><td class="num monocell">${rates[i].toFixed(1)}% ${rates[i]===best&&best>0?'<span class="pill replied" style="margin-left:6px"><span class="pd"></span>best</span>':''}</td></tr>`).join("");
+
+  // daily breakdown
+  const dbPanel=$("#daily-breakdown-panel");
+  if(MODE==="live"&&D.dailyBreakdown&&D.dailyBreakdown.length){
+    dbPanel.style.display="";
+    $("#daily-breakdown tbody").innerHTML=D.dailyBreakdown.map(d=>{
+      const dt=d.send_date||"";
+      return `<tr><td>${dt}</td><td class="num monocell">${d.original_sends||0}</td><td class="num monocell">${d.followup_sends||0}</td><td class="num monocell">${d.total_sends||0}</td><td class="num monocell">${d.bounces||0}</td><td class="num monocell">${d.dead_total||0}</td><td class="num monocell">${d.dead_from_original||0}</td><td class="num monocell">${d.dead_from_followup||0}</td></tr>`;
+    }).join("");
+  }else{
+    dbPanel.style.display="none";
+  }
+
+  $("#foot").innerHTML=MODE==="live"
+    ?`Live from Supabase - reading aggregate views only, no individual lead is exposed by the public key.`
+    :`Sample data - the layout and every view with illustrative numbers. Flips to your real figures automatically once n8n starts sending.`;
+  renderDailyLimit();
+}
+function convRow(label,big,sub,p,max){
+  const w=Math.min(p/max*100,100);
+  return `<div><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="color:var(--ink-2);font-size:13px">${label}</span><span style="font-family:var(--disp);font-weight:700;font-size:16px">${big}</span></div><div style="height:6px;background:var(--line-soft);border-radius:4px;margin:7px 0 4px;overflow:hidden"><div style="height:100%;width:${w}%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:4px;transition:width .5s"></div></div><div style="font-size:11.5px;color:var(--ink-3)">${sub}</div></div>`;
+}
+function renderTrend(data){
+  const svg=$("#trend"),tip=$("#trendtip");svg.innerHTML="";
+  const W=760,H=210,pl=34,pr=10,pt=14,pb=26;
+  if(!data||!data.length||data.every(v=>!v)){svg.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" class="axl" style="font-size:12px">No sends logged yet - fills in once n8n starts sending</text>`;return;}
+  const n=data.length,maxV=Math.max(150,Math.ceil(Math.max(...data)/50)*50);
+  const X=i=>pl+(n===1?0.5:i/(n-1))*(W-pl-pr),Y=v=>pt+(1-v/maxV)*(H-pt-pb);
+  const NS="http://www.w3.org/2000/svg",mk=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+  for(let v=0;v<=maxV;v+=maxV/3){svg.appendChild(mk("line",{x1:pl,x2:W-pr,y1:Y(v),y2:Y(v),stroke:"var(--line-soft)","stroke-width":1}));const t=mk("text",{x:pl-6,y:Y(v)+3,"text-anchor":"end",class:"axl"});t.textContent=Math.round(v);svg.appendChild(t);}
+  [[0,"Day 1"],[Math.floor(n/2),"Day "+(Math.floor(n/2)+1)],[n-1,"Day "+n]].forEach(([i,l])=>{const t=mk("text",{x:X(i),y:H-8,"text-anchor":"middle",class:"axl"});t.textContent=l;svg.appendChild(t);});
+  let dl="";data.forEach((v,i)=>dl+=(i?"L":"M")+X(i)+" "+Y(v)+" ");
+  const defs=mk("defs",{}),g=mk("linearGradient",{id:"tg",x1:0,y1:0,x2:0,y2:1});
+  g.appendChild(mk("stop",{offset:"0%","stop-color":"var(--accent)","stop-opacity":.25}));g.appendChild(mk("stop",{offset:"100%","stop-color":"var(--accent)","stop-opacity":0}));
+  defs.appendChild(g);svg.appendChild(defs);
+  svg.appendChild(mk("path",{d:dl+"L"+X(n-1)+" "+Y(0)+" L"+X(0)+" "+Y(0)+" Z",fill:"url(#tg)"}));
+  svg.appendChild(mk("path",{d:dl,fill:"none",stroke:"var(--accent)","stroke-width":2.2,"stroke-linejoin":"round","stroke-linecap":"round"}));
+  svg.appendChild(mk("circle",{cx:X(n-1),cy:Y(data[n-1]),r:3.5,fill:"var(--accent)",stroke:"var(--surface)","stroke-width":2}));
+  const hov=mk("line",{y1:pt,y2:H-pb,stroke:"var(--ink-3)","stroke-width":1,"stroke-dasharray":"3 3",opacity:0}),hd=mk("circle",{r:3.5,fill:"var(--accent)",stroke:"var(--surface)","stroke-width":2,opacity:0});
+  svg.appendChild(hov);svg.appendChild(hd);
+  svg.onpointermove=e=>{const r=svg.getBoundingClientRect(),px=(e.clientX-r.left)/r.width*W;let i=Math.round((px-pl)/((W-pl-pr)/Math.max(1,n-1)));i=Math.max(0,Math.min(n-1,i));hov.setAttribute("x1",X(i));hov.setAttribute("x2",X(i));hov.setAttribute("opacity",1);hd.setAttribute("cx",X(i));hd.setAttribute("cy",Y(data[i]));hd.setAttribute("opacity",1);tip.style.opacity=1;tip.style.left=X(i)/W*r.width+"px";tip.style.top=Y(data[i])/H*r.height+"px";tip.textContent="Day "+(i+1)+", "+data[i]+" sent";};
+  svg.onpointerleave=()=>{hov.setAttribute("opacity",0);hd.setAttribute("opacity",0);tip.style.opacity=0;};
+}
+
+/* ======================= RENDER: SEND LOG ======================= */
+function logDays(){ // returns array of {dayIdx,date,count} filtered by mailbox, newest first
+  if(MODE==="demo"){
+    const days=[];
+    for(let i=DATA.DAYS;i>=1;i--){const rows=DATA.log.filter(r=>r.dayIdx===i&&(logMailbox==="all"||r.mailbox===logMailbox));if(rows.length)days.push({dayIdx:i,date:rows[0].date,count:rows.length});}
+    return days;
+  }
+  // live: aggregate from DATA.sendDays [{mailbox,sent_on,sends}]
+  const map={};
+  (DATA.sendDays||[]).forEach(d=>{if(logMailbox!=="all"){const mb=MAILBOXES.find(m=>m.key===logMailbox);if(d.mailbox!==mb.full)return;}map[d.sent_on]=(map[d.sent_on]||0)+Number(d.sends);});
+  return Object.keys(map).sort().reverse().map((d,idx,arr)=>({dayIdx:arr.length-idx,date:new Date(d+"T00:00:00"),sent_on:d,count:map[d]}));
+}
+async function logRows(day){
+  if(MODE==="demo")return DATA.log.filter(r=>r.dayIdx===day.dayIdx&&(logMailbox==="all"||r.mailbox===logMailbox)).sort((a,b)=>a.time<b.time?1:-1);
+  let qs=`select=*&sent_on=eq.${day.sent_on}&order=sent_at.desc`;
+  if(logMailbox!=="all"){const mb=MAILBOXES.find(m=>m.key===logMailbox);qs+=`&mailbox=eq.${encodeURIComponent(mb.full)}`;}
+  const rows=await sb("v_send_log",qs);
+  return rows.map(r=>({email:r.email,mailbox:(MAILBOXES.find(m=>m.full===r.mailbox)||{}).key||r.mailbox,touch:r.touch,statusCode:r.booked?"booked":r.replied?"replied":r.status,time:new Date(r.sent_at).toTimeString().slice(0,5)}));
+}
+function renderLogTabs(){
+  const tabs=[{key:"all",label:"All inboxes"}].concat(MAILBOXES.map(m=>({key:m.key,label:m.full.replace("founder@","")})));
+  $("#log-tabs").innerHTML=tabs.map(t=>`<button class="${t.key===logMailbox?'on':''}" data-mb="${t.key}">${t.label}</button>`).join("");
+  $$("#log-tabs button").forEach(b=>b.onclick=()=>{logMailbox=b.dataset.mb;logDayIdx=null;renderLog();});
+}
+async function renderLog(){
+  renderLogTabs();
+  const days=logDays();
+  if(!days.length){$("#logtable tbody").innerHTML="";$("#day-ttl").textContent="No sends yet";$("#day-sub").textContent="";$("#day-count").textContent="0";$("#pager").innerHTML="";$(".logbar .count-b").style.visibility="hidden";
+    $("#logtable").parentElement.innerHTML=`<div class="empty"><div class="big">Nothing sent for this inbox yet</div>The daily log fills in the moment n8n starts sending.</div>`;return;}
+  $(".logbar .count-b").style.visibility="visible";
+  if(logDayIdx==null||!days.find(d=>d.dayIdx===logDayIdx))logDayIdx=days[0].dayIdx;
+  const idx=days.findIndex(d=>d.dayIdx===logDayIdx),day=days[idx];
+  $("#day-ttl").textContent="Day "+day.dayIdx;
+  $("#day-sub").textContent=dLabel(day.date)+(idx===0?" (latest)":"");
+  $("#day-count").textContent=fmt(day.count);
+  $("#day-prev").disabled=idx===0; $("#day-next").disabled=idx===days.length-1;
+  $("#day-prev").onclick=()=>{if(idx>0){logDayIdx=days[idx-1].dayIdx;renderLog();}};
+  $("#day-next").onclick=()=>{if(idx<days.length-1){logDayIdx=days[idx+1].dayIdx;renderLog();}};
+  // pager
+  $("#pager").innerHTML=days.map(d=>`<button class="${d.dayIdx===logDayIdx?'on':''}" data-d="${d.dayIdx}">Day ${d.dayIdx}<span>${d.count} sent</span></button>`).join("");
+  $$("#pager button").forEach(b=>b.onclick=()=>{logDayIdx=+b.dataset.d;renderLog();});
+  // rows
+  const body=$("#logtable tbody");body.innerHTML=`<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">Loading...</td></tr>`;
+  const rows=await logRows(day);
+  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td>${naturePill(r.touch)}</td><td>${statusPill(r.statusCode)}</td><td class="num monocell">${r.time}</td></tr>`).join("")
+    ||`<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">No sends on this day for this inbox.</td></tr>`;
+}
+
+/* ======================= RENDER: FOLLOW-UPS ======================= */
+async function fuData(step){
+  if(MODE==="demo")return DATA.fu.filter(r=>r.step===step);
+  const rows=await sb("v_followup_queue",`select=*&step=eq.${step}&order=next_send_at.asc`);
+  const today=new Date();
+  const excludeEmails=new Set([
+    ...(DATA.repliedList||[]).map(r=>r.email),
+    ...(DATA.successList||[]).map(r=>r.email)
+  ]);
+  return rows.filter(r=>!excludeEmails.has(r.email)).map(r=>({email:r.email,mailbox:(MAILBOXES.find(m=>m.full===r.mailbox)||{}).key||r.mailbox,step:r.step,first:r.first_contacted?new Date(r.first_contacted+"T00:00:00"):null,next:r.next_send_at?new Date(r.next_send_at):null,waiting:r.first_contacted?Math.round((today-new Date(r.first_contacted))/864e5):null}));
+}
+async function renderFollowups(){
+  const c7=countOf("fu",1),c10=countOf("fu",2);
+  $("#fu-tabs").innerHTML=`<button class="${fuTab===1?'on':''}" data-s="1">3rd-day follow-up <span class="c">${c7}</span></button><button class="${fuTab===2?'on accent':''}" data-s="2">7th-day follow-up <span class="c">${c10}</span></button>`;
+  $$("#fu-tabs button").forEach(b=>b.onclick=()=>{fuTab=+b.dataset.s;renderFollowups();});
+  const body=$("#futable tbody");body.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">Loading...</td></tr>`;
+  const rows=await fuData(fuTab);
+  if(!rows.length){body.innerHTML=`<tr><td colspan="6"><div class="empty"><div class="big">No one in this queue</div>Leads land here automatically when a reply hasn't come in.</div></td></tr>`;return;}
+  body.innerHTML=rows.map(r=>{
+    const phaseLabel=r.step===1?"day3":"day7";
+    const otherStep=r.step===1?2:1;
+    const otherLabel=r.step===1?"Move to 7-day":"Move to 3-day";
+    return `<tr><td class="mail">${r.email}</td><td class="monocell">${r.mailbox}</td><td class="monocell">${r.first?dLabel(r.first):"-"}</td><td class="num monocell">${r.waiting!=null?r.waiting+"d":"-"}</td><td>${naturePill(phaseLabel)}</td><td><div class="act-group"><button class="actbtn success-btn" onclick="doMoveSuccess(this,'${r.email}')">Success</button><button class="actbtn" onclick="doChangePhase(this,'${r.email}',${otherStep})">${otherLabel}</button><button class="actbtn danger" onclick="doMoveDead(this,'${r.email}')">Dead</button></div></td></tr>`;
+  }).join("");
+}
+
+/* ======================= RENDER: DEAD LIST ======================= */
+function deadRows(){
+  let rows=MODE==="demo"?DATA.deadList:(DATA.deadList||[]).map(r=>({email:r.email,mailbox:(MAILBOXES.find(m=>m.full===r.mailbox)||{}).key||r.mailbox,reason:r.reason,date:r.dead_on?new Date(r.dead_on+"T00:00:00"):null}));
+  if(deadTab!=="all")rows=rows.filter(r=>r.reason.toLowerCase().includes(deadTab));
+  return rows.sort((a,b)=>(b.date||0)-(a.date||0));
+}
+function renderDead(){
+  const all=MODE==="demo"?DATA.deadList:(DATA.deadList||[]);
+  const groups=[["all","All",all.length],["bounce","Bounced",all.filter(r=>r.reason.toLowerCase().includes("bounce")).length],["unsub","Unsubscribed",all.filter(r=>r.reason.toLowerCase().includes("unsub")).length],["no reply","No reply",all.filter(r=>r.reason.toLowerCase().includes("no reply")).length]];
+  $("#dead-tabs").innerHTML=groups.map(([k,l,c])=>`<button class="${deadTab===k?'on':''}" data-k="${k}">${l} <span class="c">${c}</span></button>`).join("");
+  $$("#dead-tabs button").forEach(b=>b.onclick=()=>{deadTab=b.dataset.k;renderDead();});
+  const rows=deadRows(),body=$("#deadtable tbody");
+  const reasonPill=rsn=>{const l=rsn.toLowerCase();const cls=l.includes("unsub")?"d7":l.includes("no reply")?"waiting":"dead";return `<span class="pill ${cls}">${rsn}</span>`;};
+  body.innerHTML=rows.length?rows.map(r=>`<tr><td class="mail">${r.email}</td><td class="monocell">${r.mailbox}</td><td>${reasonPill(r.reason)}</td><td class="monocell">${r.date?dLabel(r.date):"-"}</td></tr>`).join("")
+    :`<tr><td colspan="4"><div class="empty"><div class="big">Clean list</div>No dead addresses in this group yet.</div></td></tr>`;
+}
+
+/* ======================= ACTION HANDLERS ======================= */
+async function doMoveDead(btn,email){
+  btn.disabled=true;btn.textContent="...";
+  try{
+    if(MODE==="live"){await moveLeadStatus(email,"dead");}
+    else{/* demo: remove from fu array */DATA.fu=DATA.fu.filter(r=>r.email!==email);DATA.deadList.push({email,mailbox:"bits",reason:"Manual move",date:new Date()});DATA.dead=DATA.deadList.length;}
+    renderFollowups();setMode();
+  }catch(e){alert("Failed: "+e.message);btn.disabled=false;btn.textContent="Dead";}
+}
+async function doMoveSuccess(btn,email){
+  btn.disabled=true;btn.textContent="...";
+  try{
+    if(MODE==="live"){await moveLeadStatus(email,"success");}
+    else{DATA.fu=DATA.fu.filter(r=>r.email!==email);if(!DATA.successList)DATA.successList=[];DATA.successList.push({email,company:email.split("@")[1],date:new Date()});}
+    renderFollowups();setMode();
+  }catch(e){alert("Failed: "+e.message);btn.disabled=false;btn.textContent="Success";}
+}
+async function doChangePhase(btn,email,newPhase){
+  btn.disabled=true;btn.textContent="...";
+  try{
+    if(MODE==="live"){await setFollowUpPhase(email,newPhase);}
+    else{const r=DATA.fu.find(x=>x.email===email);if(r)r.step=newPhase;}
+    renderFollowups();
+  }catch(e){alert("Failed: "+e.message);btn.disabled=false;btn.textContent=newPhase===1?"Move to 3-day":"Move to 7-day";}
+}
+async function doRemoveSuccess(btn,email){
+  btn.disabled=true;btn.textContent="...";
+  try{
+    if(MODE==="live"){await moveLeadStatus(email,"dead");}
+    else{DATA.successList=(DATA.successList||[]).filter(r=>r.email!==email);DATA.deadList.push({email,mailbox:"bits",reason:"Removed from success",date:new Date()});DATA.dead=DATA.deadList.length;}
+    renderSuccess();setMode();
+  }catch(e){alert("Failed: "+e.message);btn.disabled=false;btn.textContent="Move to dead";}
+}
+
+/* ======================= RENDER: SUCCESS ======================= */
+function notesBtn(email){
+  const n=leadNoteCounts[email]||0;
+  return `<button class="actbtn" onclick="openLeadNotes('${email.replace(/'/g,"\\'")}')">Notes${n?' ('+n+')':''}</button>`;
+}
+async function renderSuccess(){
+  const body=$("#successtable tbody");
+  body.innerHTML=`<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">Loading...</td></tr>`;
+  let rows=[];
+  if(MODE==="live"){
+    try{rows=await sb("v_success_list");rows=rows.map(r=>({email:r.email,company:r.company||r.email.split("@")[1],date:r.moved_on?new Date(r.moved_on):null}));}catch(e){rows=[];}
+    await loadLeadNoteCounts();
+  }else{
+    rows=(DATA.successList||[]).map(r=>({email:r.email,company:r.company||r.email.split("@")[1],date:r.date}));
+  }
+  if(!rows.length){body.innerHTML=`<tr><td colspan="4"><div class="empty"><div class="big">No success leads yet</div>Move leads here from the follow-ups view when they respond positively.</div></td></tr>`;return;}
+  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td class="monocell">${r.company}</td><td class="monocell">${r.date?dLabel(r.date):"-"}</td><td style="display:flex;gap:6px">${notesBtn(r.email)}<button class="actbtn danger" onclick="doRemoveSuccess(this,'${r.email}')">Move to dead</button></td></tr>`).join("");
+}
+
+/* ======================= RENDER: REPLIED LIST ======================= */
+async function renderReplied(){
+  const body=$("#repliedtable tbody");
+  body.innerHTML=`<tr><td colspan="7" class="muted" style="text-align:center;padding:24px">Loading...</td></tr>`;
+  let rows=[];
+  if(MODE==="live"){
+    try{rows=await sb("v_replied_list");
+    }catch(e){rows=[];}
+    await loadLeadNoteCounts();
+  }else{
+    // demo: pick some replied/booked from log
+    const seen=new Set();
+    rows=DATA.log.filter(r=>(r.statusCode==="replied"||r.statusCode==="booked")&&!seen.has(r.email)&&seen.add(r.email))
+      .map(r=>({email:r.email,first_name:"",company:r.email.split("@")[1],status:r.statusCode,sent_date:isoDate(r.date),replied_date:isoDate(r.date)}));
+  }
+  if(!rows.length){body.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="big">No replies yet</div>When someone writes back, they show up here automatically.</div></td></tr>`;return;}
+  body.innerHTML=rows.map(r=>`<tr><td class="mail">${r.email}</td><td>${r.first_name||""}</td><td class="monocell">${r.company||r.email.split("@")[1]}</td><td>${statusPill(r.status)}</td><td class="monocell">${r.sent_date||""}</td><td class="monocell">${r.replied_date||""}</td><td>${notesBtn(r.email)}</td></tr>`).join("");
+}
+
+/* counts for nav/tabs */
+function countOf(kind,step){
+  if(MODE==="demo"){if(kind==="fu")return DATA.fu.filter(r=>r.step===step).length;}
+  if(kind==="fu")return (DATA.fuCounts||{})[step]||0;
+  return 0;
+}
+
+/* ======================= RENDER: BOUNCED LIST ======================= */
+async function renderBounced(){
+  const body=$("#bouncedtable tbody");
+  body.innerHTML=`<tr><td colspan="5" class="muted" style="text-align:center;padding:24px">Loading...</td></tr>`;
+  let rows=[];
+  if(MODE==="live"){
+    try{rows=await sb("v_bounced_list");}catch(e){rows=[];}
+  }else{
+    const seen=new Set();
+    rows=DATA.log.filter(r=>r.statusCode==="bounced"&&!seen.has(r.email)&&seen.add(r.email))
+      .map(r=>({email:r.email,first_name:"",company:r.email.split("@")[1],status:"bounced",bounced_at:isoDate(r.date)}));
+  }
+  if(!rows.length){body.innerHTML=`<tr><td colspan="5"><div class="empty"><div class="big">No bounces yet</div>Bounced emails appear here automatically.</div></td></tr>`;return;}
+  body.innerHTML=rows.map(r=>{const bd=r.bounced_at?isoDate(new Date(r.bounced_at)):"";return `<tr><td class="mail">${r.email}</td><td>${r.first_name||""}</td><td class="monocell">${r.company||r.email.split("@")[1]}</td><td>${statusPill(r.status)}</td><td class="monocell">${bd}</td></tr>`;}).join("");
+}
+
+/* ======================= RENDER: NOTES (synced via Supabase) ======================= */
+function escapeHtml(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function fmtNoteTs(iso){
+  const d=new Date(iso);
+  return d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear()+", "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+}
+async function loadGeneralNotes(){
+  if(!activeProfileId)return [];
+  try{return await sb("v_notes","select=*&lead_email=is.null&order=created_at.asc");}catch(e){return [];}
+}
+async function renderNotes(){
+  const wrap=$("#notes-wrap");
+  wrap.innerHTML='<div class="empty"><div class="big">Loading...</div></div>';
+  const notes=await loadGeneralNotes();
+  if(!notes.length){
+    wrap.innerHTML='<div class="empty"><div class="big">No notes yet</div>Type something below and hit Enter.</div>';
+  }else{
+    wrap.innerHTML=notes.map(n=>`<div class="note-item"><div class="note-meta"><span>${fmtNoteTs(n.created_at)}</span><button class="note-del" onclick="deleteNote('${n.id}')">x</button></div><div class="note-text">${escapeHtml(n.body)}</div></div>`).join("");
+    wrap.scrollTop=wrap.scrollHeight;
+  }
+  try{$("#nav-notes").textContent=fmt(notes.length);}catch(e){}
+  const inp=$("#note-input");
+  inp.onkeydown=e=>{if(e.key==="Enter"&&inp.value.trim())addNote();};
+  $("#note-add").onclick=addNote;
+}
+async function addNote(){
+  const inp=$("#note-input");
+  const text=inp.value.trim();
+  if(!text||!activeProfileId)return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/notes`,{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify({profile_id:activeProfileId,lead_email:null,body:text})});
+    if(!r.ok)throw new Error("save "+r.status);
+    inp.value="";
+    await renderNotes();
+  }catch(e){alert("Failed to save note: "+e.message);}
+}
+async function deleteNote(id){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/notes?id=eq.${id}`,{method:"DELETE",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
+    if(!r.ok)throw new Error("delete "+r.status);
+    await renderNotes();
+  }catch(e){alert("Failed to delete note: "+e.message);}
+}
+
+/* ======================= LEAD NOTES (per-email, Replied/Success) ======================= */
+let leadNotesEmail=null;
+let leadNoteCounts={};
+async function loadLeadNoteCounts(){
+  if(!activeProfileId){leadNoteCounts={};return;}
+  try{
+    const rows=await sb("v_notes","select=lead_email&lead_email=not.is.null");
+    const m={};
+    rows.forEach(r=>{m[r.lead_email]=(m[r.lead_email]||0)+1;});
+    leadNoteCounts=m;
+  }catch(e){leadNoteCounts={};}
+}
+function openLeadNotes(email){
+  leadNotesEmail=email;
+  $("#lnm-title").textContent=email;
+  $("#lead-notes-modal").style.display="flex";
+  const inp=$("#lnm-input");
+  inp.value="";
+  inp.onkeydown=e=>{if(e.key==="Enter"&&inp.value.trim())addLeadNote();};
+  renderLeadNotes();
+}
+function closeLeadNotes(){
+  $("#lead-notes-modal").style.display="none";
+  leadNotesEmail=null;
+}
+async function renderLeadNotes(){
+  const wrap=$("#lnm-wrap");
+  wrap.innerHTML='<div class="empty"><div class="big">Loading...</div></div>';
+  if(!leadNotesEmail)return;
+  let notes=[];
+  try{notes=await sb("v_notes",`select=*&lead_email=eq.${encodeURIComponent(leadNotesEmail)}&order=created_at.asc`);}catch(e){notes=[];}
+  if(!notes.length){
+    wrap.innerHTML='<div class="empty"><div class="big">No notes for this lead yet</div></div>';
+  }else{
+    wrap.innerHTML=notes.map(n=>`<div class="note-item"><div class="note-meta"><span>${fmtNoteTs(n.created_at)}</span><button class="note-del" onclick="deleteLeadNote('${n.id}')">x</button></div><div class="note-text">${escapeHtml(n.body)}</div></div>`).join("");
+    wrap.scrollTop=wrap.scrollHeight;
+  }
+}
+async function addLeadNote(){
+  const inp=$("#lnm-input");
+  const text=inp.value.trim();
+  if(!text||!leadNotesEmail||!activeProfileId)return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/notes`,{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify({profile_id:activeProfileId,lead_email:leadNotesEmail,body:text})});
+    if(!r.ok)throw new Error("save "+r.status);
+    inp.value="";
+    await renderLeadNotes();
+    await loadLeadNoteCounts();
+    if($("#v-replied")&&!$("#v-replied").hidden)renderReplied();
+    if($("#v-success")&&!$("#v-success").hidden)renderSuccess();
+  }catch(e){alert("Failed to save note: "+e.message);}
+}
+async function deleteLeadNote(id){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/notes?id=eq.${id}`,{method:"DELETE",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
+    if(!r.ok)throw new Error("delete "+r.status);
+    await renderLeadNotes();
+    await loadLeadNoteCounts();
+    if($("#v-replied")&&!$("#v-replied").hidden)renderReplied();
+    if($("#v-success")&&!$("#v-success").hidden)renderSuccess();
+  }catch(e){alert("Failed to delete note: "+e.message);}
+}
+
+/* ======================= MAIL TEMPLATES ======================= */
+let allTemplates=[];
+let activeTplType="original";
+let pendingFile=null; // {filename,base64} | "REMOVE" | null
+async function loadTemplates(){
+  try{allTemplates=await sb("v_email_templates");}catch(e){allTemplates=[];}
+}
+function renderTplTabs(){
+  const tabs=$("#tpl-tabs");
+  const types=[["original","Original"],["day3","Day 3"],["day7","Day 7"]];
+  tabs.innerHTML=types.map(([k,label])=>`<button type="button" class="tab${k===activeTplType?' active':''}" data-tpl="${k}" style="appearance:none;border:0;background:${k===activeTplType?'var(--accent)':'transparent'};color:${k===activeTplType?'#fff':'var(--ink-2)'};font-family:var(--ui);font-weight:600;font-size:12.5px;padding:7px 16px;border-radius:7px;cursor:pointer">${label}</button>`).join("");
+  $$("#tpl-tabs button").forEach(b=>b.onclick=()=>{activeTplType=b.dataset.tpl;renderTplTabs();renderTplForm();});
+}
+function renderTplForm(){
+  const t=allTemplates.find(x=>x.template_type===activeTplType)||{subject:"",body:"",resume_filename:"",resume_base64:null};
+  $("#tpl-subject").value=t.subject||"";
+  $("#tpl-body").value=t.body||"";
+  $("#tpl-filename").textContent=t.resume_filename?t.resume_filename:"No file attached";
+  $("#tpl-file-remove").style.display=(t.resume_filename||t.resume_base64)?"":"none";
+  $("#tpl-status").textContent="";
+  $("#tpl-status").className="tpl-status";
+  pendingFile=null;
+}
+function renderTemplates(){
+  renderTplTabs();
+  renderTplForm();
+  $("#tpl-file-btn").onclick=()=>$("#tpl-file-input").click();
+  $("#tpl-file-input").onchange=e=>{
+    const f=e.target.files[0];
+    if(!f)return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const b64=String(reader.result).split(",")[1];
+      pendingFile={filename:f.name,base64:b64};
+      $("#tpl-filename").textContent=f.name+" (not saved yet)";
+      $("#tpl-file-remove").style.display="";
+    };
+    reader.readAsDataURL(f);
+  };
+  $("#tpl-file-remove").onclick=()=>{
+    pendingFile="REMOVE";
+    $("#tpl-filename").textContent="No file attached (not saved yet)";
+  };
+  $("#tpl-save").onclick=saveTemplate;
+}
+async function saveTemplate(){
+  if(!activeProfileId){alert("No active profile");return;}
+  const btn=$("#tpl-save"),status=$("#tpl-status");
+  btn.disabled=true;status.textContent="Saving...";status.className="tpl-status";
+  const payload={profile_id:activeProfileId,template_type:activeTplType,subject:$("#tpl-subject").value,body:$("#tpl-body").value};
+  if(pendingFile==="REMOVE"){payload.resume_filename=null;payload.resume_base64=null;}
+  else if(pendingFile){payload.resume_filename=pendingFile.filename;payload.resume_base64=pendingFile.base64;}
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/email_templates?on_conflict=profile_id,template_type`,{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=representation"},body:JSON.stringify(payload)});
+    if(!r.ok){const t=await r.text();throw new Error(t);}
+    await loadTemplates();
+    pendingFile=null;
+    renderTplForm();
+    status.textContent="Saved";status.className="tpl-status";
+  }catch(e){status.textContent="Failed: "+e.message;status.className="tpl-status err";}
+  finally{btn.disabled=false;}
+}
+async function renderTemplatesView(){
+  await loadTemplates();
+  renderTemplates();
+}
+
+/* ======================= DAILY LIMIT ======================= */
+function renderDailyLimit(){
+  const inp=$("#dl-input");
+  if(!inp)return;
+  const p=allProfiles.find(x=>x.id===activeProfileId);
+  inp.value=p&&p.daily_limit!=null?p.daily_limit:50;
+  $("#dl-status").textContent="";
+  $("#dl-status").className="dl-status";
+  $("#dl-save").onclick=saveDailyLimit;
+}
+async function saveDailyLimit(){
+  if(!activeProfileId)return;
+  const val=parseInt($("#dl-input").value,10);
+  const status=$("#dl-status");
+  if(!val||val<1){status.textContent="Enter a valid number";status.className="dl-status err";return;}
+  status.textContent="Saving...";status.className="dl-status";
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/profiles?id=eq.${activeProfileId}`,{method:"PATCH",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify({daily_limit:val})});
+    if(!r.ok)throw new Error("save "+r.status);
+    await loadProfiles();
+    status.textContent="Saved";status.className="dl-status";
+  }catch(e){status.textContent="Failed: "+e.message;status.className="dl-status err";}
+}
+
+/* ======================= PROFILES ======================= */
+let allProfiles=[];
+let activeProfileId=null;
+
+async function loadProfiles(){
+  try{
+    allProfiles=await sb("v_profiles");
+  }catch(e){allProfiles=[];}
+  renderProfilePicker();
+}
+function renderProfilePicker(){
+  const sel=$("#profile-select");
+  if(!allProfiles.length){sel.innerHTML='<option value="">No profiles</option>';return;}
+  sel.innerHTML=allProfiles.map(p=>`<option value="${p.id}"${p.id===activeProfileId?' selected':''}>${p.name}</option>`).join("");
+  if(!activeProfileId&&allProfiles.length){
+    const saved=getSavedProfileId();
+    if(saved&&allProfiles.find(p=>p.id===saved)){activeProfileId=saved;}
+    else{activeProfileId=allProfiles[0].id;}
+    sel.value=activeProfileId;
+  }
+}
+function getSavedProfileId(){try{return localStorage.getItem("ady-profile");}catch(e){return null;}}
+function saveProfileId(id){try{localStorage.setItem("ady-profile",id);}catch(e){}}
+
+async function switchProfile(id){
+  activeProfileId=id;
+  saveProfileId(id);
+  const p=allProfiles.find(x=>x.id===id);
+  if(p)$(".wm").innerHTML=p.name+'<small>Srikar Bommakanti</small>';
+  try{DATA=await loadLive();MODE="live";}catch(e){DATA=buildDemo(276);MODE="demo";}
+  setMode();
+  go((location.hash||"#overview").slice(1));
+}
+async function createProfile(){
+  const name=prompt("New profile name:");
+  if(!name||!name.trim())return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/profiles`,{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json",Prefer:"return=representation"},body:JSON.stringify({name:name.trim()})});
+    if(!r.ok)throw new Error("create "+r.status);
+    const rows=await r.json();
+    if(rows&&rows.length){
+      await loadProfiles();
+      switchProfile(rows[0].id);
+    }
+  }catch(e){alert("Failed to create profile: "+e.message);}
+}
+async function renameProfile(){
+  if(!activeProfileId)return;
+  const cur=allProfiles.find(p=>p.id===activeProfileId);
+  const name=prompt("Rename profile:",cur?cur.name:"");
+  if(!name||!name.trim())return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/profiles?id=eq.${activeProfileId}`,{method:"PATCH",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify({name:name.trim()})});
+    if(!r.ok)throw new Error("rename "+r.status);
+    await loadProfiles();
+    const p=allProfiles.find(x=>x.id===activeProfileId);
+    if(p)$(".wm").innerHTML=p.name+'<small>Srikar Bommakanti</small>';
+  }catch(e){alert("Failed to rename: "+e.message);}
+}
+async function deleteProfile(){
+  if(!activeProfileId)return;
+  if(allProfiles.length<=1){alert("Cannot delete the only profile.");return;}
+  const cur=allProfiles.find(p=>p.id===activeProfileId);
+  if(!confirm(`Delete profile "${cur?cur.name:""}"? This does NOT delete the leads in it, but you will lose access to them from this dashboard.`))return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/profiles?id=eq.${activeProfileId}`,{method:"DELETE",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
+    if(!r.ok){const t=await r.text();throw new Error(t);}
+    await loadProfiles();
+    if(allProfiles.length)switchProfile(allProfiles[0].id);
+  }catch(e){alert("Failed to delete: "+e.message);}
+}
+
+/* ======================= ROUTER ======================= */
+const VIEWS={overview:"Overview",log:"Send Log",followups:"Follow-ups",bounced:"Bounced",replied:"Replied",dead:"Dead List",success:"Success",notes:"Notes",templates:"Mail Templates"};
+function go(view){
+  if(!VIEWS[view])view="overview";
+  $$(".nav a").forEach(a=>a.classList.toggle("active",a.dataset.view===view));
+  Object.keys(VIEWS).forEach(v=>$("#v-"+v).hidden=(v!==view));
+  $("#pg-title").textContent=VIEWS[view];
+  try{location.hash=view;}catch(e){}
+  $("#rail").classList.remove("open");
+  if(view==="overview")renderOverview();
+  else if(view==="log")renderLog();
+  else if(view==="followups")renderFollowups();
+  else if(view==="bounced")renderBounced();
+  else if(view==="replied")renderReplied();
+  else if(view==="dead")renderDead();
+  else if(view==="success")renderSuccess();
+  else if(view==="notes")renderNotes();
+  else if(view==="templates")renderTemplatesView();
+}
+
+/* ======================= BOOT ======================= */
+function setMode(){
+  const sample=MODE==="demo";
+  $("#mode-chip").className="chip "+(sample?"sample":"live");
+  $("#mode-chip").innerHTML=sample?"Sample data":'<span class="d"></span>Live';
+  const t=new Date();
+  const dayNum=t.getDay(); // 0=Sun..6=Sat
+  const isWeekend=(dayNum===0||dayNum===5||dayNum===6); // Fri/Sat/Sun
+  const dayDateStr=WD[dayNum]+" "+t.getDate()+" "+MONTHS[t.getMonth()];
+  if(sample){
+    $("#pulse").className="pulse sample";
+    $("#pulse-txt").textContent="Sample mode";
+  }else if(isWeekend){
+    $("#pulse").className="pulse sample";
+    $("#pulse-txt").textContent="Stopped, "+dayDateStr;
+  }else{
+    $("#pulse").className="pulse";
+    $("#pulse-txt").textContent="Live, "+dayDateStr;
+  }
+  $("#nav-fu").textContent=fmt(DATA.in_followup||0);
+  $("#nav-bounced").textContent=fmt(MODE==="live"?(DATA.bouncedList||[]).length:(DATA.bounced||0));
+  $("#nav-dead").textContent=fmt(MODE==="live"?(DATA.deadList||[]).length:(DATA.dead||0));
+  const rc=MODE==="live"?(DATA.repliedList||[]).length:(DATA.replied||0);
+  $("#nav-replied").textContent=fmt(rc);
+  const sc=MODE==="live"?(DATA.success_count||0):(DATA.successList||[]).length;
+  $("#nav-success").textContent=fmt(sc);
+  loadGeneralNotes().then(notes=>{try{$("#nav-notes").textContent=fmt(notes.length);}catch(e){}}).catch(()=>{});
+  loadLeadNoteCounts();
+  renderStartStop();
+  $("#pg-date").textContent=dayDateStr;
+}
+function renderStartStop(){
+  const b=$("#startstop"); if(!b)return;
+  const dayNum=new Date().getDay();
+  const isWeekend=(dayNum===0||dayNum===5||dayNum===6);
+  const on=DATA.outreach_active!==false&&!isWeekend;
+  b.className="startstop "+(on?"on":"off");
+  if(isWeekend&&DATA.outreach_active!==false){
+    b.innerHTML=`<span class="d"></span>Paused (weekend)`;
+  }else{
+    b.innerHTML=`<span class="d"></span>${on?"Running - Stop":"Stopped - Start"}`;
+  }
+}
+async function loadLive(){
+  const [funnel,daily,mbx,days,dailyBreakdown,repliedList,bouncedList]=await Promise.all([sb("v_funnel"),sb("v_daily_sends"),sb("v_mailbox_performance"),sb("v_send_days"),sb("v_daily_breakdown"),sb("v_replied_list"),sb("v_bounced_list")]);
+  const f=funnel[0]||{};
+  const fu=await sb("v_followup_queue","select=step,email");
+  const dead=await sb("v_dead_list");
+  let successList=[];let success_count=0;
+  try{successList=await sb("v_success_list");success_count=successList.length;}catch(e){}
+  const excludeEmails=new Set([
+    ...(repliedList||[]).map(r=>r.email),
+    ...(successList||[]).map(r=>r.email)
+  ]);
+  const filteredFu=fu.filter(r=>!excludeEmails.has(r.email));
+  const fuCounts={1:filteredFu.filter(r=>r.step===1).length,2:filteredFu.filter(r=>r.step===2).length};
+  const filteredFuTotal=filteredFu.length;
+  return {live:true,outreach_active:(f.outreach_active!==false),
+    total_leads:+f.total_leads||0,left_to_send:+f.left_to_send||0,sent:+f.sent||0,
+    delivered:(+f.sent||0)-(+f.bounced||0),bounced:+f.bounced||0,replied:+f.replied||0,booked:+f.booked||0,
+    in_followup:filteredFuTotal,dead:+f.dead||0,success_count,
+    daily:(daily||[]).map(d=>+d.sends),
+    mbx:(mbx||[]).map(m=>({mb:m.mailbox,sent:+m.sent||0,replied:+m.replied||0,booked:+m.booked||0})),
+    sendDays:days||[],deadList:dead||[],successList,fuCounts,dailyBreakdown:dailyBreakdown||[],repliedList:repliedList||[],bouncedList:bouncedList||[]};
+}
+async function boot(){
+  await loadProfiles();
+  const saved=getSavedProfileId();
+  if(saved&&allProfiles.find(p=>p.id===saved)){activeProfileId=saved;}
+  else if(allProfiles.length){activeProfileId=allProfiles[0].id;}
+  if(activeProfileId){
+    saveProfileId(activeProfileId);
+    const sel=$("#profile-select");if(sel)sel.value=activeProfileId;
+    const p=allProfiles.find(x=>x.id===activeProfileId);
+    if(p)$(".wm").innerHTML=p.name+'<small>Srikar Bommakanti</small>';
+  }
+  let funnel=null;
+  try{funnel=(await sb("v_funnel"))[0];}catch(e){}
+  if(funnel){
+    try{DATA=await loadLive();MODE="live";}catch(e){DATA=buildDemo(+funnel.total_leads||276);MODE="demo";}
+  }else{
+    DATA=buildDemo(276);MODE="demo";
+  }
+  setMode();
+  go((location.hash||"#overview").slice(1));
+}
+
+/* nav + controls */
+$("#nav").addEventListener("click",e=>{const a=e.target.closest("a");if(a){e.preventDefault();go(a.dataset.view);}});
+$("#menubtn").onclick=()=>$("#rail").classList.toggle("open");
+$("#refresh").onclick=()=>location.reload();
+$("#startstop").onclick=async()=>{
+  const b=$("#startstop"); if(b.hasAttribute("disabled"))return;
+  const turningOn=!(DATA.outreach_active!==false);
+  const msg=turningOn?"Start the outreach? n8n will resume sending up to 50 emails each weekday at 10 AM.":"Stop the outreach? n8n will send nothing until you start it again. (Any emails already in progress for today finish.)";
+  if(!confirm(msg))return;
+  b.setAttribute("disabled","");b.innerHTML=`<span class="d"></span>...`;
+  try{await setOutreach(turningOn);DATA.outreach_active=turningOn;}catch(e){alert("Could not change state: "+e.message);}
+  b.removeAttribute("disabled");renderStartStop();
+};
+$("#theme").onclick=()=>{const dark=document.documentElement.getAttribute("data-theme")==="dark";if(dark){document.documentElement.removeAttribute("data-theme");}else{document.documentElement.setAttribute("data-theme","dark");}try{localStorage.setItem("ady-theme",dark?"light":"dark");}catch(e){}};
+(function(){let cur=null;try{cur=localStorage.getItem("ady-theme");}catch(e){}if(cur==="dark")document.documentElement.setAttribute("data-theme","dark");})();
+window.addEventListener("hashchange",()=>{const v=(location.hash||"#overview").slice(1);if(VIEWS[v])go(v);});
+$("#profile-select").addEventListener("change",e=>{if(e.target.value)switchProfile(e.target.value);});
+$("#profile-new").addEventListener("click",createProfile);
+$("#profile-rename").addEventListener("click",renameProfile);
+$("#profile-delete").addEventListener("click",deleteProfile);
+/* ======================= SEARCH FILTER ======================= */
+function filterTable(tableId,query){
+  const q=query.trim().toLowerCase();
+  const rows=document.querySelectorAll("#"+tableId+" tbody tr");
+  rows.forEach(tr=>{
+    if(!q){tr.style.display="";return;}
+    const text=tr.textContent.toLowerCase();
+    tr.style.display=text.includes(q)?"":"none";
+  });
+}
+
+/* ======================= ALL OR NOTHING (BULK SEND) ======================= */
+let bulkRunning=false,bulkAbort=false;
+
+function showPinModal(){
+  if(bulkRunning)return;
+  const bg=document.createElement("div");bg.className="modal-bg";bg.id="pin-modal";
+  bg.innerHTML=`<div class="modal-box"><h3>All or Nothing</h3><p>This sends a cold email to every lead in the database with a 20-second gap between each. Enter PIN to proceed.</p><input id="pin-input" type="password" maxlength="4" placeholder="----" autocomplete="off"><div class="merr" id="pin-err"></div><div class="mbtn-row"><button class="mbtn" onclick="closePinModal()">Cancel</button><button class="mbtn primary" id="pin-go" onclick="verifyPin()">Launch</button></div></div>`;
+  document.body.appendChild(bg);
+  bg.querySelector("#pin-input").focus();
+  bg.querySelector("#pin-input").addEventListener("keydown",e=>{if(e.key==="Enter")verifyPin();if(e.key==="Escape")closePinModal();});
+  bg.addEventListener("click",e=>{if(e.target===bg)closePinModal();});
+}
+function closePinModal(){const m=document.getElementById("pin-modal");if(m)m.remove();}
+function verifyPin(){
+  const inp=document.getElementById("pin-input");
+  const err=document.getElementById("pin-err");
+  if(inp.value==="2006"){closePinModal();startBulkSend();}
+  else{err.textContent="Wrong PIN. Try again.";inp.value="";inp.focus();}
+}
+
+async function startBulkSend(){
+  if(bulkRunning)return;
+  bulkRunning=true;bulkAbort=false;
+  const btn=document.getElementById("nuke-btn");
+  btn.setAttribute("disabled","");
+
+  // show progress bar in overview
+  let bar=document.getElementById("bulk-bar");
+  if(!bar){bar=document.createElement("div");bar.className="bulk-bar";bar.id="bulk-bar";
+    const ov=document.getElementById("v-overview");ov.insertBefore(bar,ov.firstChild);}
+
+  bar.innerHTML=`<div class="bh"><b>Fetching lead list...</b><button class="actbtn danger" id="bulk-stop" onclick="bulkAbort=true">Stop</button></div><div class="btrack"><div class="bfill" style="width:0%"></div></div><div class="bsub"><span>Preparing...</span><span></span></div>`;
+
+  // make sure we're on overview
+  go("overview");
+
+  let leads=[];
+  try{
+    leads=await sbRpc("get_bulk_send_list",{});
+  }catch(e){
+    bar.innerHTML=`<div class="bh"><b>Failed to fetch leads</b></div><div class="bsub"><span>${e.message}</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span></div>`;
+    bulkRunning=false;btn.removeAttribute("disabled");return;
+  }
+
+  if(!leads.length){
+    bar.innerHTML=`<div class="bh"><b>No leads to send</b></div><div class="bsub"><span>All leads have already been contacted or removed.</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span></div>`;
+    bulkRunning=false;btn.removeAttribute("disabled");return;
+  }
+
+  const total=leads.length;
+  let sent=0,failed=0;
+
+  for(let i=0;i<total;i++){
+    if(bulkAbort){
+      bar.querySelector(".bh b").textContent=`Stopped at ${sent}/${total}`;
+      bar.querySelector(".bsub").innerHTML=`<span>${sent} sent, ${failed} failed, ${total-sent-failed} skipped</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span>`;
+      break;
+    }
+    const lead=leads[i];
+    const pct=((i+1)/total*100).toFixed(1);
+    bar.querySelector(".bh b").textContent=`Sending ${i+1} of ${total}...`;
+    bar.querySelector(".bfill").style.width=pct+"%";
+    bar.querySelector(".bsub").innerHTML=`<span>${lead.email}</span><span>${sent} sent, ${failed} failed</span>`;
+
+    try{
+      await fetch("https://n8n.ady.co.in/webhook/bulk-send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:lead.email,first_name:lead.first_name||"",company:lead.company||""})});
+      sent++;
+    }catch(e){failed++;}
+
+    // 20-sec wait between sends (skip on last one)
+    if(i<total-1&&!bulkAbort){
+      for(let s=20;s>0&&!bulkAbort;s--){
+        const m=Math.floor(s/60),sec=s%60;
+        bar.querySelector(".bh b").textContent=`Sent ${i+1}/${total}. Next in ${m}:${String(sec).padStart(2,"0")}`;
+        await new Promise(r=>setTimeout(r,1000));
+      }
+    }
+  }
+
+  if(!bulkAbort){
+    bar.querySelector(".bh b").textContent=`Done. ${sent} of ${total} sent.`;
+    bar.querySelector(".bfill").style.width="100%";
+    bar.querySelector(".bsub").innerHTML=`<span>${sent} sent, ${failed} failed</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span>`;
+  }
+
+  bulkRunning=false;btn.removeAttribute("disabled");
+  // refresh data
+  try{if(MODE==="live"){DATA=await loadLive();setMode();renderOverview();}}catch(e){}
+}
+
+document.getElementById("nuke-btn").onclick=showPinModal;
+
+boot();
+</script>
+</body>
+</html>
