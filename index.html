@@ -1411,8 +1411,37 @@ function filterTable(tableId,query){
 /* ======================= ALL OR NOTHING (BULK SEND) ======================= */
 let bulkRunning=false,bulkAbort=false;
 
-function showPinModal(){
+/* --- persist bulk-send state in Supabase (cross-device) --- */
+async function getAon(){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/settings?id=eq.1&select=bulk_active,bulk_total,bulk_sent,bulk_started_at`,{headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
+    if(!r.ok)return {};
+    const rows=await r.json();if(!rows.length)return {};
+    const s=rows[0];
+    return {active:s.bulk_active,total:s.bulk_total,sent:s.bulk_sent,started:s.bulk_started_at};
+  }catch(e){return {};}
+}
+async function setAon(o){
+  try{
+    const body={};
+    if(o.active!==undefined)body.bulk_active=o.active;
+    if(o.total!==undefined)body.bulk_total=o.total;
+    if(o.sent!==undefined)body.bulk_sent=o.sent;
+    if(o.started!==undefined)body.bulk_started_at=o.started?new Date(o.started).toISOString():null;
+    body.updated_at=new Date().toISOString();
+    await fetch(`${SB_URL}/rest/v1/settings?id=eq.1`,{method:"PATCH",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify(body)});
+  }catch(e){}
+}
+async function clearAon(){
+  try{
+    await fetch(`${SB_URL}/rest/v1/settings?id=eq.1`,{method:"PATCH",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({bulk_active:false,bulk_total:0,bulk_sent:0,bulk_started_at:null,updated_at:new Date().toISOString()})});
+  }catch(e){}}
+
+async function showPinModal(){
   if(bulkRunning)return;
+  /* if a run is already active (e.g. from another device), skip the PIN */
+  const aonState=await getAon();
+  if(aonState.active){startBulkSend(true);return;}
   const bg=document.createElement("div");bg.className="modal-bg";bg.id="pin-modal";
   bg.innerHTML=`<div class="modal-box"><h3>All or Nothing</h3><p>This sends a cold email to every lead in the database with a 20-second gap between each. Enter PIN to proceed.</p><input id="pin-input" type="password" maxlength="4" placeholder="----" autocomplete="off"><div class="merr" id="pin-err"></div><div class="mbtn-row"><button class="mbtn" onclick="closePinModal()">Cancel</button><button class="mbtn primary" id="pin-go" onclick="verifyPin()">Launch</button></div></div>`;
   document.body.appendChild(bg);
@@ -1424,11 +1453,16 @@ function closePinModal(){const m=document.getElementById("pin-modal");if(m)m.rem
 function verifyPin(){
   const inp=document.getElementById("pin-input");
   const err=document.getElementById("pin-err");
-  if(inp.value==="2006"){closePinModal();startBulkSend();}
+  if(inp.value==="2006"){closePinModal();startBulkSend(false);}
   else{err.textContent="Wrong PIN. Try again.";inp.value="";inp.focus();}
 }
 
-async function startBulkSend(){
+async function stopBulkSend(){
+  bulkAbort=true;
+  await clearAon();
+}
+
+async function startBulkSend(isResume){
   if(bulkRunning)return;
   bulkRunning=true;bulkAbort=false;
   const btn=document.getElementById("nuke-btn");
@@ -1439,7 +1473,7 @@ async function startBulkSend(){
   if(!bar){bar=document.createElement("div");bar.className="bulk-bar";bar.id="bulk-bar";
     const ov=document.getElementById("v-overview");ov.insertBefore(bar,ov.firstChild);}
 
-  bar.innerHTML=`<div class="bh"><b>Fetching lead list...</b><button class="actbtn danger" id="bulk-stop" onclick="bulkAbort=true">Stop</button></div><div class="btrack"><div class="bfill" style="width:0%"></div></div><div class="bsub"><span>Preparing...</span><span></span></div>`;
+  bar.innerHTML=`<div class="bh"><b>${isResume?"Resuming... fetching remaining leads":"Fetching lead list..."}</b><button class="actbtn danger" id="bulk-stop" onclick="stopBulkSend()">Stop</button></div><div class="btrack"><div class="bfill" style="width:0%"></div></div><div class="bsub"><span>Preparing...</span><span></span></div>`;
 
   // make sure we're on overview
   go("overview");
@@ -1449,48 +1483,70 @@ async function startBulkSend(){
     leads=await sbRpc("get_bulk_send_list",{});
   }catch(e){
     bar.innerHTML=`<div class="bh"><b>Failed to fetch leads</b></div><div class="bsub"><span>${e.message}</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span></div>`;
-    bulkRunning=false;btn.removeAttribute("disabled");return;
+    bulkRunning=false;btn.removeAttribute("disabled");await clearAon();return;
   }
 
   if(!leads.length){
-    bar.innerHTML=`<div class="bh"><b>No leads to send</b></div><div class="bsub"><span>All leads have already been contacted or removed.</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span></div>`;
-    bulkRunning=false;btn.removeAttribute("disabled");return;
+    bar.innerHTML=`<div class="bh"><b>${isResume?"All done - no leads remaining":"No leads to send"}</b></div><div class="bsub"><span>All leads have already been contacted or removed.</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span></div>`;
+    bulkRunning=false;btn.removeAttribute("disabled");await clearAon();return;
   }
 
-  const total=leads.length;
+  /* work out totals: on fresh start total = leads.length,
+     on resume the original total is stored in Supabase */
+  const aon=await getAon();
+  const grandTotal=isResume&&aon.total?aon.total:leads.length;
+  const alreadySent=grandTotal-leads.length;
+
+  /* persist the run */
+  await setAon({active:true,total:grandTotal,sent:alreadySent,started:aon.started||Date.now()});
+
+  const batch=leads.length;
   let sent=0,failed=0;
 
-  for(let i=0;i<total;i++){
-    if(bulkAbort){
-      bar.querySelector(".bh b").textContent=`Stopped at ${sent}/${total}`;
-      bar.querySelector(".bsub").innerHTML=`<span>${sent} sent, ${failed} failed, ${total-sent-failed} skipped</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span>`;
+  for(let i=0;i<batch;i++){
+    /* check stop from this tab OR another device */
+    const loopState=await getAon();
+    if(bulkAbort||!loopState.active){
+      const done=alreadySent+sent;
+      bar.querySelector(".bh b").textContent=`Stopped at ${done}/${grandTotal}`;
+      bar.querySelector(".bsub").innerHTML=`<span>${done} sent, ${failed} failed, ${grandTotal-done-failed} skipped</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span>`;
+      await clearAon();
       break;
     }
+
     const lead=leads[i];
-    const pct=((i+1)/total*100).toFixed(1);
-    bar.querySelector(".bh b").textContent=`Sending ${i+1} of ${total}...`;
+    const done=alreadySent+sent;
+    const pct=((done+1)/grandTotal*100).toFixed(1);
+    bar.querySelector(".bh b").textContent=`Sending ${done+1} of ${grandTotal}...`;
     bar.querySelector(".bfill").style.width=pct+"%";
-    bar.querySelector(".bsub").innerHTML=`<span>${lead.email}</span><span>${sent} sent, ${failed} failed</span>`;
+    bar.querySelector(".bsub").innerHTML=`<span>${lead.email}</span><span>${done} sent, ${failed} failed</span>`;
 
     try{
       await fetch("https://n8n.ady.co.in/webhook/bulk-send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:lead.email,first_name:lead.first_name||"",company:lead.company||""})});
       sent++;
     }catch(e){failed++;}
 
+    /* update persisted count so next resume knows where we are */
+    await setAon({active:true,total:grandTotal,sent:alreadySent+sent,started:aon.started||Date.now()});
+
     // 20-sec wait between sends (skip on last one)
-    if(i<total-1&&!bulkAbort){
+    if(i<batch-1&&!bulkAbort){
       for(let s=20;s>0&&!bulkAbort;s--){
-        const m=Math.floor(s/60),sec=s%60;
-        bar.querySelector(".bh b").textContent=`Sent ${i+1}/${total}. Next in ${m}:${String(sec).padStart(2,"0")}`;
+        bar.querySelector(".bh b").textContent=`Sent ${alreadySent+sent}/${grandTotal}. Next in 0:${String(s).padStart(2,"0")}`;
         await new Promise(r=>setTimeout(r,1000));
       }
     }
   }
 
   if(!bulkAbort){
-    bar.querySelector(".bh b").textContent=`Done. ${sent} of ${total} sent.`;
-    bar.querySelector(".bfill").style.width="100%";
-    bar.querySelector(".bsub").innerHTML=`<span>${sent} sent, ${failed} failed</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span>`;
+    const finalState=await getAon();
+    if(finalState.active){
+      const done=alreadySent+sent;
+      bar.querySelector(".bh b").textContent=`Done. ${done} of ${grandTotal} sent.`;
+      bar.querySelector(".bfill").style.width="100%";
+      bar.querySelector(".bsub").innerHTML=`<span>${done} sent, ${failed} failed</span><span><button class="actbtn" onclick="document.getElementById('bulk-bar').remove()">Dismiss</button></span>`;
+      await clearAon();
+    }
   }
 
   bulkRunning=false;btn.removeAttribute("disabled");
@@ -1500,7 +1556,11 @@ async function startBulkSend(){
 
 document.getElementById("nuke-btn").onclick=showPinModal;
 
-boot();
+boot().then(async()=>{
+  /* auto-resume bulk send if it was running before this page load */
+  const aon=await getAon();
+  if(aon.active) startBulkSend(true);
+});
 </script>
 </body>
 </html>
