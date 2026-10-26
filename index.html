@@ -1522,6 +1522,10 @@ async function startBulkSend(isResume){
     /* update persisted count so next resume knows where we are */
     await setAon({active:true,total:grandTotal,sent:alreadySent+sent,started:aon.started||Date.now()});
 
+    /* refresh the live KPIs (Sent/Delivered/Bounced) so they move while the run is in progress,
+       instead of only updating once the whole run finishes */
+    try{if(MODE==="live"){DATA=await loadLive();setMode();renderOverview();}}catch(e){}
+
     // 10-sec wait between sends (skip on last one)
     if(i<batch-1&&!bulkAbort){
       for(let s=10;s>0&&!bulkAbort;s--){
