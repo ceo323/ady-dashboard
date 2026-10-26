@@ -1436,7 +1436,7 @@ async function showPinModal(){
   const aonState=await getAon();
   if(aonState.active){startBulkSend(true);return;}
   const bg=document.createElement("div");bg.className="modal-bg";bg.id="pin-modal";
-  bg.innerHTML=`<div class="modal-box"><h3>All or Nothing</h3><p>This sends a cold email to every lead in the database with a 20-second gap between each. Enter PIN to proceed.</p><input id="pin-input" type="password" maxlength="4" placeholder="----" autocomplete="off"><div class="merr" id="pin-err"></div><div class="mbtn-row"><button class="mbtn" onclick="closePinModal()">Cancel</button><button class="mbtn primary" id="pin-go" onclick="verifyPin()">Launch</button></div></div>`;
+  bg.innerHTML=`<div class="modal-box"><h3>All or Nothing</h3><p>This sends a cold email to every lead in the database with a 10-second gap between each. Enter PIN to proceed.</p><input id="pin-input" type="password" maxlength="4" placeholder="----" autocomplete="off"><div class="merr" id="pin-err"></div><div class="mbtn-row"><button class="mbtn" onclick="closePinModal()">Cancel</button><button class="mbtn primary" id="pin-go" onclick="verifyPin()">Launch</button></div></div>`;
   document.body.appendChild(bg);
   bg.querySelector("#pin-input").focus();
   bg.querySelector("#pin-input").addEventListener("keydown",e=>{if(e.key==="Enter")verifyPin();if(e.key==="Escape")closePinModal();});
@@ -1522,9 +1522,9 @@ async function startBulkSend(isResume){
     /* update persisted count so next resume knows where we are */
     await setAon({active:true,total:grandTotal,sent:alreadySent+sent,started:aon.started||Date.now()});
 
-    // 20-sec wait between sends (skip on last one)
+    // 10-sec wait between sends (skip on last one)
     if(i<batch-1&&!bulkAbort){
-      for(let s=20;s>0&&!bulkAbort;s--){
+      for(let s=10;s>0&&!bulkAbort;s--){
         bar.querySelector(".bh b").textContent=`Sent ${alreadySent+sent}/${grandTotal}. Next in 0:${String(s).padStart(2,"0")}`;
         await new Promise(r=>setTimeout(r,1000));
       }
