@@ -1414,7 +1414,7 @@ let bulkRunning=false,bulkAbort=false;
 function showPinModal(){
   if(bulkRunning)return;
   const bg=document.createElement("div");bg.className="modal-bg";bg.id="pin-modal";
-  bg.innerHTML=`<div class="modal-box"><h3>All or Nothing</h3><p>This sends a cold email to every lead in the database with a 2-minute gap between each. Enter PIN to proceed.</p><input id="pin-input" type="password" maxlength="4" placeholder="----" autocomplete="off"><div class="merr" id="pin-err"></div><div class="mbtn-row"><button class="mbtn" onclick="closePinModal()">Cancel</button><button class="mbtn primary" id="pin-go" onclick="verifyPin()">Launch</button></div></div>`;
+  bg.innerHTML=`<div class="modal-box"><h3>All or Nothing</h3><p>This sends a cold email to every lead in the database with a 20-second gap between each. Enter PIN to proceed.</p><input id="pin-input" type="password" maxlength="4" placeholder="----" autocomplete="off"><div class="merr" id="pin-err"></div><div class="mbtn-row"><button class="mbtn" onclick="closePinModal()">Cancel</button><button class="mbtn primary" id="pin-go" onclick="verifyPin()">Launch</button></div></div>`;
   document.body.appendChild(bg);
   bg.querySelector("#pin-input").focus();
   bg.querySelector("#pin-input").addEventListener("keydown",e=>{if(e.key==="Enter")verifyPin();if(e.key==="Escape")closePinModal();});
@@ -1477,9 +1477,9 @@ async function startBulkSend(){
       sent++;
     }catch(e){failed++;}
 
-    // 2-min wait between sends (skip on last one)
+    // 20-sec wait between sends (skip on last one)
     if(i<total-1&&!bulkAbort){
-      for(let s=120;s>0&&!bulkAbort;s--){
+      for(let s=20;s>0&&!bulkAbort;s--){
         const m=Math.floor(s/60),sec=s%60;
         bar.querySelector(".bh b").textContent=`Sent ${i+1}/${total}. Next in ${m}:${String(sec).padStart(2,"0")}`;
         await new Promise(r=>setTimeout(r,1000));
