@@ -1411,31 +1411,24 @@ function filterTable(tableId,query){
 /* ======================= ALL OR NOTHING (BULK SEND) ======================= */
 let bulkRunning=false,bulkAbort=false;
 
-/* --- persist bulk-send state in Supabase (cross-device) --- */
+/* --- persist bulk-send state in Supabase (cross-device, via RPC to bypass RLS) --- */
 async function getAon(){
   try{
-    const r=await fetch(`${SB_URL}/rest/v1/settings?id=eq.1&select=bulk_active,bulk_total,bulk_sent,bulk_started_at`,{headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
-    if(!r.ok)return {};
-    const rows=await r.json();if(!rows.length)return {};
-    const s=rows[0];
-    return {active:s.bulk_active,total:s.bulk_total,sent:s.bulk_sent,started:s.bulk_started_at};
+    const s=await sbRpc("get_bulk_state",{});
+    if(!s)return {};
+    return {active:s.active,total:s.total,sent:s.sent,started:s.started};
   }catch(e){return {};}
 }
 async function setAon(o){
   try{
-    const body={};
-    if(o.active!==undefined)body.bulk_active=o.active;
-    if(o.total!==undefined)body.bulk_total=o.total;
-    if(o.sent!==undefined)body.bulk_sent=o.sent;
-    if(o.started!==undefined)body.bulk_started_at=o.started?new Date(o.started).toISOString():null;
-    body.updated_at=new Date().toISOString();
-    await fetch(`${SB_URL}/rest/v1/settings?id=eq.1`,{method:"PATCH",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify(body)});
+    await sbRpc("set_bulk_state",{p_active:!!o.active,p_total:o.total!==undefined?o.total:null,p_sent:o.sent!==undefined?o.sent:null});
   }catch(e){}
 }
 async function clearAon(){
   try{
-    await fetch(`${SB_URL}/rest/v1/settings?id=eq.1`,{method:"PATCH",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({bulk_active:false,bulk_total:0,bulk_sent:0,bulk_started_at:null,updated_at:new Date().toISOString()})});
-  }catch(e){}}
+    await sbRpc("set_bulk_state",{p_active:false,p_total:0,p_sent:0});
+  }catch(e){}
+}
 
 async function showPinModal(){
   if(bulkRunning)return;
